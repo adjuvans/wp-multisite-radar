@@ -2,6 +2,7 @@
 namespace MultisiteRadar;
 
 use MultisiteRadar\Collector\RegistryProbe;
+use MultisiteRadar\Collector\SiteCollector;
 use MultisiteRadar\Install\Installer;
 use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Storage\ExtensionsRepository;
@@ -23,6 +24,8 @@ final class Plugin {
 	private ?ExtensionsRepository $extensions = null;
 
 	private ?RegistryProbe $probe = null;
+
+	private ?SiteCollector $collector = null;
 
 	public static function instance(): self {
 		if ( null === self::$instance ) {
@@ -62,6 +65,10 @@ final class Plugin {
 
 	public function probe(): RegistryProbe {
 		return $this->probe ??= new RegistryProbe( $this->sites() );
+	}
+
+	public function collector(): SiteCollector {
+		return $this->collector ??= new SiteCollector( $this->settings() );
 	}
 
 	public function extensions(): ExtensionsRepository {
