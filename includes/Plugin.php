@@ -7,6 +7,8 @@ use MultisiteRadar\Alerts\RuleRegistry;
 use MultisiteRadar\Collector\RegistryProbe;
 use MultisiteRadar\Collector\SiteCollector;
 use MultisiteRadar\Install\Installer;
+use MultisiteRadar\Scan\BatchRunner;
+use MultisiteRadar\Scan\Lock;
 use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Storage\ExtensionsRepository;
 use MultisiteRadar\Storage\SitesRepository;
@@ -35,6 +37,10 @@ final class Plugin {
 	private ?AlertEvaluator $evaluator = null;
 
 	private ?AlertFormatter $formatter = null;
+
+	private ?Lock $lock = null;
+
+	private ?BatchRunner $runner = null;
 
 	public static function instance(): self {
 		if ( null === self::$instance ) {
@@ -90,6 +96,14 @@ final class Plugin {
 
 	public function formatter(): AlertFormatter {
 		return $this->formatter ??= new AlertFormatter( $this->rules() );
+	}
+
+	public function lock(): Lock {
+		return $this->lock ??= new Lock();
+	}
+
+	public function runner(): BatchRunner {
+		return $this->runner ??= new BatchRunner( $this->sites(), $this->extensions(), $this->collector(), $this->evaluator(), $this->lock() );
 	}
 
 	public function extensions(): ExtensionsRepository {
