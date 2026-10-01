@@ -114,7 +114,7 @@ test( 'renders the preloaded list without any request (spec 1.4, criterion 2)', 
 	expect( apiFetch ).not.toHaveBeenCalled();
 } );
 
-test( 'opening a site writes it to the address', () => {
+test( 'opening a site writes it to the address and shows its panel', async () => {
 	renderView();
 
 	fireEvent.click( screen.getByText( 'Blog RH' ) );
@@ -122,6 +122,9 @@ test( 'opening a site writes it to the address', () => {
 	expect( new URLSearchParams( window.location.search ).get( 'site' ) ).toBe(
 		'1'
 	);
+	expect( screen.getByRole( 'dialog' ) ).toBeInTheDocument();
+	// Let the panel's own request start here, so that it cannot leak into the next test.
+	await settle();
 } );
 
 test( 'only managers can start an analysis', () => {

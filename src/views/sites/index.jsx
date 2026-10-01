@@ -9,6 +9,7 @@ import { useScan } from '../../hooks/use-scan';
 import { useUrlState } from '../../hooks/use-url-state';
 import { buildPath } from '../../store/paths';
 import { samePrefs } from '../../utils/view-query';
+import SitePanel from '../site-panel';
 import { getSitesActions } from './actions';
 import { exportUrl } from './export';
 import ExportMenu from './export-menu';
@@ -122,6 +123,18 @@ export default function SitesView() {
 						scan.total
 					) }
 				</p>
+			) }
+			{ state.site > 0 && (
+				<SitePanel
+					siteId={ state.site }
+					items={ list.data || [] }
+					onNavigate={ ( id ) =>
+						setState( ( current ) => ( { ...current, site: id } ) )
+					}
+					onClose={ () =>
+						setState( ( current ) => ( { ...current, site: 0 } ) )
+					}
+				/>
 			) }
 		</div>
 	);
