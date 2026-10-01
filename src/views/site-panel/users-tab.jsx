@@ -1,5 +1,5 @@
 import { Button } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import ErrorNotice from '../../components/error-notice';
 import { useResource } from '../../hooks/use-resource';
@@ -7,7 +7,6 @@ import { buildPath } from '../../store/paths';
 
 export default function UsersTab( { siteId } ) {
 	const [ page, setPage ] = useState( 1 );
-	useEffect( () => setPage( 1 ), [ siteId ] );
 	const users = useResource(
 		buildPath( `/sites/${ siteId }/users`, { page, per_page: 20 } )
 	);

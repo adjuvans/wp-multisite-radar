@@ -224,3 +224,95 @@ test( 'users are loaded on demand, page by page', async () => {
 		expect( screen.getByText( 'Page 1 of 1' ) ).toBeInTheDocument()
 	);
 } );
+
+function usersResponse( totalPages ) {
+	return async () => ( {
+		json: async () => [
+			{
+				id: 1,
+				login: 'admin',
+				display_name: 'Admin',
+				roles: [ 'administrator' ],
+				super_admin: false,
+				registered_gmt: null,
+			},
+		],
+		headers: new Map( [
+			[ 'X-WP-Total', String( totalPages * 20 ) ],
+			[ 'X-WP-TotalPages', String( totalPages ) ],
+		] ),
+	} );
+}
+
+const userPaths = () =>
+	apiFetch.mock.calls
+		.map( ( [ args ] ) => args.path )
+		.filter( ( p ) => p.includes( '/users' ) );
+
+test( 'no users request before the Users tab is opened', async () => {
+	apiFetch.mockImplementation( usersResponse( 1 ) );
+	setup();
+
+	await act( () => new Promise( ( resolve ) => setTimeout( resolve, 0 ) ) );
+
+	expect( userPaths() ).toEqual( [] );
+} );
+
+test( 'the pager follows X-WP-TotalPages and never requests out of range', async () => {
+	apiFetch.mockImplementation( usersResponse( 3 ) );
+	setup();
+	fireEvent.click( screen.getByRole( 'tab', { name: 'Users' } ) );
+
+	expect( await screen.findByText( 'Page 1 of 3' ) ).toBeInTheDocument();
+	expect( screen.getByRole( 'button', { name: 'Previous' } ) ).toBeDisabled();
+
+	fireEvent.click( screen.getByRole( 'button', { name: 'Next' } ) );
+	expect( await screen.findByText( 'Page 2 of 3' ) ).toBeInTheDocument();
+	fireEvent.click( screen.getByRole( 'button', { name: 'Next' } ) );
+	expect( await screen.findByText( 'Page 3 of 3' ) ).toBeInTheDocument();
+	expect( screen.getByRole( 'button', { name: 'Next' } ) ).toBeDisabled();
+
+	expect( userPaths() ).toEqual( [
+		'/multisite-radar/v1/sites/12/users?page=1&per_page=20',
+		'/multisite-radar/v1/sites/12/users?page=2&per_page=20',
+		'/multisite-radar/v1/sites/12/users?page=3&per_page=20',
+	] );
+} );
+
+test( 'changing site restarts the users list at page 1', async () => {
+	apiFetch.mockImplementation( usersResponse( 3 ) );
+	const registry = createRegistry();
+	registry.register( noticesStore );
+	registry.register(
+		createCoreStore( {
+			'/multisite-radar/v1/sites/12': { body: DETAIL, headers: {} },
+			'/multisite-radar/v1/sites/13': {
+				body: { ...DETAIL, id: 13, name: 'Gamma' },
+				headers: {},
+			},
+		} )
+	);
+	const ui = ( siteId ) => (
+		<RegistryProvider value={ registry }>
+			<SitePanel
+				siteId={ siteId }
+				items={ ITEMS }
+				onNavigate={ vi.fn() }
+				onClose={ vi.fn() }
+			/>
+		</RegistryProvider>
+	);
+	const { rerender } = render( ui( 12 ) );
+	fireEvent.click( screen.getByRole( 'tab', { name: 'Users' } ) );
+	await screen.findByText( 'Page 1 of 3' );
+	fireEvent.click( screen.getByRole( 'button', { name: 'Next' } ) );
+	await screen.findByText( 'Page 2 of 3' );
+
+	rerender( ui( 13 ) );
+
+	expect( await screen.findByText( 'Page 1 of 3' ) ).toBeInTheDocument();
+	const forNext = userPaths().filter( ( p ) => p.includes( '/sites/13/' ) );
+	expect( forNext ).toEqual( [
+		'/multisite-radar/v1/sites/13/users?page=1&per_page=20',
+	] );
+} );

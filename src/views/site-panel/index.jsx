@@ -26,7 +26,7 @@ function Tab( { name, site } ) {
 		case 'content':
 			return <ContentTab site={ site } />;
 		case 'users':
-			return <UsersTab siteId={ site.id } />;
+			return <UsersTab key={ site.id } siteId={ site.id } />;
 		case 'extensions':
 			return <ExtensionsTab site={ site } />;
 		case 'alerts':
