@@ -128,6 +128,9 @@ final class Plugin {
 		if ( null !== $this->evaluator ) {
 			$this->evaluator->reset();
 		}
+		if ( null !== $this->queue ) {
+			$this->queue->reset();
+		}
 	}
 
 	public function queue(): Queue {

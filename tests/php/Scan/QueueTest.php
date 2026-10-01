@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Tests\Scan;
 
+use MultisiteRadar\Scan\Lock;
 use MultisiteRadar\Scan\Queue;
 use MultisiteRadar\Support\MainSite;
 use MultisiteRadar\Tests\TestCase;
@@ -121,6 +122,42 @@ final class QueueTest extends TestCase {
 		$this->assertSame( 1, $this->queue->recompute_alerts() );
 		$this->assertSame( 3, $this->plugin()->sites()->find( 3001 )->alert_level );
 		$this->assertSame( 0, $this->plugin()->sites()->find( 3002 )->alert_level );
+	}
+
+	public function test_recompute_is_deferred_while_another_process_holds_the_lock(): void {
+		$this->make_record( 3001, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		wp_clear_scheduled_hook( Queue::HOOK_RECOMPUTE );
+		$other = new Lock();
+		$this->assertTrue( $other->acquire() );
+
+		$this->queue->run_recompute();
+		$other->release();
+
+		$this->assertSame( 0, $this->plugin()->sites()->find( 3001 )->alert_level );
+		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_RECOMPUTE ) );
+	}
+
+	public function test_recompute_hook_runs_under_the_lock_and_releases_it(): void {
+		$this->make_record( 3001, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+
+		do_action( Queue::HOOK_RECOMPUTE );
+
+		$this->assertSame( 3, $this->plugin()->sites()->find( 3001 )->alert_level );
+		$this->assertFalse( $this->plugin()->lock()->is_locked() );
+	}
+
+	public function test_only_one_process_pass_runs_per_request(): void {
+		$this->plugin()->sites()->seed_from_blogs( get_current_network_id() );
+		wp_clear_scheduled_hook( Queue::HOOK_CONTINUE );
+		$this->queue->process();
+		$this->assertSame( 0, $this->plugin()->sites()->count_dirty() );
+
+		$this->plugin()->sites()->mark_all_dirty( get_current_network_id() );
+		$dirty = $this->plugin()->sites()->count_dirty();
+		$this->queue->process();
+
+		$this->assertSame( $dirty, $this->plugin()->sites()->count_dirty() );
+		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_CONTINUE ) );
 	}
 
 	public function test_settings_update_schedules_a_recompute(): void {

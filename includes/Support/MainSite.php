@@ -29,11 +29,11 @@ final class MainSite {
 	/**
 	 * Planifie un événement unique immédiat sur le site principal, s'il n'y en a pas déjà un.
 	 */
-	public static function schedule_once( string $hook ): void {
+	public static function schedule_once( string $hook, int $delay = 0 ): void {
 		self::run(
-			static function () use ( $hook ): void {
+			static function () use ( $hook, $delay ): void {
 				if ( false === wp_next_scheduled( $hook ) ) {
-					wp_schedule_single_event( time(), $hook );
+					wp_schedule_single_event( time() + $delay, $hook );
 				}
 			}
 		);

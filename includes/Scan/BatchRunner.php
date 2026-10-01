@@ -41,6 +41,24 @@ final class BatchRunner {
 	}
 
 	/**
+	 * Exécute un callback sous le verrou d'analyse.
+	 *
+	 * @param callable $callback Appelé avec le Lock (à rafraîchir pour les longs traitements).
+	 * @return bool False si le verrou est détenu par un autre processus (callback non appelé).
+	 */
+	public function locked( callable $callback ): bool {
+		if ( ! $this->lock->acquire() ) {
+			return false;
+		}
+		try {
+			$callback( $this->lock );
+		} finally {
+			$this->lock->release();
+		}
+		return true;
+	}
+
+	/**
 	 * @param float         $budget  Secondes disponibles ; au moins un site est toujours traité.
 	 * @param callable|null $on_site Appelé après chaque site avec ( int $site_id, bool $ok ).
 	 * @return array{processed: int, remaining: int, locked: bool}

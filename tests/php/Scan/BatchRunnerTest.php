@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Tests\Scan;
 
+use MultisiteRadar\Scan\Lock;
 use MultisiteRadar\Tests\TestCase;
 
 final class BatchRunnerTest extends TestCase {
@@ -59,6 +60,37 @@ final class BatchRunnerTest extends TestCase {
 
 		$this->assertSame( 1, $result['processed'] );
 		$this->assertSame( $total - 1, $result['remaining'] );
+	}
+
+	public function test_locked_runs_the_callback_under_the_lock_and_releases_it(): void {
+		$called = false;
+
+		$result = $this->plugin()->runner()->locked(
+			function () use ( &$called ): void {
+				$called = true;
+				$this->assertTrue( $this->plugin()->lock()->is_locked() );
+			}
+		);
+
+		$this->assertTrue( $result );
+		$this->assertTrue( $called );
+		$this->assertFalse( $this->plugin()->lock()->is_locked() );
+	}
+
+	public function test_locked_does_nothing_when_the_lock_is_held(): void {
+		$other = new Lock();
+		$this->assertTrue( $other->acquire() );
+		$called = false;
+
+		$result = $this->plugin()->runner()->locked(
+			static function () use ( &$called ): void {
+				$called = true;
+			}
+		);
+		$other->release();
+
+		$this->assertFalse( $result );
+		$this->assertFalse( $called );
 	}
 
 	public function test_reports_a_lock_held_by_another_process(): void {

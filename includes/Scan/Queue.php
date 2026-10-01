@@ -27,12 +27,17 @@ final class Queue {
 	private SitesRepository $sites;
 	private AlertEvaluator $evaluator;
 	private Settings $settings;
+	private bool $processed = false;
 
 	public function __construct( BatchRunner $runner, SitesRepository $sites, AlertEvaluator $evaluator, Settings $settings ) {
 		$this->runner    = $runner;
 		$this->sites     = $sites;
 		$this->evaluator = $evaluator;
 		$this->settings  = $settings;
+	}
+
+	public function reset(): void {
+		$this->processed = false;
 	}
 
 	public function register(): void {
@@ -89,8 +94,16 @@ final class Queue {
 		);
 	}
 
+	/**
+	 * Une seule passe par requête : wp-cron exécute tous les événements échus dans la même requête.
+	 */
 	public function process(): void {
-		$result = $this->runner->run( BatchRunner::default_budget() );
+		if ( $this->processed ) {
+			$this->continue_soon();
+			return;
+		}
+		$this->processed = true;
+		$result          = $this->runner->run( BatchRunner::default_budget() );
 		if ( ! $result['locked'] && $result['remaining'] > 0 ) {
 			$this->continue_soon();
 		}
@@ -119,15 +132,16 @@ final class Queue {
 			$this->continue_soon();
 		}
 
-		$this->recompute_alerts();
+		$this->run_recompute();
 	}
 
 	/**
 	 * Recalcule les alertes de tous les sites déjà analysés, à partir des données stockées.
 	 *
+	 * @param Lock|null $lock Verrou détenu à rafraîchir entre deux lots.
 	 * @return int Nombre de sites recalculés.
 	 */
-	public function recompute_alerts(): int {
+	public function recompute_alerts( ?Lock $lock = null ): int {
 		$now   = time();
 		$after = 0;
 		$count = 0;
@@ -145,13 +159,23 @@ final class Queue {
 				$after = (int) end( $ids );
 			}
 			$fetched = count( $ids );
+			if ( null !== $lock && ! $lock->refresh() ) {
+				break;
+			}
 		} while ( self::RECOMPUTE_CHUNK === $fetched );
 
 		return $count;
 	}
 
 	public function run_recompute(): void {
-		$this->recompute_alerts();
+		$done = $this->runner->locked(
+			function ( Lock $lock ): void {
+				$this->recompute_alerts( $lock );
+			}
+		);
+		if ( ! $done ) {
+			MainSite::schedule_once( self::HOOK_RECOMPUTE, MINUTE_IN_SECONDS );
+		}
 	}
 
 	public function on_settings_updated(): void {
