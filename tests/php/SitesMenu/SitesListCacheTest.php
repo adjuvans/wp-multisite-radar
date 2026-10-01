@@ -1,0 +1,75 @@
+<?php
+namespace MultisiteRadar\Tests\SitesMenu;
+
+use MultisiteRadar\SitesMenu\SitesListCache;
+use MultisiteRadar\Tests\TestCase;
+
+final class SitesListCacheTest extends TestCase {
+
+	public function test_builds_the_public_sites_of_the_network_with_their_name_and_home_url(): void {
+		$public   = self::factory()->blog->create( [ 'title' => 'Blog RH' ] );
+		$archived = self::factory()->blog->create();
+		update_blog_status( $archived, 'archived', '1' );
+		$private = self::factory()->blog->create( [ 'public' => 0 ] );
+		$other   = self::factory()->blog->create( [ 'network_id' => self::factory()->network->create() ] );
+
+		$sites = ( new SitesListCache() )->build( get_current_network_id() );
+		$ids   = wp_list_pluck( $sites, 'id' );
+
+		$this->assertContains( $public, $ids );
+		$this->assertNotContains( $archived, $ids );
+		$this->assertNotContains( $private, $ids );
+		$this->assertNotContains( $other, $ids );
+		$entry = $sites[ array_search( $public, $ids, true ) ];
+		$this->assertSame( 'Blog RH', $entry['name'] );
+		$this->assertSame( get_blog_option( $public, 'home' ), $entry['url'] );
+		$this->assertSame( [ 'id', 'name', 'url', 'registered' ], array_keys( $entry ) );
+	}
+
+	public function test_a_site_whose_tables_are_missing_is_skipped(): void {
+		global $wpdb;
+		$healthy = self::factory()->blog->create( [ 'title' => 'Healthy' ] );
+		$wpdb->insert(
+			$wpdb->blogs,
+			[
+				'blog_id'      => 99999,
+				'site_id'      => get_current_network_id(),
+				'domain'       => 'ghost.test',
+				'path'         => '/',
+				'registered'   => '2026-01-01 00:00:00',
+				'last_updated' => '2026-01-01 00:00:00',
+				'public'       => 1,
+				'archived'     => 0,
+				'mature'       => 0,
+				'spam'         => 0,
+				'deleted'      => 0,
+				'lang_id'      => 0,
+			]
+		);
+
+		$ids = wp_list_pluck( ( new SitesListCache() )->build( get_current_network_id() ), 'id' );
+
+		$this->assertContains( $healthy, $ids );
+		$this->assertNotContains( 99999, $ids );
+	}
+
+	public function test_get_is_cached_per_network_and_site_changes_flush_it(): void {
+		$cache   = $this->plugin()->sites_list_cache();
+		$network = get_current_network_id();
+		$site    = self::factory()->blog->create( [ 'title' => 'Before' ] );
+		$cache->flush( $network );
+
+		$this->assertContains( 'Before', wp_list_pluck( $cache->get(), 'name' ) );
+		$this->assertIsArray( get_site_transient( SitesListCache::name( $network ) ) );
+
+		update_blog_option( $site, 'blogname', 'After' );
+		$this->assertFalse( get_site_transient( SitesListCache::name( $network ) ), 'Renaming a site flushes the list.' );
+		$this->assertContains( 'After', wp_list_pluck( $cache->get(), 'name' ) );
+
+		update_blog_status( $site, 'archived', '1' );
+		$this->assertNotContains( $site, wp_list_pluck( $cache->get(), 'id' ), 'Archiving a site removes it at once.' );
+
+		$new = self::factory()->blog->create( [ 'title' => 'Newcomer' ] );
+		$this->assertContains( $new, wp_list_pluck( $cache->get(), 'id' ) );
+	}
+}

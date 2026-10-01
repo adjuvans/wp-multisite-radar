@@ -28,6 +28,11 @@ foreach ( $msradar_network_ids as $msradar_network_id ) {
 	foreach ( $msradar_network_options as $msradar_option ) {
 		delete_network_option( (int) $msradar_network_id, $msradar_option );
 	}
+
+	// Cache du module « menu des sites », propre à chaque réseau.
+	delete_network_option( (int) $msradar_network_id, '_site_transient_msradar_sites_list_' . $msradar_network_id );
+	delete_network_option( (int) $msradar_network_id, '_site_transient_timeout_msradar_sites_list_' . $msradar_network_id );
+	wp_cache_delete( 'msradar_sites_list_' . $msradar_network_id, 'site-transient' );
 }
 
 delete_metadata( 'user', 0, 'msradar_view_prefs', '', true );

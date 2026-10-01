@@ -24,6 +24,8 @@ use MultisiteRadar\Scan\Lock;
 use MultisiteRadar\Scan\Queue;
 use MultisiteRadar\Settings\Preferences;
 use MultisiteRadar\Settings\Settings;
+use MultisiteRadar\SitesMenu\Module as SitesMenuModule;
+use MultisiteRadar\SitesMenu\SitesListCache;
 use MultisiteRadar\Storage\ExtensionsRepository;
 use MultisiteRadar\Storage\SitesRepository;
 
@@ -72,6 +74,10 @@ final class Plugin {
 
 	private ?ExportHandler $export = null;
 
+	private ?SitesListCache $sites_list_cache = null;
+
+	private ?SitesMenuModule $sites_menu = null;
+
 	public static function instance(): self {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
@@ -90,6 +96,7 @@ final class Plugin {
 		$this->probe()->register();
 		$this->queue()->register();
 		$this->invalidation()->register();
+		$this->sites_menu()->register();
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 		$this->legacy()->register();
 
@@ -187,6 +194,14 @@ final class Plugin {
 
 	public function queue(): Queue {
 		return $this->queue ??= new Queue( $this->runner(), $this->sites(), $this->evaluator(), $this->settings() );
+	}
+
+	public function sites_list_cache(): SitesListCache {
+		return $this->sites_list_cache ??= new SitesListCache();
+	}
+
+	public function sites_menu(): SitesMenuModule {
+		return $this->sites_menu ??= new SitesMenuModule( $this->settings(), $this->sites_list_cache() );
 	}
 
 	public function invalidation(): Invalidation {

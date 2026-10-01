@@ -46,5 +46,6 @@
 	<rule ref="WordPress.DB.DirectDatabaseQuery">
 		<exclude-pattern>/includes/(Storage|Collector|Scan|Install)/*</exclude-pattern>
 		<exclude-pattern>/uninstall\.php</exclude-pattern>
+		<exclude-pattern>/includes/SitesMenu/SitesListCache\.php</exclude-pattern>
 	</rule>
 </ruleset>
