@@ -64,6 +64,42 @@ jobs:
           composer update --no-progress --prefer-dist -W
       - run: vendor/bin/phpunit
 
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_e2e
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      E2E_DB_NAME: wordpress_e2e
+      E2E_DB_USER: root
+      E2E_DB_PASSWORD: root
+      E2E_DB_HOST: 127.0.0.1:3306
+      E2E_WP_VERSION: '7.1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mysqli
+          coverage: none
+      - name: Install WP-CLI
+        run: |
+          curl -sSfL -o /tmp/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          sudo install -m 0755 /tmp/wp-cli.phar /usr/local/bin/wp
+          wp --version
+      - name: Acceptance test (spec 1.4 criterion 1)
+        run: bin/e2e.sh
+
   plugin-check:
     runs-on: ubuntu-latest
     steps:

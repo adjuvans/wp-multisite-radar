@@ -12,7 +12,7 @@ Réécriture complète sous le nom **Multisite Radar** (slug `multisite-radar`).
 - API REST `multisite-radar/v1` (sites, analyse, réglages, synthèse des alertes).
 - Commandes `wp multisite-radar scan|probe|sites list`. `scan` exige exactement une option parmi `--all`, `--dirty` et `--site=<id>` ; `--site` n'analyse (et, avec `--probe`, ne relève) que ce site, sans vider le reste de la file.
 - Migration automatique des réglages et des éléments de menu de la 1.x.
-- Outillage : PHPUnit multisite, WPCS, PHPStan niveau 6, CI GitHub Actions, Plugin Check.
+- Outillage : PHPUnit multisite, WPCS, PHPStan niveau 6, CI GitHub Actions, Plugin Check, test d'acceptation E2E sur un multisite neuf (`bin/e2e.sh`).
 
 ---
 
