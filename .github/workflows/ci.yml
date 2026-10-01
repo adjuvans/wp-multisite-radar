@@ -100,10 +100,31 @@ jobs:
       - name: Acceptance test (spec 1.4 criterion 1)
         run: bin/e2e.sh
 
+  js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run version:check
+      - run: npm run lint:js
+      - run: npm run lint:css
+      - run: npm run test:unit
+      - run: npm run build
+
   plugin-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
       - name: Build the distributable directory
         run: |
           mkdir -p /tmp/build/multisite-radar

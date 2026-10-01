@@ -16,3 +16,13 @@
 /phpunit.xml.dist
 /.phpunit.result.cache
 /README.md
+/src
+/package.json
+/package-lock.json
+/.nvmrc
+/webpack.config.js
+/vitest.config.mjs
+/eslint.config.cjs
+/playwright.config.js
+/.wp-env.json
+/artifacts
