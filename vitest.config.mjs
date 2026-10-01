@@ -2,7 +2,8 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react-swc';
 
 export default defineConfig( {
-	plugins: [ react() ],
+	// Le paquet est épinglé par le plan ; on coupe seulement l'avertissement qui recommande plugin-react.
+	plugins: [ react( { disableOxcRecommendation: true } ) ],
 	test: {
 		environment: 'jsdom',
 		globals: false,
