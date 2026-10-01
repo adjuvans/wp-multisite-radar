@@ -3,6 +3,7 @@ namespace MultisiteRadar\Scan;
 
 use MultisiteRadar\Alerts\AlertEvaluator;
 use MultisiteRadar\Settings\Settings;
+use MultisiteRadar\Storage\SiteRecord;
 use MultisiteRadar\Storage\SitesRepository;
 use MultisiteRadar\Support\MainSite;
 
@@ -11,7 +12,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Planification sur le site principal de chaque réseau, qui ne traite que ses propres sites, avec ses propres réglages :
  * - traitement de la file toutes les 5 minutes, avec relance immédiate tant qu'il reste des sites ;
- * - passage quotidien : sites manquants, lignes orphelines, analyse complète périodique, recalcul des alertes.
+ * - passage quotidien : sites manquants, lignes orphelines, analyse complète périodique ;
+ * - recalcul des alertes par lots bornés et reprenables, planifié chaque jour et après un changement de réglages.
  */
 final class Queue {
 
@@ -21,6 +23,7 @@ final class Queue {
 	public const HOOK_RECOMPUTE   = 'msradar_recompute_alerts';
 	public const SCHEDULE         = 'msradar_five_minutes';
 	public const LAST_FULL_SCAN   = 'msradar_last_full_scan';
+	public const RECOMPUTE_CURSOR = 'msradar_recompute_cursor';
 	private const RECOMPUTE_CHUNK = 200;
 
 	private BatchRunner $runner;
@@ -132,40 +135,64 @@ final class Queue {
 			$this->continue_soon();
 		}
 
-		$this->run_recompute();
+		// Jamais dans la même requête qu'un passage de file : wp-cron exécute tous les événements échus ensemble.
+		MainSite::schedule_once( self::HOOK_RECOMPUTE );
 	}
 
 	/**
 	 * Recalcule les alertes des sites déjà analysés du réseau courant (avec ses réglages), à partir des données stockées.
 	 *
-	 * @param Lock|null $lock Verrou détenu à rafraîchir entre deux lots.
-	 * @return int Nombre de sites recalculés.
+	 * Le parcours reprend après le curseur msradar_recompute_cursor. Dès que le budget est écoulé (au moins un site
+	 * est évalué par appel) ou que le verrou est perdu, la position est enregistrée et la suite est planifiée ;
+	 * à la fin du parcours, le curseur est supprimé. Seuls les sites dont les alertes changent sont réécrits.
+	 *
+	 * @param Lock|null  $lock   Verrou détenu à rafraîchir entre deux lots.
+	 * @param float|null $budget Secondes disponibles ; BatchRunner::default_budget() par défaut.
+	 * @return int Nombre de sites évalués pendant cet appel, que leurs alertes aient changé (et été réécrites) ou non.
 	 */
-	public function recompute_alerts( ?Lock $lock = null ): int {
+	public function recompute_alerts( ?Lock $lock = null, ?float $budget = null ): int {
 		$network_id = get_current_network_id();
+		$budget     = $budget ?? BatchRunner::default_budget();
+		$start      = microtime( true );
 		$now        = time();
-		$after      = 0;
+		$after      = max( 0, (int) get_site_option( self::RECOMPUTE_CURSOR, 0 ) );
 		$count      = 0;
-		do {
+		while ( true ) {
 			$ids = $this->sites->ids_after( $after, self::RECOMPUTE_CHUNK, $network_id );
-			foreach ( $this->sites->find_many( $ids ) as $record ) {
-				if ( null === $record->scanned_at ) {
-					continue;
+			foreach ( $this->sites->find_many( $ids ) as $site_id => $record ) {
+				if ( null !== $record->scanned_at ) {
+					if ( $count > 0 && microtime( true ) - $start >= $budget ) {
+						$this->pause_recompute( $after );
+						return $count;
+					}
+					$this->recompute_site( $record, $now );
+					++$count;
 				}
-				$this->evaluator->apply( $record, $now );
-				$this->sites->save_alerts( $record );
-				++$count;
+				$after = $site_id;
 			}
-			if ( [] !== $ids ) {
-				$after = (int) end( $ids );
+			if ( count( $ids ) < self::RECOMPUTE_CHUNK ) {
+				delete_site_option( self::RECOMPUTE_CURSOR );
+				return $count;
 			}
-			$fetched = count( $ids );
+			$after = (int) end( $ids );
 			if ( null !== $lock && ! $lock->refresh() ) {
-				break;
+				$this->pause_recompute( $after );
+				return $count;
 			}
-		} while ( self::RECOMPUTE_CHUNK === $fetched );
+		}
+	}
 
-		return $count;
+	private function recompute_site( SiteRecord $record, int $now ): void {
+		$before = [ $record->alert_level, $record->alert_rules, $record->data['alerts'] ?? null ];
+		$this->evaluator->apply( $record, $now );
+		if ( [ $record->alert_level, $record->alert_rules, $record->data['alerts'] ?? null ] !== $before ) {
+			$this->sites->save_alerts( $record );
+		}
+	}
+
+	private function pause_recompute( int $after ): void {
+		update_site_option( self::RECOMPUTE_CURSOR, $after );
+		MainSite::schedule_once( self::HOOK_RECOMPUTE );
 	}
 
 	public function run_recompute(): void {
@@ -179,8 +206,12 @@ final class Queue {
 		}
 	}
 
+	/**
+	 * Les nouveaux réglages s'appliquent à tout le réseau : le recalcul repart du premier site.
+	 */
 	public function on_settings_updated(): void {
 		$this->evaluator->reset();
+		delete_site_option( self::RECOMPUTE_CURSOR );
 		MainSite::schedule_once( self::HOOK_RECOMPUTE );
 	}
 

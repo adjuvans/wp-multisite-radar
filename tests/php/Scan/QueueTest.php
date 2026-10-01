@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Tests\Scan;
 
+use MultisiteRadar\Install\Schema;
 use MultisiteRadar\Scan\Lock;
 use MultisiteRadar\Scan\Queue;
 use MultisiteRadar\Settings\Settings;
@@ -8,6 +9,11 @@ use MultisiteRadar\Support\MainSite;
 use MultisiteRadar\Tests\TestCase;
 
 final class QueueTest extends TestCase {
+
+	/**
+	 * Nom littéral : uninstall.php le reprend tel quel.
+	 */
+	private const CURSOR = 'msradar_recompute_cursor';
 
 	private Queue $queue;
 
@@ -146,6 +152,69 @@ final class QueueTest extends TestCase {
 		$this->assertSame( 1, $this->as_network( $other, fn (): int => $this->queue->recompute_alerts() ) );
 		$this->assertSame( [], $this->plugin()->sites()->find( 3102 )->alert_rule_ids(), 'Its own 12-month threshold applies.' );
 		$this->assertSame( [ 'inactive' ], $this->plugin()->sites()->find( 3101 )->alert_rule_ids(), 'The first network is left alone.' );
+	}
+
+	public function test_recompute_stops_when_its_budget_is_spent_and_resumes_after_its_cursor(): void {
+		$this->make_record( 3201, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		$this->make_record( 3202, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		wp_clear_scheduled_hook( Queue::HOOK_RECOMPUTE );
+
+		$this->assertSame( 1, $this->queue->recompute_alerts( null, 0.0 ), 'At least one site per call.' );
+		$this->assertSame( 3201, (int) get_site_option( self::CURSOR ) );
+		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_RECOMPUTE ) );
+		$this->assertSame( 3, $this->plugin()->sites()->find( 3201 )->alert_level );
+		$this->assertSame( 0, $this->plugin()->sites()->find( 3202 )->alert_level );
+
+		$this->assertSame( 1, $this->queue->recompute_alerts( null, 0.0 ) );
+		$this->assertSame( 3, $this->plugin()->sites()->find( 3202 )->alert_level );
+		$this->assertFalse( get_site_option( self::CURSOR ), 'Finished: the cursor is removed.' );
+	}
+
+	public function test_recompute_rewrites_only_the_sites_whose_alerts_changed(): void {
+		global $wpdb;
+		$this->make_record( 3301, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		$this->make_record( 3302, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		$this->queue->recompute_alerts();
+		$table = Schema::sites_table();
+		$wpdb->update( $table, [ 'users_count' => 4 ], [ 'site_id' => 3302 ] );
+		$writes = [];
+		$spy    = static function ( string $query ) use ( &$writes, $table ): string {
+			if ( 0 === strpos( $query, 'UPDATE `' . $table . '`' ) && 1 === preg_match( '/`site_id` = (\d+)/', $query, $match ) ) {
+				$writes[] = (int) $match[1];
+			}
+			return $query;
+		};
+		add_filter( 'query', $spy );
+
+		$evaluated = $this->queue->recompute_alerts();
+		remove_filter( 'query', $spy );
+
+		$this->assertSame( 2, $evaluated );
+		$this->assertSame( [ 3302 ], $writes );
+		$this->assertSame( 0, $this->plugin()->sites()->find( 3302 )->alert_level );
+		$this->assertSame( 3, $this->plugin()->sites()->find( 3301 )->alert_level );
+	}
+
+	public function test_a_settings_change_restarts_the_recompute_from_the_first_site(): void {
+		update_site_option( self::CURSOR, 3201 );
+		wp_clear_scheduled_hook( Queue::HOOK_RECOMPUTE );
+
+		$this->plugin()->settings()->update( [ 'scan' => [ 'full_rescan_days' => 14 ] ] );
+
+		$this->assertFalse( get_site_option( self::CURSOR ) );
+		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_RECOMPUTE ) );
+	}
+
+	public function test_daily_schedules_the_recompute_instead_of_running_it(): void {
+		$site_id = self::factory()->blog->create();
+		$this->make_record( $site_id, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		update_site_option( Queue::LAST_FULL_SCAN, time() );
+		wp_clear_scheduled_hook( Queue::HOOK_RECOMPUTE );
+
+		$this->queue->daily();
+
+		$this->assertSame( 0, $this->plugin()->sites()->find( $site_id )->alert_level, 'Not in the same request as a queue pass.' );
+		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_RECOMPUTE ) );
 	}
 
 	public function test_recompute_is_deferred_while_another_process_holds_the_lock(): void {
