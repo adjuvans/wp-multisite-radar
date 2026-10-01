@@ -10,6 +10,30 @@ defined( 'ABSPATH' ) || exit;
  */
 final class SitesRepository {
 
+	/**
+	 * Tri autorisé : clé publique => colonne.
+	 */
+	public const ORDERBY = [
+		'id'            => 'site_id',
+		'name'          => 'name',
+		'last_activity' => 'last_activity_gmt',
+		'users_count'   => 'users_count',
+		'content_count' => 'content_count',
+		'media_count'   => 'media_count',
+		'disk_bytes'    => 'disk_bytes',
+		'db_bytes'      => 'db_bytes',
+		'alert_level'   => 'alert_level',
+		'scanned_at'    => 'scanned_at',
+	];
+
+	private const STATUS_CLAUSES = [
+		'public'   => '(is_public = 1 AND is_archived = 0 AND is_spam = 0 AND is_deleted = 0)',
+		'private'  => 'is_public = 0',
+		'archived' => 'is_archived = 1',
+		'spam'     => 'is_spam = 1',
+		'deleted'  => 'is_deleted = 1',
+	];
+
 	public function find( int $site_id ): ?SiteRecord {
 		global $wpdb;
 		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE site_id = %d', Schema::sites_table(), $site_id ), ARRAY_A );
@@ -224,5 +248,118 @@ final class SitesRepository {
 
 	private static function now(): string {
 		return current_time( 'mysql', true );
+	}
+
+	/**
+	 * @param array $args Arguments déjà normalisés par SitesQuery::list().
+	 * @return array{items: SiteRecord[], total: int}
+	 */
+	public function query( array $args ): array {
+		global $wpdb;
+		$clauses = [ 'network_id = %d' ];
+		$params  = [ (int) $args['network_id'] ];
+
+		if ( '' !== $args['search'] ) {
+			$like      = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+			$clauses[] = '(name LIKE %s OR url LIKE %s)';
+			array_push( $params, $like, $like );
+		}
+		if ( [] !== $args['alert_level'] ) {
+			$clauses[] = 'alert_level IN (' . implode( ',', array_fill( 0, count( $args['alert_level'] ), '%d' ) ) . ')';
+			$params    = array_merge( $params, array_map( 'intval', $args['alert_level'] ) );
+		}
+		$status_parts = array_values( array_intersect_key( self::STATUS_CLAUSES, array_flip( $args['status'] ) ) );
+		if ( [] !== $status_parts ) {
+			$clauses[] = '(' . implode( ' OR ', $status_parts ) . ')';
+		}
+		if ( '' !== $args['theme'] ) {
+			$clauses[] = '(theme_stylesheet = %s OR theme_template = %s)';
+			array_push( $params, $args['theme'], $args['theme'] );
+		}
+		if ( '' !== $args['plugin'] ) {
+			$clauses[] = "site_id IN (SELECT site_id FROM %i WHERE type = 'plugin' AND slug = %s)";
+			array_push( $params, Schema::extensions_table(), $args['plugin'] );
+		}
+		if ( true === $args['has_users'] ) {
+			$clauses[] = 'users_count > 0';
+		} elseif ( false === $args['has_users'] ) {
+			$clauses[] = '(users_count = 0 AND scanned_at IS NOT NULL)';
+		}
+		if ( null !== $args['inactive_since'] ) {
+			$clauses[] = '(scanned_at IS NOT NULL AND (last_activity_gmt IS NULL OR last_activity_gmt < %s))';
+			$params[]  = $args['inactive_since'];
+		}
+		if ( [] !== $args['registry_status'] ) {
+			$clauses[] = 'registry_status IN (' . implode( ',', array_fill( 0, count( $args['registry_status'] ), '%s' ) ) . ')';
+			$params    = array_merge( $params, $args['registry_status'] );
+		}
+		if ( '' !== $args['rule'] ) {
+			$clauses[] = 'alert_rules LIKE %s';
+			$params[]  = '%' . $wpdb->esc_like( ',' . $args['rule'] . ',' ) . '%';
+		}
+
+		$table    = Schema::sites_table();
+		$where    = implode( ' AND ', $clauses );
+		$column   = self::ORDERBY[ $args['orderby'] ] ?? 'name';
+		$order    = 'desc' === $args['order'] ? 'DESC' : 'ASC';
+		$per_page = (int) $args['per_page'];
+		$offset   = ( (int) $args['page'] - 1 ) * $per_page;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $where ne contient que des fragments fixes et des placeholders ; $order vaut ASC ou DESC.
+		$total = (int) $wpdb->get_var(
+			$wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where}", array_merge( [ $table ], $params ) )
+		);
+		$rows  = $wpdb->get_results(
+			$wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Parameters are spread via array_merge ; placeholders match.
+				"SELECT * FROM %i WHERE {$where} ORDER BY %i {$order}, site_id ASC LIMIT %d OFFSET %d",
+				array_merge( [ $table ], $params, [ $column, $per_page, $offset ] )
+			),
+			ARRAY_A
+		);
+		// phpcs:enable
+
+		return [
+			'items' => array_map( [ SiteRecord::class, 'from_row' ], (array) $rows ),
+			'total' => $total,
+		];
+	}
+
+	/**
+	 * @param string[] $rule_ids
+	 * @return array{total: int, pending: int, with_alerts: int, error: int, warning: int, info: int, rules: array<string, int>}
+	 */
+	public function alert_counts( int $network_id, array $rule_ids ): array {
+		global $wpdb;
+		$table = Schema::sites_table();
+		$row   = (array) $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT COUNT(*) AS total, SUM(scanned_at IS NULL) AS pending, SUM(alert_level > 0) AS with_alerts, SUM(alert_level = 3) AS error, SUM(alert_level = 2) AS warning, SUM(alert_level = 1) AS info FROM %i WHERE network_id = %d',
+				$table,
+				$network_id
+			),
+			ARRAY_A
+		);
+
+		$rules = [];
+		foreach ( $rule_ids as $rule_id ) {
+			$rules[ $rule_id ] = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					'SELECT COUNT(*) FROM %i WHERE network_id = %d AND alert_rules LIKE %s',
+					$table,
+					$network_id,
+					'%' . $wpdb->esc_like( ',' . $rule_id . ',' ) . '%'
+				)
+			);
+		}
+
+		return [
+			'total'       => (int) ( $row['total'] ?? 0 ),
+			'pending'     => (int) ( $row['pending'] ?? 0 ),
+			'with_alerts' => (int) ( $row['with_alerts'] ?? 0 ),
+			'error'       => (int) ( $row['error'] ?? 0 ),
+			'warning'     => (int) ( $row['warning'] ?? 0 ),
+			'info'        => (int) ( $row['info'] ?? 0 ),
+			'rules'       => $rules,
+		];
 	}
 }

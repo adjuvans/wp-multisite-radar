@@ -7,6 +7,8 @@ use MultisiteRadar\Alerts\RuleRegistry;
 use MultisiteRadar\Collector\RegistryProbe;
 use MultisiteRadar\Collector\SiteCollector;
 use MultisiteRadar\Install\Installer;
+use MultisiteRadar\Query\AlertsQuery;
+use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Scan\BatchRunner;
 use MultisiteRadar\Scan\Invalidation;
 use MultisiteRadar\Scan\Lock;
@@ -47,6 +49,10 @@ final class Plugin {
 	private ?Queue $queue = null;
 
 	private ?Invalidation $invalidation = null;
+
+	private ?SitesQuery $sites_query = null;
+
+	private ?AlertsQuery $alerts_query = null;
 
 	public static function instance(): self {
 		if ( null === self::$instance ) {
@@ -139,5 +145,13 @@ final class Plugin {
 
 	public function invalidation(): Invalidation {
 		return $this->invalidation ??= new Invalidation( $this->sites(), $this->extensions(), $this->settings() );
+	}
+
+	public function sites_query(): SitesQuery {
+		return $this->sites_query ??= new SitesQuery( $this->sites(), $this->extensions(), $this->formatter(), $this->settings() );
+	}
+
+	public function alerts_query(): AlertsQuery {
+		return $this->alerts_query ??= new AlertsQuery( $this->sites(), $this->rules() );
 	}
 }
