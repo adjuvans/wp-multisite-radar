@@ -32,21 +32,28 @@ foreach ( $msradar_network_ids as $msradar_network_id ) {
 
 delete_metadata( 'user', 0, 'msradar_view_prefs', '', true );
 
-$msradar_hooks    = [ 'msradar_probe', 'msradar_process_queue', 'msradar_process_queue_continue', 'msradar_daily', 'msradar_recompute_alerts', 'msradar_legacy_menu_batch' ];
-$msradar_site_ids = $wpdb->get_col( $wpdb->prepare( 'SELECT blog_id FROM %i', $wpdb->blogs ) );
-foreach ( $msradar_site_ids as $msradar_site_id ) {
-	$wpdb->query(
-		$wpdb->prepare(
-			'DELETE FROM %i WHERE option_name IN (%s, %s)',
-			$wpdb->get_blog_prefix( (int) $msradar_site_id ) . 'options',
-			'msradar_registry',
-			'msradar_scan_lock'
-		)
-	);
+// Par lots de 500 sites. Seuls les sites dont l'option cron brute mentionne un de nos événements sont basculés :
+// lire l'option cron charge tout l'autoload du site, et le cache d'exécution est vidé après chaque bascule.
+$msradar_hooks = [ 'msradar_probe', 'msradar_process_queue', 'msradar_process_queue_continue', 'msradar_daily', 'msradar_recompute_alerts', 'msradar_legacy_menu_batch' ];
+$msradar_after = 0;
+do {
+	$msradar_site_ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT blog_id FROM %i WHERE blog_id > %d ORDER BY blog_id ASC LIMIT 500', $wpdb->blogs, $msradar_after ) ) );
+	$msradar_fetched  = count( $msradar_site_ids );
+	foreach ( $msradar_site_ids as $msradar_site_id ) {
+		$msradar_options_table = $wpdb->get_blog_prefix( $msradar_site_id ) . 'options';
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE option_name IN (%s, %s)', $msradar_options_table, 'msradar_registry', 'msradar_scan_lock' ) );
 
-	switch_to_blog( (int) $msradar_site_id );
-	foreach ( $msradar_hooks as $msradar_hook ) {
-		wp_clear_scheduled_hook( $msradar_hook );
+		$msradar_cron = $wpdb->get_var( $wpdb->prepare( 'SELECT option_value FROM %i WHERE option_name = %s', $msradar_options_table, 'cron' ) );
+		if ( is_string( $msradar_cron ) && false !== strpos( $msradar_cron, 'msradar_' ) ) {
+			switch_to_blog( $msradar_site_id );
+			foreach ( $msradar_hooks as $msradar_hook ) {
+				wp_clear_scheduled_hook( $msradar_hook );
+			}
+			restore_current_blog();
+			if ( wp_cache_supports( 'flush_runtime' ) ) {
+				wp_cache_flush_runtime();
+			}
+		}
+		$msradar_after = $msradar_site_id;
 	}
-	restore_current_blog();
-}
+} while ( 500 === $msradar_fetched );
