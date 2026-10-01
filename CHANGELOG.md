@@ -1,4 +1,4 @@
-# Changelog - Network Plugin Utilities
+# Changelog — Multisite Radar
 
 ## [2.0.0-alpha.1] - 2026-10-01
 

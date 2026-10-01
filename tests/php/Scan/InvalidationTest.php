@@ -2,6 +2,7 @@
 namespace MultisiteRadar\Tests\Scan;
 
 use MultisiteRadar\Install\Schema;
+use MultisiteRadar\Scan\Invalidation;
 use MultisiteRadar\Tests\TestCase;
 
 final class InvalidationTest extends TestCase {
@@ -127,5 +128,36 @@ final class InvalidationTest extends TestCase {
 		restore_current_blog();
 
 		$this->assertFalse( $this->dirty( $this->site_id ) );
+	}
+
+	public function test_a_storage_failure_during_site_deletion_does_not_break_the_core_hook(): void {
+		global $wpdb;
+		$site_id  = self::factory()->blog->create();
+		$errors   = [];
+		$on_error = static function ( $context ) use ( &$errors ): void {
+			$errors[] = $context;
+		};
+		$later    = false;
+		$probe    = static function () use ( &$later ): void {
+			$later = true;
+		};
+		$break    = static function ( string $query ): string {
+			return false !== strpos( $query, Schema::extensions_table() ) ? 'SELECT * FROM msradar_missing_table' : $query;
+		};
+		add_action( 'msradar_error', $on_error );
+		add_action( 'wp_delete_site', $probe, 99 );
+		add_filter( 'query', $break );
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			wp_delete_site( $site_id );
+		} finally {
+			$wpdb->suppress_errors( $suppress );
+			remove_filter( 'query', $break );
+			remove_action( 'wp_delete_site', $probe, 99 );
+			remove_action( 'msradar_error', $on_error );
+		}
+
+		$this->assertTrue( $later, 'Later subscribers of wp_delete_site still run.' );
+		$this->assertSame( [ Invalidation::class . '::on_site_deleted' ], $errors );
 	}
 }

@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Tests\Scan;
 
+use MultisiteRadar\Install\Schema;
 use MultisiteRadar\Scan\Lock;
 use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Tests\TestCase;
@@ -282,5 +283,36 @@ final class BatchRunnerTest extends TestCase {
 		$this->assertFalse( $ok );
 		$this->assertNull( $this->plugin()->sites()->find( $site_id ) );
 		$this->assertSame( [], $this->plugin()->extensions()->for_site( $site_id ) );
+	}
+
+	public function test_a_storage_failure_while_recording_a_scan_error_does_not_escape(): void {
+		global $wpdb;
+		$site_id = self::factory()->blog->create();
+		$this->plugin()->sites()->seed_from_blogs( get_current_network_id() );
+		$errors   = [];
+		$on_error = static function ( $context ) use ( &$errors ): void {
+			$errors[] = $context;
+		};
+		$options  = $wpdb->get_blog_prefix( $site_id ) . 'options';
+		$break    = static function ( string $query ) use ( $options ): string {
+			$write = 1 === preg_match( '/^\s*(INSERT|UPDATE|REPLACE)\b/i', $query );
+			if ( false !== strpos( $query, $options ) || ( $write && false !== strpos( $query, Schema::sites_table() ) ) ) {
+				return 'SELECT * FROM msradar_missing_table';
+			}
+			return $query;
+		};
+		add_action( 'msradar_error', $on_error );
+		add_filter( 'query', $break );
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			$scanned = $this->plugin()->runner()->scan_site( $site_id );
+		} finally {
+			$wpdb->suppress_errors( $suppress );
+			remove_filter( 'query', $break );
+			remove_action( 'msradar_error', $on_error );
+		}
+
+		$this->assertFalse( $scanned );
+		$this->assertSame( [ 'MultisiteRadar\Scan\BatchRunner::scan_site' ], $errors );
 	}
 }

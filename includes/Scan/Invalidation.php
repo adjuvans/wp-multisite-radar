@@ -105,17 +105,29 @@ final class Invalidation {
 	}
 
 	public function on_site_initialized( WP_Site $site ): void {
-		if ( $this->ready() ) {
-			// WP_Site::$site_id contient l'ID du réseau.
-			$this->sites->insert_pending( (int) $site->blog_id, (int) $site->site_id, $site->domain . $site->path );
+		if ( ! $this->ready() ) {
+			return;
 		}
+		$this->safely(
+			__METHOD__,
+			function () use ( $site ): void {
+				// WP_Site::$site_id contient l'ID du réseau.
+				$this->sites->insert_pending( (int) $site->blog_id, (int) $site->site_id, $site->domain . $site->path );
+			}
+		);
 	}
 
 	public function on_site_deleted( WP_Site $site ): void {
-		if ( $this->ready() ) {
-			$this->sites->delete( (int) $site->blog_id );
-			$this->extensions->delete_for_site( (int) $site->blog_id );
+		if ( ! $this->ready() ) {
+			return;
 		}
+		$this->safely(
+			__METHOD__,
+			function () use ( $site ): void {
+				$this->sites->delete( (int) $site->blog_id );
+				$this->extensions->delete_for_site( (int) $site->blog_id );
+			}
+		);
 	}
 
 	/**
@@ -141,5 +153,17 @@ final class Invalidation {
 
 	private function ready(): bool {
 		return Schema::is_current();
+	}
+
+	/**
+	 * Les dépôts lèvent une exception quand une écriture échoue. Un gestionnaire de hook ne doit jamais la laisser
+	 * remonter dans le hook du cœur : l'opération de WordPress réussirait, mais les abonnés suivants ne seraient pas appelés.
+	 */
+	private function safely( string $context, callable $callback ): void {
+		try {
+			$callback();
+		} catch ( \RuntimeException $error ) {
+			do_action( 'msradar_error', $context, $error );
+		}
 	}
 }

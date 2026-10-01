@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Collector;
 
+use MultisiteRadar\Install\Schema;
 use MultisiteRadar\Storage\SitesRepository;
 
 defined( 'ABSPATH' ) || exit;
@@ -105,7 +106,9 @@ final class RegistryProbe {
 			return;
 		}
 		update_option( self::OPTION, $this->build(), true );
-		$this->sites->mark_dirty( [ get_current_blog_id() ] );
+		if ( Schema::is_current() ) {
+			$this->sites->mark_dirty( [ get_current_blog_id() ] );
+		}
 		wp_clear_scheduled_hook( self::CRON_HOOK );
 	}
 

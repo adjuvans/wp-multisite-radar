@@ -5,6 +5,7 @@ use MultisiteRadar\Collector\Fingerprint;
 use MultisiteRadar\Collector\OriginResolver;
 use MultisiteRadar\Collector\RegistryProbe;
 use MultisiteRadar\Collector\SiteCollector;
+use MultisiteRadar\Install\Schema;
 use MultisiteRadar\Storage\SiteRecord;
 use MultisiteRadar\Tests\TestCase;
 
@@ -224,5 +225,29 @@ final class RegistryProbeTest extends TestCase {
 
 	public function test_plugin_boot_registers_the_probe(): void {
 		$this->assertSame( 10, has_action( RegistryProbe::CRON_HOOK, [ $this->plugin()->probe(), 'run' ] ) );
+	}
+
+	public function test_run_does_not_touch_the_sites_table_when_the_schema_is_not_installed(): void {
+		$queries = [];
+		$spy     = static function ( string $query ) use ( &$queries ): string {
+			if ( false !== strpos( $query, Schema::sites_table() ) ) {
+				$queries[] = $query;
+			}
+			return $query;
+		};
+		$version = get_site_option( Schema::OPTION );
+		update_site_option( Schema::OPTION, 0 );
+		$probe = new RegistryProbe( $this->plugin()->sites() );
+		$probe->start_tracking();
+		add_filter( 'query', $spy );
+		try {
+			$probe->run();
+		} finally {
+			remove_filter( 'query', $spy );
+			update_site_option( Schema::OPTION, $version );
+		}
+
+		$this->assertSame( [], $queries );
+		$this->assertIsArray( get_option( RegistryProbe::OPTION ), 'The registry is still written.' );
 	}
 }

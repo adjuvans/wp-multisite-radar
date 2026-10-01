@@ -2,6 +2,8 @@
 namespace MultisiteRadar\Tests\Alerts;
 
 use MultisiteRadar\Alerts\Alert;
+use MultisiteRadar\Alerts\RuleInterface;
+use MultisiteRadar\Alerts\RuleRegistry;
 use MultisiteRadar\Alerts\Rules\HighMediaRule;
 use MultisiteRadar\Alerts\Rules\InactiveRule;
 use MultisiteRadar\Alerts\Rules\NoUsersRule;
@@ -41,12 +43,61 @@ final class RulesTest extends TestCase {
 		$alert = $rule->evaluate( $this->build_record( [ 'media_count' => 1000 ] ), [ 'threshold' => 1000 ], time() );
 		$this->assertSame( [ 'count' => 1000, 'threshold' => 1000 ], $alert->args );
 		$this->assertNull( $rule->evaluate( $this->build_record( [ 'media_count' => 999 ] ), [ 'threshold' => 1000 ], time() ) );
-		$this->assertSame( '1000 media files (threshold: 1000)', $rule->message( $alert->args ) );
+		$this->assertSame( '1,000 media files (threshold: 1,000)', $rule->message( $alert->args ) );
 	}
 
 	public function test_default_params_satisfy_their_schema(): void {
 		foreach ( [ new NoUsersRule(), new InactiveRule(), new HighMediaRule() ] as $rule ) {
 			$this->assertTrue( rest_validate_value_from_schema( $rule->default_params(), $rule->params_schema(), 'params' ) );
 		}
+	}
+
+	public function test_rules_with_an_invalid_identifier_are_ignored(): void {
+		$bad    = new class() implements RuleInterface {
+			public function id(): string {
+				return 'bad,id';
+			}
+			public function label(): string {
+				return 'Bad';
+			}
+			public function description(): string {
+				return '';
+			}
+			public function default_severity(): string {
+				return 'info';
+			}
+			public function params_schema(): array {
+				return [ 'type' => 'object' ];
+			}
+			public function default_params(): array {
+				return [];
+			}
+			public function evaluate( SiteRecord $site, array $params, int $now ): ?Alert {
+				return null;
+			}
+			public function message( array $args ): string {
+				return '';
+			}
+		};
+		$add    = static function ( array $rules ) use ( $bad ): array {
+			$rules[] = $bad;
+			return $rules;
+		};
+		$this->setExpectedIncorrectUsage( RuleRegistry::class . '::all' );
+		add_filter( 'msradar_alert_rules', $add );
+		try {
+			$ids = array_keys( ( new RuleRegistry( [ new HighMediaRule() ] ) )->all() );
+		} finally {
+			remove_filter( 'msradar_alert_rules', $add );
+		}
+
+		$this->assertSame( [ 'high_media' ], $ids );
+	}
+
+	public function test_the_media_message_is_pluralised_and_localised(): void {
+		$rule = new HighMediaRule();
+
+		$this->assertSame( '1 media file (threshold: 1)', $rule->message( [ 'count' => 1, 'threshold' => 1 ] ) );
+		$this->assertSame( '1,500 media files (threshold: 1,000)', $rule->message( [ 'count' => 1500, 'threshold' => 1000 ] ) );
 	}
 }

@@ -61,7 +61,12 @@ final class HighMediaRule implements RuleInterface {
 	}
 
 	public function message( array $args ): string {
-		/* translators: 1: number of media files, 2: alert threshold. */
-		return sprintf( __( '%1$d media files (threshold: %2$d)', 'multisite-radar' ), (int) ( $args['count'] ?? 0 ), (int) ( $args['threshold'] ?? 0 ) );
+		$count = (int) ( $args['count'] ?? 0 );
+		return sprintf(
+			/* translators: 1: number of media files, 2: alert threshold. */
+			_n( '%1$s media file (threshold: %2$s)', '%1$s media files (threshold: %2$s)', $count, 'multisite-radar' ),
+			number_format_i18n( $count ),
+			number_format_i18n( (int) ( $args['threshold'] ?? 0 ) )
+		);
 	}
 }

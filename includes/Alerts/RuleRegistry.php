@@ -13,6 +13,8 @@ defined( 'ABSPATH' ) || exit;
  */
 final class RuleRegistry {
 
+	public const ID_PATTERN = '/^[a-z0-9_]{1,40}$/';
+
 	/** @var RuleInterface[] */
 	private array $defaults;
 	/** @var array<string, RuleInterface>|null */
@@ -38,9 +40,26 @@ final class RuleRegistry {
 		}
 		$rules = [];
 		foreach ( (array) apply_filters( 'msradar_alert_rules', $this->defaults ) as $rule ) {
-			if ( $rule instanceof RuleInterface ) {
-				$rules[ $rule->id() ] = $rule;
+			if ( ! $rule instanceof RuleInterface ) {
+				continue;
 			}
+			$id = $rule->id();
+			if ( 1 !== preg_match( self::ID_PATTERN, $id ) ) {
+				// Une virgule ou un « % » casserait l'encodage « ,id, » de la colonne alert_rules.
+				_doing_it_wrong(
+					__METHOD__,
+					esc_html(
+						sprintf(
+							/* translators: %s: alert rule identifier. */
+							__( 'The alert rule "%s" was ignored: identifiers may only contain lowercase letters, digits and underscores (40 characters at most).', 'multisite-radar' ),
+							$id
+						)
+					),
+					'2.0.0'
+				);
+				continue;
+			}
+			$rules[ $id ] = $rule;
 		}
 		if ( did_action( 'plugins_loaded' ) ) {
 			$this->rules = $rules;

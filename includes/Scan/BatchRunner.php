@@ -137,12 +137,17 @@ final class BatchRunner {
 			);
 			$this->sites->save( $record );
 		} catch ( Throwable $error ) {
-			if ( null === get_site( $site_id ) ) {
-				$this->sites->delete( $site_id );
-				$this->extensions->delete_for_site( $site_id );
-				return false;
+			try {
+				if ( null === get_site( $site_id ) ) {
+					$this->sites->delete( $site_id );
+					$this->extensions->delete_for_site( $site_id );
+					return false;
+				}
+				$this->record_failure( $site_id, $error->getMessage() );
+			} catch ( \RuntimeException $storage ) {
+				// Le stockage lui-même est en échec : rien n'est enregistré, le site sera repris au prochain passage complet.
+				do_action( 'msradar_error', __METHOD__, $storage );
 			}
-			$this->record_failure( $site_id, $error->getMessage() );
 			return false;
 		}
 
