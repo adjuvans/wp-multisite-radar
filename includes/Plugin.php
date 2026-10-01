@@ -7,6 +7,7 @@ use MultisiteRadar\Alerts\RuleRegistry;
 use MultisiteRadar\Cli\RadarCommand;
 use MultisiteRadar\Collector\RegistryProbe;
 use MultisiteRadar\Collector\SiteCollector;
+use MultisiteRadar\Export\ExportHandler;
 use MultisiteRadar\Install\Installer;
 use MultisiteRadar\Install\LegacyMigration;
 use MultisiteRadar\Query\AlertsQuery;
@@ -69,6 +70,8 @@ final class Plugin {
 
 	private ?LegacyMigration $legacy = null;
 
+	private ?ExportHandler $export = null;
+
 	public static function instance(): self {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
@@ -89,6 +92,10 @@ final class Plugin {
 		$this->invalidation()->register();
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 		$this->legacy()->register();
+
+		if ( is_admin() ) {
+			$this->export()->register();
+		}
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			RadarCommand::register( $this );
@@ -200,5 +207,9 @@ final class Plugin {
 
 	public function preferences(): Preferences {
 		return $this->preferences ??= new Preferences();
+	}
+
+	public function export(): ExportHandler {
+		return $this->export ??= new ExportHandler( $this->sites_query() );
 	}
 }
