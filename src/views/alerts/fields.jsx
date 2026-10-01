@@ -24,7 +24,8 @@ export function getAlertsFields( rules = [] ) {
 				label: rule.label,
 			} ) ),
 			filterBy: { operators: [ 'isAny' ] },
-			getValue: ( { item } ) => item.rule,
+			// The group header shows this value; the filter keeps rule ids (elements, URL and REST args).
+			getValue: ( { item } ) => item.label || item.rule,
 			render: ( { item } ) => item.label,
 		},
 		{

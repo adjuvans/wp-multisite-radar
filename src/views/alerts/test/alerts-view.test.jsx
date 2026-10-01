@@ -70,7 +70,9 @@ test( 'renders the preloaded alerts without any request', async () => {
 
 	expect( screen.getByText( 'Site vide' ) ).toBeInTheDocument();
 	// Sorted by rule: DataViews shows the group header.
-	expect( screen.getByText( 'Rule: no_users' ) ).toBeInTheDocument();
+	expect(
+		screen.getByText( 'Rule: Site without users' )
+	).toBeInTheDocument();
 	await act( async () => {
 		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 	} );
