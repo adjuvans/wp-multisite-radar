@@ -1,0 +1,13 @@
+parameters:
+	level: 6
+	paths:
+		- multisite-radar.php
+		- includes
+	bootstrapFiles:
+		- tests/phpstan-bootstrap.php
+	scanFiles:
+		- vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
+	ignoreErrors:
+		-
+			identifier: missingType.iterableValue
+	reportUnmatchedIgnoredErrors: false

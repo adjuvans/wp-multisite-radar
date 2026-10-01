@@ -49,3 +49,6 @@ build/
 
 # AI
 .claude
+# Multisite Radar
+/vendor/
+.phpunit.result.cache

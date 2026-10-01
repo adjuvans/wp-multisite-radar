@@ -1,0 +1,32 @@
+<?php
+/**
+ * Plugin Name:       Multisite Radar
+ * Plugin URI:        https://github.com/adjuvans/wp-network-plugin-utilities
+ * Description:       Network-wide audit for WordPress Multisite: sites, content types, users, plugins, themes and health alerts.
+ * Version:           2.0.0-dev
+ * Requires at least: 6.9
+ * Requires PHP:      7.4
+ * Author:            Cyrille de Gourcy
+ * License:           GPL-3.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
+ * Text Domain:       multisite-radar
+ * Network:           true
+ *
+ * @package MultisiteRadar
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+if ( defined( 'MSRADAR_VERSION' ) ) {
+	return;
+}
+
+define( 'MSRADAR_VERSION', '2.0.0-dev' );
+define( 'MSRADAR_FILE', __FILE__ );
+define( 'MSRADAR_DIR', plugin_dir_path( __FILE__ ) );
+define( 'MSRADAR_URL', plugin_dir_url( __FILE__ ) );
+
+require_once MSRADAR_DIR . 'includes/Autoloader.php';
+MultisiteRadar\Autoloader::register( MSRADAR_DIR . 'includes/' );
+
+MultisiteRadar\Plugin::instance()->boot();

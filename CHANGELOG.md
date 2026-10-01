@@ -1,5 +1,11 @@
 # Changelog - Network Plugin Utilities
 
+## [2.0.0] - en cours
+
+Réécriture complète sous le nom **Multisite Radar** (slug `multisite-radar`). Voir la spec dans `docs/superpowers/specs/`.
+
+---
+
 ## [1.6.0] - 2025-12-10
 
 ### 🐛 Correction critique
