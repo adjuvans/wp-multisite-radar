@@ -231,8 +231,25 @@ final class SiteCollectorTest extends TestCase {
 		$site_id = self::factory()->blog->create();
 		$wpdb->query( $wpdb->prepare( 'DROP TABLE %i', $wpdb->get_blog_prefix( $site_id ) . 'posts' ) );
 
-		$this->expectException( RuntimeException::class );
-		( new SiteCollector( $this->plugin()->settings() ) )->collect( $site_id );
+		try {
+			( new SiteCollector( $this->plugin()->settings() ) )->collect( $site_id );
+			$this->fail( 'Expected a RuntimeException.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertNotSame( '', $e->getMessage() );
+			$this->assertStringNotContainsString( '&#', $e->getMessage() );
+		}
+	}
+
+	public function test_network_active_plugins_come_from_the_sites_own_network(): void {
+		$network_id = self::factory()->network->create();
+		update_network_option( $network_id, 'active_sitewide_plugins', [ 'acme/acme.php' => time() ] );
+		$site_id = self::factory()->blog->create( [ 'network_id' => $network_id ] );
+		update_blog_option( $site_id, 'active_plugins', [ 'acme/acme.php' ] );
+
+		$record = $this->collect( $site_id );
+
+		$this->assertSame( $network_id, $record->network_id );
+		$this->assertSame( [], $record->data['plugins_local'] );
 	}
 
 	public function test_unknown_site_returns_null(): void {

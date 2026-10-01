@@ -50,7 +50,7 @@ final class SiteCollector {
 			$wpdb->suppress_errors( $suppress );
 		}
 
-		$network_plugins = array_keys( (array) get_site_option( 'active_sitewide_plugins', [] ) );
+		$network_plugins = array_keys( (array) get_network_option( (int) $site->site_id, 'active_sitewide_plugins', [] ) );
 		$active_plugins  = isset( $options['active_plugins'] ) && is_array( $options['active_plugins'] )
 			? array_values( array_filter( $options['active_plugins'], 'is_string' ) )
 			: [];
@@ -99,7 +99,7 @@ final class SiteCollector {
 				'blog_public' => (int) ( $options['blog_public'] ?? 1 ),
 				'siteurl'     => $siteurl,
 				'home'        => $home,
-				'locale'      => $this->locale( $options ),
+				'locale'      => $this->locale( $options, (int) $site->site_id ),
 			],
 		];
 		$record->dirty             = false;
@@ -373,10 +373,10 @@ final class SiteCollector {
 		return $names;
 	}
 
-	private function locale( array $options ): string {
+	private function locale( array $options, int $network_id ): string {
 		$locale = self::string_option( $options, 'WPLANG' );
 		if ( '' === $locale ) {
-			$locale = (string) get_site_option( 'WPLANG', '' );
+			$locale = (string) get_network_option( $network_id, 'WPLANG', '' );
 		}
 		return '' !== $locale ? $locale : 'en_US';
 	}
@@ -393,7 +393,7 @@ final class SiteCollector {
 	private function guard(): void {
 		global $wpdb;
 		if ( '' !== $wpdb->last_error ) {
-			throw new RuntimeException( esc_html( $wpdb->last_error ) );
+			throw new RuntimeException( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- not output; escaped at display.
 		}
 	}
 }
