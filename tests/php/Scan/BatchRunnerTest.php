@@ -145,4 +145,47 @@ final class BatchRunnerTest extends TestCase {
 		$this->assertNotNull( $this->plugin()->sites()->find( $healthy )->scanned_at );
 		$this->assertFalse( $this->plugin()->lock()->is_locked() );
 	}
+
+	public function test_an_extensions_failure_is_recorded_and_the_queue_continues(): void {
+		global $wpdb;
+		$failing = self::factory()->blog->create();
+		$healthy = self::factory()->blog->create();
+		$this->seed();
+		$table = $wpdb->base_prefix . 'msradar_site_extensions';
+		$fired = 0;
+		$guard = static function ( string $query ) use ( &$fired, $table, $failing ): string {
+			if ( 0 === $fired && 0 === strpos( $query, 'DELETE FROM `' . $table . '`' ) && false !== strpos( $query, '`site_id` = ' . $failing ) ) {
+				++$fired;
+				return 'DELETE FROM msradar_no_such_table';
+			}
+			return $query;
+		};
+		add_filter( 'query', $guard );
+		$previous = $wpdb->suppress_errors( true );
+
+		$result = $this->plugin()->runner()->run( 60.0 );
+		$wpdb->suppress_errors( $previous );
+		remove_filter( 'query', $guard );
+		$record = $this->plugin()->sites()->find( $failing );
+
+		$this->assertSame( 1, $fired );
+		$this->assertSame( 0, $result['remaining'] );
+		$this->assertArrayHasKey( 'scan_error', $record->data );
+		$this->assertNull( $record->scanned_at );
+		$this->assertNotNull( $this->plugin()->sites()->find( $healthy )->scanned_at );
+	}
+
+	public function test_a_site_deleted_with_broken_tables_is_not_recreated(): void {
+		global $wpdb;
+		$site_id = self::factory()->blog->create();
+		$this->seed();
+		$wpdb->query( $wpdb->prepare( 'DROP TABLE %i', $wpdb->get_blog_prefix( $site_id ) . 'posts' ) );
+		$wpdb->delete( $wpdb->blogs, [ 'blog_id' => $site_id ] );
+		clean_blog_cache( $site_id );
+
+		$ok = $this->plugin()->runner()->scan_site( $site_id );
+
+		$this->assertFalse( $ok );
+		$this->assertNull( $this->plugin()->sites()->find( $site_id ) );
+	}
 }

@@ -26,4 +26,21 @@ final class ExtensionsRepositoryTest extends TestCase {
 		$extensions->delete_for_site( 5 );
 		$this->assertSame( [], $extensions->for_site( 5 ) );
 	}
+
+	public function test_a_failed_write_throws(): void {
+		global $wpdb;
+		$guard = static fn ( string $query ): string => 0 === strpos( $query, 'DELETE' ) ? 'DELETE FROM msradar_no_such_table' : $query;
+		add_filter( 'query', $guard );
+		$previous = $wpdb->suppress_errors( true );
+
+		try {
+			$this->plugin()->extensions()->replace_for_site( 5, [ 'a.php' ], '', '' );
+			$this->fail( 'A RuntimeException was expected.' );
+		} catch ( \RuntimeException $error ) {
+			$this->assertNotSame( '', $error->getMessage() );
+		} finally {
+			$wpdb->suppress_errors( $previous );
+			remove_filter( 'query', $guard );
+		}
+	}
 }

@@ -70,9 +70,12 @@ final class BatchRunner {
 					$seen[] = $site_id;
 					$ok     = $this->scan_site( $site_id );
 					++$processed;
-					$this->lock->refresh();
+					$owned = $this->lock->refresh();
 					if ( null !== $on_site ) {
 						$on_site( $site_id, $ok );
+					}
+					if ( ! $owned ) {
+						break 2;
 					}
 				}
 			}
@@ -104,14 +107,19 @@ final class BatchRunner {
 			}
 
 			$this->evaluator->apply( $record, time() );
-			$this->sites->save( $record );
 			$this->extensions->replace_for_site(
 				$site_id,
 				(array) ( $record->data['plugins_local'] ?? [] ),
 				$record->theme_stylesheet,
 				$record->theme_template
 			);
+			$this->sites->save( $record );
 		} catch ( Throwable $error ) {
+			if ( null === get_site( $site_id ) ) {
+				$this->sites->delete( $site_id );
+				$this->extensions->delete_for_site( $site_id );
+				return false;
+			}
 			$this->record_failure( $site_id, $error->getMessage() );
 			return false;
 		}
@@ -123,9 +131,11 @@ final class BatchRunner {
 	private function record_failure( int $site_id, string $message ): void {
 		$record = $this->sites->find( $site_id );
 		if ( null === $record ) {
+			$site               = get_site( $site_id );
 			$record             = new SiteRecord();
 			$record->site_id    = $site_id;
-			$record->network_id = get_current_network_id();
+			$record->network_id = null !== $site ? (int) $site->site_id : get_current_network_id();
+			$record->url        = null !== $site ? $site->domain . $site->path : '';
 		}
 		$record->data['scan_error'] = [
 			'message' => $message,
