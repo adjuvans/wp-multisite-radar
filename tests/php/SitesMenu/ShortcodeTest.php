@@ -17,19 +17,40 @@ final class ShortcodeTest extends TestCase {
 		$this->plugin()->settings()->update( [ 'sites_menu' => [ 'enabled' => true ] ] );
 	}
 
-	public function test_nothing_is_registered_while_the_module_is_disabled(): void {
-		remove_shortcode( Shortcode::TAG );
+	public function test_the_1x_api_exists_but_renders_nothing_while_the_module_is_disabled(): void {
+		self::factory()->blog->create( [ 'title' => 'Blog RH' ] );
+		update_site_option( LegacyMigration::ALIASES, 1 );
 
-		$this->plugin()->sites_menu()->init();
+		$this->plugin()->sites_menu()->register();
 
-		$this->assertFalse( shortcode_exists( Shortcode::TAG ) );
+		// Comme en 1.x, dont la fonction et le shortcode existaient toujours et n'affichaient rien, menu désactivé.
+		$this->assertTrue( function_exists( 'rdc_network_sites_menu' ), 'Themes calling the 1.x function must not hit a fatal error.' );
+		$this->assertSame( '', do_shortcode( '[network_sites_menu]' ) );
+		$this->assertSame( '', do_shortcode( '[msradar_sites]' ), 'No raw shortcode left in the content.' );
+		ob_start();
+		rdc_network_sites_menu();
+		$this->assertSame( '', ob_get_clean() );
+	}
+
+	public function test_the_shortcode_is_registered_but_empty_while_the_module_is_disabled(): void {
+		self::factory()->blog->create( [ 'title' => 'Blog RH' ] );
+
+		$this->plugin()->sites_menu()->register();
+
+		$this->assertSame( '', do_shortcode( '[msradar_sites]' ) );
+		$this->assertFalse( shortcode_exists( Shortcode::LEGACY_TAG ), 'No 1.x alias without a migrated 1.x install.' );
+	}
+
+	public function test_the_public_api_is_loaded_on_plugins_loaded_after_a_1x_mu_plugin(): void {
+		// 1.x déclarait sa fonction et son shortcode à plugins_loaded (priorité 10) : passer après évite de les redéclarer.
+		$this->assertSame( 20, has_action( 'plugins_loaded', [ $this->plugin()->sites_menu(), 'register_public_api' ] ) );
 	}
 
 	public function test_the_shortcode_lists_public_sites_with_a_safe_wrapper(): void {
 		self::factory()->blog->create( [ 'title' => 'Blog RH' ] );
 		$this->enable();
 
-		$this->plugin()->sites_menu()->init();
+		$this->plugin()->sites_menu()->register();
 		$html = do_shortcode( '[msradar_sites class="menu-a" wrapper="script"]' );
 
 		$this->assertStringStartsWith( '<ul class="menu-a">', $html );
@@ -42,7 +63,7 @@ final class ShortcodeTest extends TestCase {
 		$this->enable();
 		update_site_option( LegacyMigration::ALIASES, 1 );
 
-		$this->plugin()->sites_menu()->init();
+		$this->plugin()->sites_menu()->register();
 
 		$this->assertStringStartsWith( '<ul class="network-sites-menu">', do_shortcode( '[network_sites_menu]' ) );
 		$this->assertTrue( function_exists( 'rdc_network_sites_menu' ) );
@@ -61,7 +82,7 @@ final class ShortcodeTest extends TestCase {
 		$this->enable();
 		update_site_option( LegacyMigration::ALIASES, 1 );
 
-		$this->plugin()->sites_menu()->init();
+		$this->plugin()->sites_menu()->register();
 
 		$this->assertSame( 'from 1.x', do_shortcode( '[network_sites_menu]' ) );
 	}

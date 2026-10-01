@@ -1,6 +1,7 @@
 <?php
 /**
- * Fonction publique de la 1.x, chargée seulement si une installation 1.x a été migrée (thèmes qui l'appellent).
+ * Fonction publique de la 1.x, chargée dès qu'une installation 1.x a été migrée (thèmes qui l'appellent), que le
+ * module soit actif ou non : désactivé, elle n'affiche rien, comme en 1.x.
  *
  * @package MultisiteRadar
  */

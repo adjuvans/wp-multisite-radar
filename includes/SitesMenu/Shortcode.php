@@ -4,7 +4,7 @@ namespace MultisiteRadar\SitesMenu;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * [msradar_sites wrapper="ul" class="…"] et l'alias 1.x [network_sites_menu].
+ * [msradar_sites wrapper="ul" class="…"] et l'alias 1.x [network_sites_menu]. Vides tant que le module est désactivé.
  */
 final class Shortcode {
 
@@ -13,8 +13,14 @@ final class Shortcode {
 
 	private SitesListCache $cache;
 
-	public function __construct( SitesListCache $cache ) {
-		$this->cache = $cache;
+	/**
+	 * Indique si le module est actif (Module::enabled()).
+	 */
+	private \Closure $enabled;
+
+	public function __construct( SitesListCache $cache, \Closure $enabled ) {
+		$this->cache   = $cache;
+		$this->enabled = $enabled;
 	}
 
 	public function register( bool $legacy ): void {
@@ -58,6 +64,9 @@ final class Shortcode {
 	}
 
 	public function markup( string $wrapper, string $css_class, string $order_by = 'name' ): string {
+		if ( ! ( $this->enabled )() ) {
+			return '';
+		}
 		$sites = Renderer::select( $this->cache->get(), [], [], $order_by, 'asc' );
 		if ( [] === $sites ) {
 			return '';
