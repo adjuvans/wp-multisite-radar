@@ -27,20 +27,31 @@ final class ExtensionsRepositoryTest extends TestCase {
 		$this->assertSame( [], $extensions->for_site( 5 ) );
 	}
 
-	public function test_a_failed_write_throws(): void {
+	/**
+	 * @dataProvider failing_statements
+	 */
+	public function test_a_failed_write_throws( string $prefix ): void {
 		global $wpdb;
-		$guard = static fn ( string $query ): string => 0 === strpos( $query, 'DELETE' ) ? 'DELETE FROM msradar_no_such_table' : $query;
+		$guard = static fn ( string $query ): string => 0 === strpos( $query, $prefix . ' `' . $wpdb->base_prefix . 'msradar_site_extensions`' ) ? 'SELECT * FROM msradar_no_such_table' : $query;
 		add_filter( 'query', $guard );
 		$previous = $wpdb->suppress_errors( true );
+		$this->expectException( \RuntimeException::class );
 
 		try {
 			$this->plugin()->extensions()->replace_for_site( 5, [ 'a.php' ], '', '' );
-			$this->fail( 'A RuntimeException was expected.' );
-		} catch ( \RuntimeException $error ) {
-			$this->assertNotSame( '', $error->getMessage() );
 		} finally {
 			$wpdb->suppress_errors( $previous );
 			remove_filter( 'query', $guard );
 		}
+	}
+
+	/**
+	 * @return array<string, array{string}>
+	 */
+	public function failing_statements(): array {
+		return [
+			'delete' => [ 'DELETE FROM' ],
+			'insert' => [ 'INSERT INTO' ],
+		];
 	}
 }

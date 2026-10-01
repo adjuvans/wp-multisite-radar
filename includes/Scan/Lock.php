@@ -17,7 +17,7 @@ final class Lock {
 
 	public function __construct( int $ttl = 120 ) {
 		$this->ttl   = $ttl;
-		$this->token = wp_generate_password( 20, false );
+		$this->token = bin2hex( random_bytes( 10 ) );
 	}
 
 	private function value( int $expires ): string {

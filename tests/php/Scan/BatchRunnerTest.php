@@ -154,38 +154,62 @@ final class BatchRunnerTest extends TestCase {
 		$table = $wpdb->base_prefix . 'msradar_site_extensions';
 		$fired = 0;
 		$guard = static function ( string $query ) use ( &$fired, $table, $failing ): string {
-			if ( 0 === $fired && 0 === strpos( $query, 'DELETE FROM `' . $table . '`' ) && false !== strpos( $query, '`site_id` = ' . $failing ) ) {
+			if ( 0 === $fired && 0 === strpos( $query, 'INSERT INTO `' . $table . '`' ) && false !== strpos( $query, 'VALUES (' . $failing . ',' ) ) {
 				++$fired;
-				return 'DELETE FROM msradar_no_such_table';
+				return 'SELECT * FROM msradar_no_such_table';
 			}
 			return $query;
 		};
 		add_filter( 'query', $guard );
 		$previous = $wpdb->suppress_errors( true );
+		$results  = [];
 
-		$result = $this->plugin()->runner()->run( 60.0 );
+		$result = $this->plugin()->runner()->run(
+			60.0,
+			static function ( int $id, bool $ok ) use ( &$results ): void {
+				$results[ $id ] = $ok;
+			}
+		);
 		$wpdb->suppress_errors( $previous );
 		remove_filter( 'query', $guard );
 		$record = $this->plugin()->sites()->find( $failing );
 
 		$this->assertSame( 1, $fired );
+		$this->assertFalse( $results[ $failing ] );
+		$this->assertTrue( $results[ $healthy ] );
 		$this->assertSame( 0, $result['remaining'] );
 		$this->assertArrayHasKey( 'scan_error', $record->data );
 		$this->assertNull( $record->scanned_at );
 		$this->assertNotNull( $this->plugin()->sites()->find( $healthy )->scanned_at );
 	}
 
-	public function test_a_site_deleted_with_broken_tables_is_not_recreated(): void {
+	public function test_a_site_that_vanishes_during_a_failing_collection_is_not_recreated(): void {
 		global $wpdb;
 		$site_id = self::factory()->blog->create();
 		$this->seed();
-		$wpdb->query( $wpdb->prepare( 'DROP TABLE %i', $wpdb->get_blog_prefix( $site_id ) . 'posts' ) );
-		$wpdb->delete( $wpdb->blogs, [ 'blog_id' => $site_id ] );
-		clean_blog_cache( $site_id );
+		$this->plugin()->extensions()->replace_for_site( $site_id, [ 'a.php' ], '', '' );
+		$posts = '`' . $wpdb->get_blog_prefix( $site_id ) . 'posts`';
+		$fired = false;
+		$guard = static function ( string $query ) use ( &$fired, $posts, $site_id ): string {
+			if ( ! $fired && false !== strpos( $query, $posts ) ) {
+				$fired = true;
+				global $wpdb;
+				$wpdb->delete( $wpdb->blogs, [ 'blog_id' => $site_id ] );
+				clean_blog_cache( $site_id );
+				return 'SELECT * FROM msradar_no_such_table';
+			}
+			return $query;
+		};
+		add_filter( 'query', $guard );
+		$previous = $wpdb->suppress_errors( true );
 
 		$ok = $this->plugin()->runner()->scan_site( $site_id );
+		$wpdb->suppress_errors( $previous );
+		remove_filter( 'query', $guard );
 
+		$this->assertTrue( $fired );
 		$this->assertFalse( $ok );
 		$this->assertNull( $this->plugin()->sites()->find( $site_id ) );
+		$this->assertSame( [], $this->plugin()->extensions()->for_site( $site_id ) );
 	}
 }
