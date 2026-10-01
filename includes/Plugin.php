@@ -13,6 +13,7 @@ use MultisiteRadar\Query\AlertsQuery;
 use MultisiteRadar\Query\SiteUsersQuery;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Rest\AlertsController;
+use MultisiteRadar\Rest\PreferencesController;
 use MultisiteRadar\Rest\ScanController;
 use MultisiteRadar\Rest\SettingsController;
 use MultisiteRadar\Rest\SitesController;
@@ -20,6 +21,7 @@ use MultisiteRadar\Scan\BatchRunner;
 use MultisiteRadar\Scan\Invalidation;
 use MultisiteRadar\Scan\Lock;
 use MultisiteRadar\Scan\Queue;
+use MultisiteRadar\Settings\Preferences;
 use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Storage\ExtensionsRepository;
 use MultisiteRadar\Storage\SitesRepository;
@@ -34,6 +36,8 @@ final class Plugin {
 	private static ?Plugin $instance = null;
 
 	private ?Settings $settings = null;
+
+	private ?Preferences $preferences = null;
 
 	private ?SitesRepository $sites = null;
 
@@ -98,6 +102,7 @@ final class Plugin {
 			new ScanController( $this->sites(), $this->runner(), $this->queue(), $this->lock() ),
 			new SettingsController( $this->settings(), $this->rules() ),
 			new AlertsController( $this->alerts_query() ),
+			new PreferencesController( $this->preferences() ),
 		];
 		foreach ( $controllers as $controller ) {
 			$controller->register_routes();
@@ -191,5 +196,9 @@ final class Plugin {
 
 	public function alerts_query(): AlertsQuery {
 		return $this->alerts_query ??= new AlertsQuery( $this->sites(), $this->rules(), $this->evaluator(), $this->formatter() );
+	}
+
+	public function preferences(): Preferences {
+		return $this->preferences ??= new Preferences();
 	}
 }
