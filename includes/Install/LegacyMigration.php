@@ -32,6 +32,7 @@ final class LegacyMigration {
 
 	public function register(): void {
 		add_action( 'msradar_activated', [ $this, 'start' ] );
+		add_action( 'msradar_deactivated', [ $this, 'unschedule' ] );
 		add_action( 'admin_init', [ $this, 'maybe_start' ] );
 		add_action( self::HOOK, [ $this, 'run_menu_batch' ] );
 		add_action( 'network_admin_notices', [ $this, 'render_coexistence_notice' ] );
@@ -61,6 +62,17 @@ final class LegacyMigration {
 			]
 		);
 		$this->schedule_next();
+	}
+
+	/**
+	 * À la désactivation : plus d'événement en attente. Le curseur reste, et start() reprend la migration à la réactivation.
+	 */
+	public function unschedule(): void {
+		MainSite::run(
+			static function (): void {
+				wp_clear_scheduled_hook( self::HOOK );
+			}
+		);
 	}
 
 	/**

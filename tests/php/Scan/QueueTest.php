@@ -160,7 +160,7 @@ final class QueueTest extends TestCase {
 		wp_clear_scheduled_hook( Queue::HOOK_RECOMPUTE );
 
 		$this->assertSame( 1, $this->queue->recompute_alerts( null, 0.0 ), 'At least one site per call.' );
-		$this->assertSame( 3201, (int) get_site_option( self::CURSOR ) );
+		$this->assertSame( 3201, get_site_option( self::CURSOR )['after'] );
 		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_RECOMPUTE ) );
 		$this->assertSame( 3, $this->plugin()->sites()->find( 3201 )->alert_level );
 		$this->assertSame( 0, $this->plugin()->sites()->find( 3202 )->alert_level );
@@ -213,7 +213,7 @@ final class QueueTest extends TestCase {
 
 		$this->queue->daily();
 
-		$this->assertSame( 0, $this->plugin()->sites()->find( $site_id )->alert_level, 'Not in the same request as a queue pass.' );
+		$this->assertSame( 0, $this->plugin()->sites()->find( $site_id )->alert_level, 'daily() only schedules the recompute; it never runs it.' );
 		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_RECOMPUTE ) );
 	}
 
@@ -259,5 +259,96 @@ final class QueueTest extends TestCase {
 		$this->plugin()->settings()->update( [ 'scan' => [ 'full_rescan_days' => 14 ] ] );
 
 		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_RECOMPUTE ) );
+	}
+
+	public function test_recompute_waits_when_a_queue_pass_already_ran_in_this_request(): void {
+		$this->make_record( 3501, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		$this->mark_all_clean();
+		wp_clear_scheduled_hook( Queue::HOOK_RECOMPUTE );
+		$this->queue->process();
+
+		$before = time();
+		$this->queue->run_recompute();
+
+		$this->assertSame( 0, $this->plugin()->sites()->find( 3501 )->alert_level, 'A single time budget per cron request.' );
+		$next = wp_next_scheduled( Queue::HOOK_RECOMPUTE );
+		$this->assertNotFalse( $next );
+		$this->assertGreaterThanOrEqual( $before + MINUTE_IN_SECONDS, $next );
+	}
+
+	public function test_a_queue_pass_waits_when_the_recompute_already_ran_in_this_request(): void {
+		$network = get_current_network_id();
+		$this->plugin()->sites()->seed_from_blogs( $network );
+		$this->plugin()->sites()->mark_all_dirty( $network );
+		$dirty = $this->plugin()->sites()->count_dirty();
+		wp_clear_scheduled_hook( Queue::HOOK_CONTINUE );
+
+		$this->queue->run_recompute();
+		$this->queue->process();
+
+		$this->assertSame( $dirty, $this->plugin()->sites()->count_dirty() );
+		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_CONTINUE ) );
+	}
+
+	public function test_the_cursor_records_the_settings_it_was_computed_with(): void {
+		$this->make_record( 3601, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		$this->make_record( 3602, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		wp_clear_scheduled_hook( Queue::HOOK_RECOMPUTE );
+
+		$this->queue->recompute_alerts( null, 0.0 );
+
+		$this->assertSame(
+			[
+				'after'  => 3601,
+				'config' => md5( (string) wp_json_encode( $this->plugin()->settings()->get( 'alerts' ) ) ),
+			],
+			get_site_option( self::CURSOR )
+		);
+	}
+
+	public function test_a_cursor_written_with_other_settings_restarts_from_the_first_site(): void {
+		$this->make_record( 3601, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		$this->make_record( 3602, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		update_site_option(
+			self::CURSOR,
+			[
+				'after'  => 3601,
+				'config' => 'settings-of-an-older-run',
+			]
+		);
+
+		$this->assertSame( 2, $this->queue->recompute_alerts() );
+		$this->assertSame( 3, $this->plugin()->sites()->find( 3601 )->alert_level, 'Sites before the old cursor are evaluated again.' );
+	}
+
+	public function test_an_integer_cursor_from_2_0_0_alpha_1_restarts_from_the_first_site(): void {
+		$this->make_record( 3601, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		$this->make_record( 3602, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		update_site_option( self::CURSOR, 3601 );
+
+		$this->assertSame( 2, $this->queue->recompute_alerts() );
+	}
+
+	public function test_changing_the_activity_types_marks_every_site_for_analysis(): void {
+		$network = get_current_network_id();
+		$this->plugin()->sites()->seed_from_blogs( $network );
+		$this->mark_all_clean();
+		wp_clear_scheduled_hook( Queue::HOOK_CONTINUE );
+
+		$this->plugin()->settings()->update( [ 'scan' => [ 'activity_post_types' => [ 'post' ] ] ] );
+
+		$this->assertSame( $this->plugin()->sites()->count_all( $network ), $this->plugin()->sites()->count_dirty( $network ) );
+		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_CONTINUE ) );
+	}
+
+	public function test_other_setting_changes_do_not_mark_sites(): void {
+		$network = get_current_network_id();
+		$this->plugin()->sites()->seed_from_blogs( $network );
+		$this->mark_all_clean();
+
+		$this->plugin()->settings()->update( [ 'scan' => [ 'activity_post_types' => [ 'page', 'post' ] ] ] );
+		$this->plugin()->settings()->update( [ 'scan' => [ 'full_rescan_days' => 30 ] ] );
+
+		$this->assertSame( 0, $this->plugin()->sites()->count_dirty( $network ), 'The same types in another order are not a change.' );
 	}
 }

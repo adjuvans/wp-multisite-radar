@@ -2,6 +2,7 @@
 namespace MultisiteRadar\Tests\Install;
 
 use MultisiteRadar\Install\LegacyMigration;
+use MultisiteRadar\Support\MainSite;
 use MultisiteRadar\Tests\TestCase;
 
 final class LegacyMigrationTest extends TestCase {
@@ -270,5 +271,23 @@ final class LegacyMigrationTest extends TestCase {
 		$this->assertFalse( get_site_option( LegacyMigration::CURSOR ), 'The migration finished.' );
 		$this->assertNotFalse( get_site_option( LegacyMigration::DONE ) );
 		$this->assertSame( 'network_site', $this->item_type( $site_id, $item_id ) );
+	}
+
+	public function test_deactivation_unschedules_the_menu_batch_and_reactivation_resumes_it(): void {
+		delete_site_option( LegacyMigration::DONE );
+		update_site_option(
+			LegacyMigration::CURSOR,
+			[
+				'after'    => 0,
+				'attempts' => 0,
+			]
+		);
+		MainSite::schedule_once( LegacyMigration::HOOK );
+
+		do_action( 'msradar_deactivated' );
+		$this->assertFalse( wp_next_scheduled( LegacyMigration::HOOK ) );
+
+		do_action( 'msradar_activated', true );
+		$this->assertNotFalse( wp_next_scheduled( LegacyMigration::HOOK ), 'The interrupted migration resumes.' );
 	}
 }

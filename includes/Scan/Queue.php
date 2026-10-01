@@ -51,7 +51,7 @@ final class Queue {
 		add_action( self::HOOK_RECOMPUTE, [ $this, 'run_recompute' ] );
 		add_action( 'msradar_activated', [ $this, 'schedule' ] );
 		add_action( 'msradar_deactivated', [ $this, 'unschedule' ] );
-		add_action( 'msradar_settings_updated', [ $this, 'on_settings_updated' ] );
+				add_action( 'msradar_settings_updated', [ $this, 'on_settings_updated' ], 10, 2 );
 		add_action( 'admin_init', [ $this, 'ensure_scheduled' ] );
 	}
 
@@ -63,7 +63,8 @@ final class Queue {
 		$schedules                   = is_array( $schedules ) ? $schedules : [];
 		$schedules[ self::SCHEDULE ] = [
 			'interval' => 5 * MINUTE_IN_SECONDS,
-			'display'  => __( 'Every five minutes (Multisite Radar)', 'multisite-radar' ),
+			// Un plugin tiers peut planifier un événement avant init : ne pas charger les traductions trop tôt.
+			'display'  => did_action( 'init' ) ? __( 'Every five minutes (Multisite Radar)', 'multisite-radar' ) : 'Every five minutes (Multisite Radar)',
 		];
 		return $schedules;
 	}
@@ -98,7 +99,7 @@ final class Queue {
 	}
 
 	/**
-	 * Une seule passe par requête : wp-cron exécute tous les événements échus dans la même requête.
+	 * Une seule passe de travail (file ou recalcul) par requête : wp-cron exécute ensemble tous les événements échus.
 	 */
 	public function process(): void {
 		if ( $this->processed ) {
@@ -135,16 +136,18 @@ final class Queue {
 			$this->continue_soon();
 		}
 
-		// Jamais dans la même requête qu'un passage de file : wp-cron exécute tous les événements échus ensemble.
+		// Planifié plutôt qu'exécuté ici. Si wp-cron le lance dans la même requête qu'un passage de file, run_recompute() se reporte.
 		MainSite::schedule_once( self::HOOK_RECOMPUTE );
 	}
 
 	/**
 	 * Recalcule les alertes des sites déjà analysés du réseau courant (avec ses réglages), à partir des données stockées.
 	 *
-	 * Le parcours reprend après le curseur msradar_recompute_cursor. Dès que le budget est écoulé (au moins un site
-	 * est évalué par appel) ou que le verrou est perdu, la position est enregistrée et la suite est planifiée ;
-	 * à la fin du parcours, le curseur est supprimé. Seuls les sites dont les alertes changent sont réécrits.
+	 * Le parcours reprend après le curseur msradar_recompute_cursor si celui-ci a été écrit avec les mêmes réglages
+	 * d'alertes. Sinon (réglages modifiés pendant un recalcul, ou curseur entier de la 2.0.0-alpha.1), il repart du
+	 * premier site. Dès que le budget est écoulé (au moins un site est évalué par appel) ou que le verrou est perdu,
+	 * la position est enregistrée et la suite est planifiée ; à la fin du parcours, le curseur est supprimé.
+	 * Seuls les sites dont les alertes changent sont réécrits.
 	 *
 	 * @param Lock|null  $lock   Verrou détenu à rafraîchir entre deux lots.
 	 * @param float|null $budget Secondes disponibles ; BatchRunner::default_budget() par défaut.
@@ -155,14 +158,16 @@ final class Queue {
 		$budget     = $budget ?? BatchRunner::default_budget();
 		$start      = microtime( true );
 		$now        = time();
-		$after      = max( 0, (int) get_site_option( self::RECOMPUTE_CURSOR, 0 ) );
+		$config     = $this->alerts_config_hash();
+		$cursor     = get_site_option( self::RECOMPUTE_CURSOR, false );
+		$after      = is_array( $cursor ) && ( $cursor['config'] ?? null ) === $config ? max( 0, (int) ( $cursor['after'] ?? 0 ) ) : 0;
 		$count      = 0;
 		while ( true ) {
 			$ids = $this->sites->ids_after( $after, self::RECOMPUTE_CHUNK, $network_id );
 			foreach ( $this->sites->find_many( $ids ) as $site_id => $record ) {
 				if ( null !== $record->scanned_at ) {
 					if ( $count > 0 && microtime( true ) - $start >= $budget ) {
-						$this->pause_recompute( $after );
+						$this->pause_recompute( $after, $config );
 						return $count;
 					}
 					$this->recompute_site( $record, $now );
@@ -176,7 +181,7 @@ final class Queue {
 			}
 			$after = (int) end( $ids );
 			if ( null !== $lock && ! $lock->refresh() ) {
-				$this->pause_recompute( $after );
+				$this->pause_recompute( $after, $config );
 				return $count;
 			}
 		}
@@ -190,13 +195,32 @@ final class Queue {
 		}
 	}
 
-	private function pause_recompute( int $after ): void {
-		update_site_option( self::RECOMPUTE_CURSOR, $after );
+	/**
+	 * Empreinte des réglages d'alertes avec lesquels un parcours a été calculé.
+	 */
+	private function alerts_config_hash(): string {
+		return md5( (string) wp_json_encode( $this->settings->get( 'alerts', [] ) ) );
+	}
+
+	private function pause_recompute( int $after, string $config ): void {
+		update_site_option(
+			self::RECOMPUTE_CURSOR,
+			[
+				'after'  => $after,
+				'config' => $config,
+			]
+		);
 		MainSite::schedule_once( self::HOOK_RECOMPUTE );
 	}
 
 	public function run_recompute(): void {
-		$done = $this->runner->locked(
+		if ( $this->processed ) {
+			// Un passage de file a déjà consommé le budget de cette requête cron.
+			MainSite::schedule_once( self::HOOK_RECOMPUTE, MINUTE_IN_SECONDS );
+			return;
+		}
+		$this->processed = true;
+		$done            = $this->runner->locked(
 			function ( Lock $lock ): void {
 				$this->recompute_alerts( $lock );
 			}
@@ -208,11 +232,31 @@ final class Queue {
 
 	/**
 	 * Les nouveaux réglages s'appliquent à tout le réseau : le recalcul repart du premier site.
+	 * La date de dernière activité dépend des types d'activité : s'ils changent, tous les sites sont réanalysés.
+	 *
+	 * @param mixed $new Réglages complets après la mise à jour.
+	 * @param mixed $old Réglages complets avant la mise à jour.
 	 */
-	public function on_settings_updated(): void {
+	public function on_settings_updated( $new = [], $old = [] ): void {
 		$this->evaluator->reset();
 		delete_site_option( self::RECOMPUTE_CURSOR );
 		MainSite::schedule_once( self::HOOK_RECOMPUTE );
+
+		if ( self::activity_types( $new ) !== self::activity_types( $old ) ) {
+			$this->sites->mark_all_dirty( get_current_network_id() );
+			$this->continue_soon();
+		}
+	}
+
+	/**
+	 * @param mixed $settings Réglages complets.
+	 * @return string[] Types d'activité triés (l'ordre de saisie ne compte pas).
+	 */
+	private static function activity_types( $settings ): array {
+		$types = is_array( $settings ) ? (array) ( $settings['scan']['activity_post_types'] ?? [] ) : [];
+		$types = array_values( array_unique( array_map( 'strval', $types ) ) );
+		sort( $types );
+		return $types;
 	}
 
 	public static function next_run(): ?int {
