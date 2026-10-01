@@ -23,7 +23,7 @@ beforeEach( () => {
 } );
 
 describe( 'msradar/core', () => {
-	test( 'serves preloaded responses synchronously, whatever the encoding of the same path', () => {
+	test( 'serves preloaded responses synchronously, whatever the encoding of the same path', async () => {
 		const registry = setup( {
 			'/multisite-radar/v1/sites?search=O%27Brien&page=1': {
 				body: [ { id: 1 } ],
@@ -38,6 +38,8 @@ describe( 'msradar/core', () => {
 					"/multisite-radar/v1/sites?page=1&search=O'Brien"
 				)
 		).toEqual( { data: [ { id: 1 } ], total: 1, totalPages: 1 } );
+		// The resolver is scheduled with setTimeout( 0 ): let it run before asserting.
+		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 		expect( apiFetch ).not.toHaveBeenCalled();
 	} );
 
