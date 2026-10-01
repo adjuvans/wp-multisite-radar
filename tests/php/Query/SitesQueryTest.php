@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Tests\Query;
 
+use MultisiteRadar\Install\Schema;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Tests\TestCase;
 
@@ -52,7 +53,7 @@ final class SitesQueryTest extends TestCase {
 		$this->assertSame( [ 104, 101, 102, 103 ], $this->ids( [ 'plugin' => 'net/net.php' ] ), 'A network-active plugin is used everywhere.' );
 		$this->assertSame( [ 102 ], $this->ids( [ 'has_users' => false ] ), 'Unscanned sites are not counted as empty.' );
 		$this->assertSame( [ 101, 103 ], $this->ids( [ 'has_users' => true ] ) );
-		$this->assertSame( [ 102, 103 ], $this->ids( [ 'inactive_since' => '2025-01-01 00:00:00' ] ) );
+		$this->assertSame( [ 102 ], $this->ids( [ 'inactive_since' => '2025-01-01 00:00:00' ] ), 'Sites without any activity date are not inactive, as for the inactive rule.' );
 		$this->assertSame( [ 104, 102, 103 ], $this->ids( [ 'registry_status' => [ 'stale', 'missing' ] ] ) );
 		$this->assertSame( [ 102 ], $this->ids( [ 'rule' => 'no_users' ] ) );
 	}
@@ -164,5 +165,49 @@ final class SitesQueryTest extends TestCase {
 		$this->assertSame( 'error', $this->query->get( 102 )['alert_level'] );
 		$this->assertSame( 'none', $this->query->get( 101 )['alert_level'] );
 		$this->assertSame( [ 104, 101 ], $this->ids( [ 'alert_level' => [ 'none', 'bogus' ] ] ) );
+	}
+
+	public function test_include_restricts_to_the_given_sites_of_the_network(): void {
+		$this->make_record( 105, [ 'name' => 'Elsewhere', 'network_id' => 2 ] );
+
+		$this->assertSame( [ 101, 103 ], $this->ids( [ 'include' => [ 103, 101, 105, -1, 0 ] ] ) );
+		$this->assertSame( [ 104, 101, 102, 103 ], $this->ids( [ 'include' => [] ] ) );
+	}
+
+	public function test_huge_pages_are_capped_instead_of_breaking_the_query(): void {
+		$result = $this->query->list( [ 'page' => PHP_INT_MAX ] );
+
+		$this->assertSame( [], $result['items'] );
+		$this->assertSame( 4, $result['total'] );
+	}
+
+	public function test_each_walks_every_matching_site_in_chunks(): void {
+		$seen  = [];
+		$count = $this->query->each(
+			[ 'orderby' => 'id' ],
+			static function ( array $item ) use ( &$seen ): void {
+				$seen[] = $item['id'];
+			},
+			3
+		);
+
+		$this->assertSame( 4, $count );
+		$this->assertSame( [ 101, 102, 103, 104 ], $seen );
+	}
+
+	public function test_read_failures_are_exceptions_not_empty_results(): void {
+		global $wpdb;
+		$break    = static function ( string $query ): string {
+			return 0 === strpos( ltrim( $query ), 'SELECT COUNT(*)' ) && false !== strpos( $query, Schema::sites_table() ) ? 'SELECT * FROM msradar_missing_table' : $query;
+		};
+		$suppress = $wpdb->suppress_errors( true );
+		add_filter( 'query', $break );
+		try {
+			$this->expectException( \RuntimeException::class );
+			$this->query->list( [] );
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $suppress );
+		}
 	}
 }

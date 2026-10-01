@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Tests\Rest;
 
+use MultisiteRadar\Install\Schema;
 use MultisiteRadar\Tests\RestTestCase;
 
 final class SitesControllerTest extends RestTestCase {
@@ -88,5 +89,57 @@ final class SitesControllerTest extends RestTestCase {
 		$missing = $this->request( 'GET', '/sites/999999' );
 		$this->assertSame( 404, $missing->get_status() );
 		$this->assertSame( 'msradar_site_not_found', $missing->get_data()['code'] );
+	}
+
+	public function test_include_selects_sites(): void {
+		$this->login_as_super_admin();
+
+		$this->assertSame( [ 102 ], wp_list_pluck( $this->request( 'GET', '/sites', [ 'include' => [ 102, 999 ] ] )->get_data(), 'id' ) );
+		$this->assertSame( [ 101, 102 ], wp_list_pluck( $this->request( 'GET', '/sites', [ 'include' => '102,101' ] )->get_data(), 'id' ) );
+	}
+
+	public function test_inactive_since_honours_the_utc_offset(): void {
+		$this->login_as_super_admin();
+		$this->make_record(
+			103,
+			[
+				'name'              => 'Gamma',
+				'users_count'       => 1,
+				'last_activity_gmt' => '2024-12-31 23:30:00',
+				'scanned_at'        => '2026-09-01 00:00:00',
+			]
+		);
+
+		$ids = wp_list_pluck( $this->request( 'GET', '/sites', [ 'inactive_since' => '2025-01-01T01:00:00+02:00' ] )->get_data(), 'id' );
+
+		$this->assertSame( [ 102 ], $ids, '01:00+02:00 is 23:00 UTC: Gamma was still active at 23:30 UTC.' );
+	}
+
+	public function test_empty_maps_are_json_objects(): void {
+		$this->login_as_super_admin();
+
+		$json = (string) wp_json_encode( $this->request( 'GET', '/sites/101' )->get_data() );
+
+		$this->assertStringContainsString( '"options":{}', $json );
+		$this->assertStringContainsString( '"by_role":{}', $json );
+	}
+
+	public function test_a_failed_read_is_a_500_not_an_empty_list(): void {
+		global $wpdb;
+		$this->login_as_super_admin();
+		$break    = static function ( string $query ): string {
+			return 0 === strpos( ltrim( $query ), 'SELECT COUNT(*)' ) && false !== strpos( $query, Schema::sites_table() ) ? 'SELECT * FROM msradar_missing_table' : $query;
+		};
+		$suppress = $wpdb->suppress_errors( true );
+		add_filter( 'query', $break );
+		try {
+			$response = $this->request( 'GET', '/sites' );
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $suppress );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'msradar_storage_error', $response->get_data()['code'] );
 	}
 }

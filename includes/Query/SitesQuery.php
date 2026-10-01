@@ -18,6 +18,8 @@ final class SitesQuery {
 
 	public const STATUSES          = [ 'public', 'private', 'archived', 'spam', 'deleted' ];
 	public const REGISTRY_STATUSES = [ RegistryProbe::STATUS_FRESH, RegistryProbe::STATUS_STALE, RegistryProbe::STATUS_MISSING ];
+	public const MAX_PAGE          = 100000;
+	public const MAX_INCLUDE       = 500;
 
 	private SitesRepository $sites;
 	private ExtensionsRepository $extensions;
@@ -46,21 +48,25 @@ final class SitesQuery {
 			'inactive_since'  => null,
 			'registry_status' => [],
 			'rule'            => '',
+			'include'         => [],
 		];
 	}
 
 	/**
-	 * @return array{items: array[], total: int}
+	 * Arguments publics (REST, WP-CLI, exports) → arguments du dépôt, bornés et validés.
 	 */
-	public function list( array $args ): array {
-		$args   = array_merge( self::defaults(), $args );
-		$plugin = (string) $args['plugin'];
-		$query  = [
+	public function normalize( array $args, int $max_per_page = 100 ): array {
+		$args    = array_merge( self::defaults(), $args );
+		$plugin  = (string) $args['plugin'];
+		$orderby = (string) $args['orderby'];
+		$include = array_values( array_unique( array_filter( array_map( 'intval', (array) $args['include'] ), static fn ( int $id ): bool => $id > 0 ) ) );
+
+		return [
 			'network_id'      => get_current_network_id(),
-			'page'            => max( 1, (int) $args['page'] ),
-			'per_page'        => min( 100, max( 1, (int) $args['per_page'] ) ),
+			'page'            => min( self::MAX_PAGE, max( 1, (int) $args['page'] ) ),
+			'per_page'        => min( $max_per_page, max( 1, (int) $args['per_page'] ) ),
 			'search'          => trim( (string) $args['search'] ),
-			'orderby'         => isset( SitesRepository::ORDERBY[ $args['orderby'] ] ) ? (string) $args['orderby'] : 'name',
+			'orderby'         => isset( SitesRepository::ORDERBY[ $orderby ] ) ? $orderby : 'name',
 			'order'           => 'desc' === strtolower( (string) $args['order'] ) ? 'desc' : 'asc',
 			'alert_level'     => array_values( array_unique( array_map( [ Severity::class, 'level' ], array_intersect( array_map( 'strval', (array) $args['alert_level'] ), Severity::names() ) ) ) ),
 			'status'          => array_values( array_intersect( array_map( 'strval', (array) $args['status'] ), self::STATUSES ) ),
@@ -70,13 +76,47 @@ final class SitesQuery {
 			'inactive_since'  => null === $args['inactive_since'] ? null : (string) $args['inactive_since'],
 			'registry_status' => array_values( array_intersect( array_map( 'strval', (array) $args['registry_status'] ), self::REGISTRY_STATUSES ) ),
 			'rule'            => (string) $args['rule'],
+			'include'         => array_slice( $include, 0, self::MAX_INCLUDE ),
 		];
+	}
 
-		$result = $this->sites->query( $query );
+	/**
+	 * @return array{items: array[], total: int}
+	 * @throws \RuntimeException Si la lecture échoue.
+	 */
+	public function list( array $args ): array {
+		$result = $this->sites->query( $this->normalize( $args ) );
 		return [
 			'items' => array_map( [ $this, 'summary' ], $result['items'] ),
 			'total' => $result['total'],
 		];
+	}
+
+	/**
+	 * Parcourt tous les sites qui correspondent aux filtres, par tranches et sans le plafond de 100 par page (exports).
+	 *
+	 * @param callable $consumer Appelé avec chaque site mis en forme par summary().
+	 * @return int Nombre de sites parcourus.
+	 * @throws \RuntimeException Si une lecture échoue.
+	 */
+	public function each( array $args, callable $consumer, int $chunk = 500 ): int {
+		$chunk = max( 1, $chunk );
+		$query = $this->normalize( $args, $chunk );
+		$count = 0;
+		$page  = 1;
+		while ( true ) {
+			$query['page']     = $page;
+			$query['per_page'] = $chunk;
+			$result            = $this->sites->query( $query );
+			foreach ( $result['items'] as $record ) {
+				$consumer( $this->summary( $record ) );
+				++$count;
+			}
+			if ( count( $result['items'] ) < $chunk || $count >= $result['total'] ) {
+				return $count;
+			}
+			++$page;
+		}
 	}
 
 	public function get( int $site_id ): ?array {

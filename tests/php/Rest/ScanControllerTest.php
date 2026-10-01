@@ -77,4 +77,27 @@ final class ScanControllerTest extends RestTestCase {
 
 		$this->assertSame( 400, $this->request( 'POST', '/scan', [ 'scope' => 'everything' ] )->get_status() );
 	}
+
+	public function test_scope_ids_only_marks_sites_of_the_current_network(): void {
+		$this->login_as_super_admin();
+		$this->make_record( 701, [ 'scanned_at' => '2026-09-01 00:00:00' ] );
+		$this->make_record( 702, [ 'scanned_at' => '2026-09-01 00:00:00', 'network_id' => 2 ] );
+
+		$response = $this->request( 'POST', '/scan', [ 'scope' => 'ids', 'ids' => [ 701, 702 ] ] );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $this->plugin()->sites()->find( 701 )->dirty );
+		$this->assertFalse( $this->plugin()->sites()->find( 702 )->dirty );
+	}
+
+	public function test_scope_ids_without_any_site_of_the_network_is_rejected(): void {
+		$this->login_as_super_admin();
+		$this->make_record( 702, [ 'network_id' => 2 ] );
+
+		foreach ( [ [], [ 702 ], [ 999999 ] ] as $ids ) {
+			$response = $this->request( 'POST', '/scan', [ 'scope' => 'ids', 'ids' => $ids ] );
+			$this->assertSame( 400, $response->get_status() );
+			$this->assertSame( 'msradar_no_sites', $response->get_data()['code'] );
+		}
+	}
 }

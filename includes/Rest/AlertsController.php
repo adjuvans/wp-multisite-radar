@@ -2,6 +2,7 @@
 namespace MultisiteRadar\Rest;
 
 use MultisiteRadar\Query\AlertsQuery;
+use WP_Error;
 use WP_REST_Response;
 use WP_REST_Server;
 
@@ -34,7 +35,14 @@ final class AlertsController extends Controller {
 		);
 	}
 
-	public function get_summary(): WP_REST_Response {
-		return new WP_REST_Response( $this->query->summary( get_current_network_id() ) );
+	/**
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_summary() {
+		return $this->guard(
+			function (): WP_REST_Response {
+				return new WP_REST_Response( $this->query->summary( get_current_network_id() ) );
+			}
+		);
 	}
 }

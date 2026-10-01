@@ -110,8 +110,9 @@ final class SitesController extends Controller {
 			],
 			'has_users'       => [ 'type' => 'boolean' ],
 			'inactive_since'  => [
-				'type'   => 'string',
-				'format' => 'date-time',
+				'type'        => 'string',
+				'format'      => 'date-time',
+				'description' => __( 'Sites analysed, with an activity date, and no activity since this date.', 'multisite-radar' ),
 			],
 			'registry_status' => [
 				'type'    => 'array',
@@ -125,38 +126,50 @@ final class SitesController extends Controller {
 				'type'    => 'string',
 				'default' => '',
 			],
+			'include'         => [
+				'type'     => 'array',
+				'default'  => [],
+				'maxItems' => SitesQuery::MAX_INCLUDE,
+				'items'    => [
+					'type'    => 'integer',
+					'minimum' => 1,
+				],
+			],
 		];
 	}
 
 	/**
 	 * @param \WP_REST_Request $request Requête.
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( $request ) {
-		$per_page = (int) $request['per_page'];
-		$since    = isset( $request['inactive_since'] ) ? rest_parse_date( (string) $request['inactive_since'], true ) : false;
-		$result   = $this->query->list(
-			[
-				'page'            => (int) $request['page'],
-				'per_page'        => $per_page,
-				'search'          => (string) $request['search'],
-				'orderby'         => (string) $request['orderby'],
-				'order'           => (string) $request['order'],
-				'alert_level'     => (array) $request['alert_level'],
-				'status'          => (array) $request['status'],
-				'theme'           => (string) $request['theme'],
-				'plugin'          => (string) $request['plugin'],
-				'has_users'       => isset( $request['has_users'] ) ? (bool) $request['has_users'] : null,
-				'inactive_since'  => false !== $since ? gmdate( 'Y-m-d H:i:s', (int) $since ) : null,
-				'registry_status' => (array) $request['registry_status'],
-				'rule'            => (string) $request['rule'],
-			]
-		);
+		return $this->guard(
+			function () use ( $request ): WP_REST_Response {
+				$per_page = (int) $request['per_page'];
+				// Sans forcer l'UTC : un décalage explicite (+02:00) est converti, et non remplacé.
+				$since  = isset( $request['inactive_since'] ) ? rest_parse_date( (string) $request['inactive_since'] ) : false;
+				$result = $this->query->list(
+					[
+						'page'            => (int) $request['page'],
+						'per_page'        => $per_page,
+						'search'          => (string) $request['search'],
+						'orderby'         => (string) $request['orderby'],
+						'order'           => (string) $request['order'],
+						'alert_level'     => (array) $request['alert_level'],
+						'status'          => (array) $request['status'],
+						'theme'           => (string) $request['theme'],
+						'plugin'          => (string) $request['plugin'],
+						'has_users'       => isset( $request['has_users'] ) ? (bool) $request['has_users'] : null,
+						'inactive_since'  => false !== $since ? gmdate( 'Y-m-d H:i:s', (int) $since ) : null,
+						'registry_status' => (array) $request['registry_status'],
+						'rule'            => (string) $request['rule'],
+						'include'         => (array) $request['include'],
+					]
+				);
 
-		$response = new WP_REST_Response( $result['items'] );
-		$response->header( 'X-WP-Total', (string) $result['total'] );
-		$response->header( 'X-WP-TotalPages', (string) (int) ceil( $result['total'] / max( 1, $per_page ) ) );
-		return $response;
+				return $this->paginated( $result['items'], $result['total'], $per_page );
+			}
+		);
 	}
 
 	/**
@@ -168,6 +181,9 @@ final class SitesController extends Controller {
 		if ( null === $item ) {
 			return new WP_Error( 'msradar_site_not_found', __( 'Site not found.', 'multisite-radar' ), [ 'status' => 404 ] );
 		}
+		// Des tableaux associatifs vides seraient encodés [] : le client attend des objets.
+		$item['options']          = (object) $item['options'];
+		$item['users']['by_role'] = (object) ( $item['users']['by_role'] ?? [] );
 		return new WP_REST_Response( $item );
 	}
 

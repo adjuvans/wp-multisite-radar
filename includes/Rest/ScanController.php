@@ -5,6 +5,7 @@ use MultisiteRadar\Scan\BatchRunner;
 use MultisiteRadar\Scan\Lock;
 use MultisiteRadar\Scan\Queue;
 use MultisiteRadar\Storage\SitesRepository;
+use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -83,13 +84,20 @@ final class ScanController extends Controller {
 		);
 	}
 
-	public function request_scan( WP_REST_Request $request ): WP_REST_Response {
+	/**
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function request_scan( WP_REST_Request $request ) {
 		$network_id = get_current_network_id();
 		$scope      = (string) $request['scope'];
 		if ( 'all' === $scope ) {
 			$this->queue->request_full_scan( $network_id );
 		} elseif ( 'ids' === $scope ) {
-			$this->sites->mark_dirty( (array) $request['ids'] );
+			$ids = $this->sites->ids_in_network( (array) $request['ids'], $network_id );
+			if ( [] === $ids ) {
+				return new WP_Error( 'msradar_no_sites', __( 'None of the requested sites belongs to this network.', 'multisite-radar' ), [ 'status' => 400 ] );
+			}
+			$this->sites->mark_dirty( $ids );
 			$this->queue->continue_soon();
 		} else {
 			$this->queue->continue_soon();

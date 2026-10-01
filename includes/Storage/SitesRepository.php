@@ -267,6 +267,38 @@ final class SitesRepository {
 		return array_values( array_unique( array_filter( array_map( 'intval', $values ), static fn ( int $id ): bool => $id > 0 ) ) );
 	}
 
+	/**
+	 * @param int[] $site_ids
+	 * @return int[] Ceux qui appartiennent au réseau, par ordre croissant.
+	 */
+	public function ids_in_network( array $site_ids, int $network_id ): array {
+		global $wpdb;
+		$site_ids = array_values( array_unique( array_filter( array_map( 'intval', $site_ids ), static fn ( int $id ): bool => $id > 0 ) ) );
+		if ( [] === $site_ids ) {
+			return [];
+		}
+		$found = $wpdb->get_col(
+			$wpdb->prepare(
+				'SELECT site_id FROM %i WHERE network_id = %d AND site_id IN (' . implode( ',', array_fill( 0, count( $site_ids ), '%d' ) ) . ') ORDER BY site_id ASC',
+				array_merge( [ Schema::sites_table(), $network_id ], $site_ids )
+			)
+		);
+		self::check_read();
+		return array_map( 'intval', (array) $found );
+	}
+
+	/**
+	 * Une lecture en échec ne doit pas passer pour une liste vide.
+	 *
+	 * @throws \RuntimeException Si la dernière requête a échoué.
+	 */
+	private static function check_read(): void {
+		global $wpdb;
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not output.
+		}
+	}
+
 	private static function now(): string {
 		return current_time( 'mysql', true );
 	}
@@ -274,6 +306,7 @@ final class SitesRepository {
 	/**
 	 * @param array $args Arguments déjà normalisés par SitesQuery::list().
 	 * @return array{items: SiteRecord[], total: int}
+	 * @throws \RuntimeException Si une lecture échoue.
 	 */
 	public function query( array $args ): array {
 		global $wpdb;
@@ -307,7 +340,8 @@ final class SitesRepository {
 			$clauses[] = '(users_count = 0 AND scanned_at IS NOT NULL)';
 		}
 		if ( null !== $args['inactive_since'] ) {
-			$clauses[] = '(scanned_at IS NOT NULL AND (last_activity_gmt IS NULL OR last_activity_gmt < %s))';
+			// Comme la règle « inactive » : un site sans aucune date d'activité n'est pas inactif.
+			$clauses[] = '(scanned_at IS NOT NULL AND last_activity_gmt IS NOT NULL AND last_activity_gmt < %s)';
 			$params[]  = $args['inactive_since'];
 		}
 		if ( [] !== $args['registry_status'] ) {
@@ -317,6 +351,11 @@ final class SitesRepository {
 		if ( '' !== $args['rule'] ) {
 			$clauses[] = 'alert_rules LIKE %s';
 			$params[]  = '%' . $wpdb->esc_like( ',' . $args['rule'] . ',' ) . '%';
+		}
+		$include = array_map( 'intval', (array) ( $args['include'] ?? [] ) );
+		if ( [] !== $include ) {
+			$clauses[] = 'site_id IN (' . implode( ',', array_fill( 0, count( $include ), '%d' ) ) . ')';
+			$params    = array_merge( $params, $include );
 		}
 
 		$table    = Schema::sites_table();
@@ -331,13 +370,15 @@ final class SitesRepository {
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where}", array_merge( [ $table ], $params ) )
 		);
-		$rows  = $wpdb->get_results(
+		self::check_read();
+		$rows = $wpdb->get_results(
 			$wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Parameters are spread via array_merge ; placeholders match.
 				"SELECT {$columns} FROM %i WHERE {$where} ORDER BY %i {$order}, site_id ASC LIMIT %d OFFSET %d",
 				array_merge( [ $table ], $params, [ $column, $per_page, $offset ] )
 			),
 			ARRAY_A
 		);
+		self::check_read();
 		// phpcs:enable
 
 		return [
@@ -349,6 +390,7 @@ final class SitesRepository {
 	/**
 	 * @param string[] $rule_ids
 	 * @return array{total: int, pending: int, with_alerts: int, error: int, warning: int, info: int, rules: array<string, int>}
+	 * @throws \RuntimeException Si une lecture échoue.
 	 */
 	public function alert_counts( int $network_id, array $rule_ids ): array {
 		global $wpdb;
@@ -361,6 +403,7 @@ final class SitesRepository {
 			),
 			ARRAY_A
 		);
+		self::check_read();
 
 		$rules = [];
 		foreach ( $rule_ids as $rule_id ) {
@@ -372,6 +415,7 @@ final class SitesRepository {
 					'%' . $wpdb->esc_like( ',' . $rule_id . ',' ) . '%'
 				)
 			);
+			self::check_read();
 		}
 
 		return [
