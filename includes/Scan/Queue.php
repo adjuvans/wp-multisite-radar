@@ -51,7 +51,7 @@ final class Queue {
 		add_action( self::HOOK_RECOMPUTE, [ $this, 'run_recompute' ] );
 		add_action( 'msradar_activated', [ $this, 'schedule' ] );
 		add_action( 'msradar_deactivated', [ $this, 'unschedule' ] );
-				add_action( 'msradar_settings_updated', [ $this, 'on_settings_updated' ], 10, 2 );
+		add_action( 'msradar_settings_updated', [ $this, 'on_settings_updated' ], 10, 2 );
 		add_action( 'admin_init', [ $this, 'ensure_scheduled' ] );
 	}
 
@@ -234,15 +234,15 @@ final class Queue {
 	 * Les nouveaux réglages s'appliquent à tout le réseau : le recalcul repart du premier site.
 	 * La date de dernière activité dépend des types d'activité : s'ils changent, tous les sites sont réanalysés.
 	 *
-	 * @param mixed $new Réglages complets après la mise à jour.
-	 * @param mixed $old Réglages complets avant la mise à jour.
+	 * @param mixed $new_settings Réglages complets après la mise à jour.
+	 * @param mixed $old_settings Réglages complets avant la mise à jour.
 	 */
-	public function on_settings_updated( $new = [], $old = [] ): void {
+	public function on_settings_updated( $new_settings = [], $old_settings = [] ): void {
 		$this->evaluator->reset();
 		delete_site_option( self::RECOMPUTE_CURSOR );
 		MainSite::schedule_once( self::HOOK_RECOMPUTE );
 
-		if ( self::activity_types( $new ) !== self::activity_types( $old ) ) {
+		if ( self::activity_types( $new_settings ) !== self::activity_types( $old_settings ) ) {
 			$this->sites->mark_all_dirty( get_current_network_id() );
 			$this->continue_soon();
 		}
