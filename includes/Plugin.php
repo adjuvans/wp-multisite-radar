@@ -183,6 +183,6 @@ final class Plugin {
 	}
 
 	public function alerts_query(): AlertsQuery {
-		return $this->alerts_query ??= new AlertsQuery( $this->sites(), $this->rules() );
+		return $this->alerts_query ??= new AlertsQuery( $this->sites(), $this->rules(), $this->evaluator(), $this->formatter() );
 	}
 }

@@ -288,6 +288,73 @@ final class SitesRepository {
 	}
 
 	/**
+	 * Couples (site, règle) des sites en alerte du réseau, paginés en SQL.
+	 *
+	 * Une branche UNION ALL par règle demandée, chacune avec la gravité réglée de la règle en constante :
+	 * le tri par gravité et le comptage restent en SQL, sans décoder le JSON des sites.
+	 *
+	 * @param array $args network_id, rules (identifiant => niveau de gravité), search, orderby, order, page, per_page.
+	 * @return array{items: array<int, array{site_id: int, rule: string}>, total: int}
+	 * @throws \RuntimeException Si une lecture échoue.
+	 */
+	public function alert_pairs( array $args ): array {
+		global $wpdb;
+		$rules = (array) $args['rules'];
+		if ( [] === $rules ) {
+			return [
+				'items' => [],
+				'total' => 0,
+			];
+		}
+
+		$table    = Schema::sites_table();
+		$search   = (string) $args['search'];
+		$like     = '%' . $wpdb->esc_like( $search ) . '%';
+		$branches = [];
+		$params   = [];
+		foreach ( $rules as $rule => $level ) {
+			$branch = 'SELECT site_id, name, %s AS rule, %d AS severity FROM %i WHERE network_id = %d AND alert_rules LIKE %s';
+			array_push( $params, (string) $rule, (int) $level, $table, (int) $args['network_id'], '%' . $wpdb->esc_like( ',' . $rule . ',' ) . '%' );
+			if ( '' !== $search ) {
+				$branch .= ' AND (name LIKE %s OR url LIKE %s)';
+				array_push( $params, $like, $like );
+			}
+			$branches[] = $branch;
+		}
+		$union     = implode( ' UNION ALL ', $branches );
+		$direction = 'desc' === $args['order'] ? 'DESC' : 'ASC';
+		$orders    = [
+			'rule'     => "rule {$direction}, name ASC, site_id ASC",
+			'name'     => "name {$direction}, site_id ASC, rule ASC",
+			'severity' => "severity {$direction}, rule ASC, name ASC, site_id ASC",
+		];
+		$order_by  = $orders[ $args['orderby'] ] ?? $orders['rule'];
+		$per_page  = (int) $args['per_page'];
+		$offset    = ( (int) $args['page'] - 1 ) * $per_page;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $union ne contient que des fragments fixes et des placeholders ; $order_by vient d'une liste blanche.
+		$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM ({$union}) AS pairs", $params ) );
+		self::check_read();
+		$rows = $wpdb->get_results(
+			$wpdb->prepare( "SELECT site_id, rule FROM ({$union}) AS pairs ORDER BY {$order_by} LIMIT %d OFFSET %d", array_merge( $params, [ $per_page, $offset ] ) ),
+			ARRAY_A
+		);
+		self::check_read();
+		// phpcs:enable
+
+		return [
+			'items' => array_map(
+				static fn ( array $row ): array => [
+					'site_id' => (int) $row['site_id'],
+					'rule'    => (string) $row['rule'],
+				],
+				(array) $rows
+			),
+			'total' => $total,
+		];
+	}
+
+	/**
 	 * Une lecture en échec ne doit pas passer pour une liste vide.
 	 *
 	 * @throws \RuntimeException Si la dernière requête a échoué.
