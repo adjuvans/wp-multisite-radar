@@ -19,7 +19,10 @@
 	"scripts": {
 		"build": "wp-scripts build",
 		"start": "wp-scripts start",
-		"lint:js": "wp-scripts lint-js src tests/js bin",
+		"lint:js": "wp-scripts lint-js src tests/js tests/e2e bin",
+		"wp-env": "wp-env",
+		"e2e:setup": "wp-env run cli sh wp-content/plugins/multisite-radar/tests/e2e/setup.sh",
+		"test:e2e": "WP_BASE_URL=${WP_BASE_URL:-http://localhost:8888} wp-scripts test-playwright --config playwright.config.js",
 		"lint:css": "wp-scripts lint-style \"src/**/*.scss\"",
 		"test:unit": "wp-scripts test-unit-js",
 		"version:check": "node bin/version.mjs check",
@@ -44,11 +47,15 @@
 		"@wordpress/url": "4.56.0"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "4.13.0",
+		"@playwright/test": "1.63.0",
 		"@testing-library/dom": "10.4.1",
 		"@testing-library/jest-dom": "7.0.1",
 		"@testing-library/react": "16.3.3",
 		"@vitejs/plugin-react-swc": "4.3.3",
 		"@wordpress/dependency-extraction-webpack-plugin": "6.56.0",
+		"@wordpress/e2e-test-utils-playwright": "2.1.0",
+		"@wordpress/env": "11.16.0",
 		"@wordpress/scripts": "36.0.0",
 		"jsdom": "26.1.0",
 		"react": "18.3.1",

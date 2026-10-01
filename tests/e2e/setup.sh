@@ -1,0 +1,23 @@
+#!/bin/sh
+# Prépare le réseau wp-env pour les tests E2E. Idempotent.
+# URL du réseau : WP_BASE_URL si définie, sinon l'URL du site principal (donc le port wp-env,
+# 8888 par défaut ou WP_ENV_PORT) : « wp-env run » ne transmet pas l'environnement de l'hôte.
+set -eu
+
+URL="${WP_BASE_URL:-$(wp option get siteurl)}"
+URL="${URL%/}"
+
+wp plugin activate multisite-radar --network
+
+if ! wp site list --field=path | grep -qx '/rh/'; then
+	wp site create --slug=rh --title='Blog RH'
+fi
+wp plugin activate msradar-demo-cpt --url="$URL/rh/"
+
+# Un site sans aucun utilisateur : il déclenche l'alerte « Site without users ».
+if ! wp site list --field=path | grep -qx '/vide/'; then
+	wp site create --slug=vide --title='Site vide'
+	wp eval 'remove_user_from_blog( 1, get_current_blog_id() );' --url="$URL/vide/"
+fi
+
+wp multisite-radar scan --all --probe

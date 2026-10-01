@@ -132,3 +132,24 @@ jobs:
       - uses: wordpress/plugin-check-action@v1
         with:
           build-dir: /tmp/build/multisite-radar
+
+  e2e-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run wp-env -- start
+      - run: npm run e2e:setup
+      - run: npm run test:e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: artifacts
+          retention-days: 7
