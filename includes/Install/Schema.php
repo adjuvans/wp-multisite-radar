@@ -8,7 +8,10 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Schema {
 
-	public const VERSION = 1;
+	/**
+	 * 1 : tables de M1 ; 2 : colonne siteurl (M2). Les tables events/snapshots de M6 prendront la version 3.
+	 */
+	public const VERSION = 2;
 	public const OPTION  = 'msradar_db_version';
 
 	public static function sites_table(): string {
@@ -45,6 +48,7 @@ site_id bigint(20) unsigned NOT NULL,
 network_id bigint(20) unsigned NOT NULL DEFAULT 1,
 name varchar(255) NOT NULL DEFAULT '',
 url varchar(255) NOT NULL DEFAULT '',
+siteurl varchar(255) NOT NULL DEFAULT '',
 is_public tinyint(1) NOT NULL DEFAULT 1,
 is_archived tinyint(1) NOT NULL DEFAULT 0,
 is_spam tinyint(1) NOT NULL DEFAULT 0,

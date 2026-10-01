@@ -173,4 +173,54 @@ final class SitesRepositoryTest extends TestCase {
 
 		$this->assertSame( str_repeat( 'é', 255 ), $this->sites->find( 1202 )->name );
 	}
+
+	public function test_list_rows_do_not_read_the_detailed_data_and_cannot_be_saved(): void {
+		$this->make_record(
+			501,
+			[
+				'name'       => 'Listed',
+				'scanned_at' => '2026-09-01 00:00:00',
+				'data'       => [ 'post_types' => [ [ 'name' => 'post' ] ] ],
+			]
+		);
+		$selects = [];
+		$spy     = static function ( string $query ) use ( &$selects ): string {
+			if ( 0 === strpos( ltrim( $query ), 'SELECT site_id' ) ) {
+				$selects[] = $query;
+			}
+			return $query;
+		};
+		$args    = [
+			'network_id'      => get_current_network_id(),
+			'page'            => 1,
+			'per_page'        => 20,
+			'search'          => 'Listed',
+			'orderby'         => 'name',
+			'order'           => 'asc',
+			'alert_level'     => [],
+			'status'          => [],
+			'theme'           => '',
+			'plugin'          => '',
+			'has_users'       => null,
+			'inactive_since'  => null,
+			'registry_status' => [],
+			'rule'            => '',
+		];
+		add_filter( 'query', $spy );
+		try {
+			$result = $this->plugin()->sites()->query( $args );
+		} finally {
+			remove_filter( 'query', $spy );
+		}
+
+		$this->assertCount( 1, $selects );
+		$this->assertDoesNotMatchRegularExpression( '/\bdata\b/', $selects[0] );
+		$record = $result['items'][0];
+		$this->assertTrue( $record->partial );
+		$this->assertSame( [], $record->data );
+		$this->assertFalse( $this->plugin()->sites()->find( 501 )->partial );
+
+		$this->expectException( \LogicException::class );
+		$this->plugin()->sites()->save( $record );
+	}
 }

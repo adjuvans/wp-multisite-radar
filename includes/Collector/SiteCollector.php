@@ -72,6 +72,7 @@ final class SiteCollector {
 		$record->site_id           = $site_id;
 		$record->network_id        = (int) $site->site_id; // WP_Site::$site_id contient l'ID du réseau.
 		$record->name              = self::string_option( $options, 'blogname' );
+		$record->siteurl           = $siteurl;
 		$record->url               = '' !== $home ? $home : ( '' !== $siteurl ? $siteurl : 'http://' . $site->domain . $site->path );
 		$record->is_public         = '1' === (string) $site->public;
 		$record->is_archived       = '1' === (string) $site->archived;
@@ -104,11 +105,6 @@ final class SiteCollector {
 		$record->dirty             = false;
 		$record->dirty_since       = null;
 		$record->scanned_at        = current_time( 'mysql', true );
-
-		if ( '' === trim( $record->name ) ) {
-			/* translators: %d: site ID. */
-			$record->name = sprintf( __( 'Site #%d', 'multisite-radar' ), $site_id );
-		}
 
 		return $record;
 	}

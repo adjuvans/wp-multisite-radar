@@ -2,6 +2,7 @@
 namespace MultisiteRadar\Query;
 
 use MultisiteRadar\Alerts\AlertFormatter;
+use MultisiteRadar\Alerts\Severity;
 use MultisiteRadar\Collector\RegistryProbe;
 use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Storage\ExtensionsRepository;
@@ -15,12 +16,6 @@ defined( 'ABSPATH' ) || exit;
  */
 final class SitesQuery {
 
-	public const ALERT_LEVELS      = [
-		'none'    => 0,
-		'info'    => 1,
-		'warning' => 2,
-		'error'   => 3,
-	];
 	public const STATUSES          = [ 'public', 'private', 'archived', 'spam', 'deleted' ];
 	public const REGISTRY_STATUSES = [ RegistryProbe::STATUS_FRESH, RegistryProbe::STATUS_STALE, RegistryProbe::STATUS_MISSING ];
 
@@ -67,7 +62,7 @@ final class SitesQuery {
 			'search'          => trim( (string) $args['search'] ),
 			'orderby'         => isset( SitesRepository::ORDERBY[ $args['orderby'] ] ) ? (string) $args['orderby'] : 'name',
 			'order'           => 'desc' === strtolower( (string) $args['order'] ) ? 'desc' : 'asc',
-			'alert_level'     => array_values( array_intersect_key( self::ALERT_LEVELS, array_flip( array_map( 'strval', (array) $args['alert_level'] ) ) ) ),
+			'alert_level'     => array_values( array_unique( array_map( [ Severity::class, 'level' ], array_intersect( array_map( 'strval', (array) $args['alert_level'] ), Severity::names() ) ) ) ),
 			'status'          => array_values( array_intersect( array_map( 'strval', (array) $args['status'] ), self::STATUSES ) ),
 			'theme'           => (string) $args['theme'],
 			'plugin'          => $this->is_network_active( $plugin ) ? '' : $plugin,
@@ -117,48 +112,58 @@ final class SitesQuery {
 		);
 	}
 
-	public function summary( SiteRecord $record ): array {
-		$siteurl = (string) ( $record->data['options']['siteurl'] ?? '' );
-		$base    = self::absolute( '' !== $siteurl ? $siteurl : $record->url );
-		$name    = $record->name;
+	/**
+	 * Identité d'un site, commune aux listes, à la fiche et aux alertes.
+	 * Le nom de repli est construit ici, dans la langue du lecteur : le collecteur stocke le nom brut, même vide.
+	 *
+	 * @return array{id: int, name: string, url: string, admin_url: string}
+	 */
+	public static function identity( SiteRecord $record ): array {
+		$base = self::absolute( '' !== $record->siteurl ? $record->siteurl : $record->url );
+		$name = $record->name;
 		if ( '' === trim( $name ) ) {
 			/* translators: %d: site ID. */
 			$name = sprintf( __( 'Site #%d', 'multisite-radar' ), $record->site_id );
 		}
-
-		$level = array_search( $record->alert_level, self::ALERT_LEVELS, true );
-
 		return [
-			'id'                => $record->site_id,
-			'name'              => $name,
-			'url'               => self::absolute( $record->url ),
-			'admin_url'         => '' !== $base ? trailingslashit( $base ) . 'wp-admin/' : '',
-			'status'            => [
-				'public'   => $record->is_public,
-				'archived' => $record->is_archived,
-				'spam'     => $record->is_spam,
-				'deleted'  => $record->is_deleted,
-			],
-			'theme'             => [
-				'stylesheet' => $record->theme_stylesheet,
-				'template'   => $record->theme_template,
-			],
-			'users_count'       => $record->users_count,
-			'admins_count'      => $record->admins_count,
-			'content_count'     => $record->content_count,
-			'media_count'       => $record->media_count,
-			'disk_bytes'        => $record->disk_bytes,
-			'db_bytes'          => $record->db_bytes,
-			'autoload_bytes'    => $record->autoload_bytes,
-			'last_activity_gmt' => self::date( (string) $record->last_activity_gmt ),
-			'alert_level'       => false !== $level ? (string) $level : 'none',
-			'alerts_count'      => $record->alerts_count,
-			'alert_rules'       => $record->alert_rule_ids(),
-			'registry_status'   => $record->registry_status,
-			'pending'           => null === $record->scanned_at,
-			'dirty'             => $record->dirty,
-			'scanned_at_gmt'    => self::date( (string) $record->scanned_at ),
+			'id'        => $record->site_id,
+			'name'      => $name,
+			'url'       => self::absolute( $record->url ),
+			'admin_url' => '' !== $base ? trailingslashit( $base ) . 'wp-admin/' : '',
 		];
+	}
+
+	public function summary( SiteRecord $record ): array {
+		return array_merge(
+			self::identity( $record ),
+			[
+				'status'            => [
+					'public'   => $record->is_public,
+					'archived' => $record->is_archived,
+					'spam'     => $record->is_spam,
+					'deleted'  => $record->is_deleted,
+				],
+				'theme'             => [
+					'stylesheet' => $record->theme_stylesheet,
+					'template'   => $record->theme_template,
+				],
+				'users_count'       => $record->users_count,
+				'admins_count'      => $record->admins_count,
+				'content_count'     => $record->content_count,
+				'media_count'       => $record->media_count,
+				'disk_bytes'        => $record->disk_bytes,
+				'db_bytes'          => $record->db_bytes,
+				'autoload_bytes'    => $record->autoload_bytes,
+				'last_activity_gmt' => self::date( (string) $record->last_activity_gmt ),
+				'alert_level'       => Severity::name( $record->alert_level ),
+				'alerts_count'      => $record->alerts_count,
+				'alert_rules'       => $record->alert_rule_ids(),
+				'registry_status'   => $record->registry_status,
+				'pending'           => null === $record->scanned_at,
+				'dirty'             => $record->dirty,
+				'scanned_at_gmt'    => self::date( (string) $record->scanned_at ),
+			]
+		);
 	}
 
 	/**

@@ -11,7 +11,7 @@ final class SiteRecord {
 	private const INT_FIELDS             = [ 'site_id', 'network_id', 'users_count', 'admins_count', 'content_count', 'media_count', 'alert_level', 'alerts_count' ];
 	private const NULLABLE_INT_FIELDS    = [ 'disk_bytes', 'db_bytes', 'autoload_bytes' ];
 	private const BOOL_FIELDS            = [ 'is_public', 'is_archived', 'is_spam', 'is_deleted', 'disk_is_estimate', 'dirty' ];
-	private const STRING_FIELDS          = [ 'name', 'url', 'theme_stylesheet', 'theme_template', 'alert_rules', 'registry_status' ];
+	private const STRING_FIELDS          = [ 'name', 'url', 'siteurl', 'theme_stylesheet', 'theme_template', 'alert_rules', 'registry_status' ];
 	private const NULLABLE_STRING_FIELDS = [ 'last_activity_gmt', 'dirty_since', 'scanned_at' ];
 
 	/**
@@ -20,6 +20,7 @@ final class SiteRecord {
 	private const STRING_WIDTHS = [
 		'name'             => 255,
 		'url'              => 255,
+		'siteurl'          => 255,
 		'theme_stylesheet' => 191,
 		'theme_template'   => 191,
 		'alert_rules'      => 255,
@@ -30,6 +31,7 @@ final class SiteRecord {
 	public int $network_id            = 1;
 	public string $name               = '';
 	public string $url                = '';
+	public string $siteurl            = '';
 	public bool $is_public            = true;
 	public bool $is_archived          = false;
 	public bool $is_spam              = false;
@@ -54,6 +56,11 @@ final class SiteRecord {
 	public ?string $dirty_since       = null;
 	public ?string $scanned_at        = null;
 
+	/**
+	 * Vrai pour une ligne lue par une liste (sans la colonne data) : elle ne doit jamais être réécrite.
+	 */
+	public bool $partial = false;
+
 	public static function from_row( array $row ): self {
 		$record = new self();
 		foreach ( self::INT_FIELDS as $field ) {
@@ -77,8 +84,9 @@ final class SiteRecord {
 		foreach ( self::NULLABLE_STRING_FIELDS as $field ) {
 			$record->$field = isset( $row[ $field ] ) ? (string) $row[ $field ] : null;
 		}
-		$data         = isset( $row['data'] ) ? json_decode( (string) $row['data'], true ) : null;
-		$record->data = is_array( $data ) ? $data : [];
+		$data            = isset( $row['data'] ) ? json_decode( (string) $row['data'], true ) : null;
+		$record->data    = is_array( $data ) ? $data : [];
+		$record->partial = ! array_key_exists( 'data', $row );
 		return $record;
 	}
 

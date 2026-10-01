@@ -141,4 +141,28 @@ final class SitesQueryTest extends TestCase {
 		$this->assertMatchesRegularExpression( '#^https?://example\.test/sub/wp-admin/$#', $summary['admin_url'] );
 		$this->assertSame( 'Site #205', $summary['name'] );
 	}
+
+	public function test_admin_links_use_the_wordpress_address_when_it_differs_from_home(): void {
+		$this->make_record(
+			206,
+			[
+				'name'       => 'Sub',
+				'url'        => 'https://home.test/',
+				'siteurl'    => 'https://home.test/wp/',
+				'scanned_at' => '2026-09-01 00:00:00',
+			]
+		);
+
+		$items = $this->query->list( [ 'search' => 'home.test' ] )['items'];
+
+		$this->assertSame( [ 206 ], wp_list_pluck( $items, 'id' ) );
+		$this->assertSame( 'https://home.test/', $items[0]['url'] );
+		$this->assertSame( 'https://home.test/wp/wp-admin/', $items[0]['admin_url'] );
+	}
+
+	public function test_alert_levels_are_reported_by_name(): void {
+		$this->assertSame( 'error', $this->query->get( 102 )['alert_level'] );
+		$this->assertSame( 'none', $this->query->get( 101 )['alert_level'] );
+		$this->assertSame( [ 104, 101 ], $this->ids( [ 'alert_level' => [ 'none', 'bogus' ] ] ) );
+	}
 }

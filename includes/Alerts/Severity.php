@@ -11,6 +11,7 @@ final class Severity {
 	public const ERROR   = 'error';
 	public const WARNING = 'warning';
 	public const INFO    = 'info';
+	public const NONE    = 'none';
 
 	private const LEVELS = [
 		self::INFO    => 1,
@@ -24,7 +25,16 @@ final class Severity {
 
 	public static function name( int $level ): string {
 		$names = array_flip( self::LEVELS );
-		return $names[ $level ] ?? 'none';
+		return $names[ $level ] ?? self::NONE;
+	}
+
+	/**
+	 * Noms publics des niveaux, du plus faible au plus fort (filtres REST et interface).
+	 *
+	 * @return string[]
+	 */
+	public static function names(): array {
+		return array_merge( [ self::NONE ], array_keys( self::LEVELS ) );
 	}
 
 	public static function is_valid( string $severity ): bool {

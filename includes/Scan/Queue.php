@@ -51,6 +51,7 @@ final class Queue {
 		add_action( self::HOOK_RECOMPUTE, [ $this, 'run_recompute' ] );
 		add_action( 'msradar_activated', [ $this, 'schedule' ] );
 		add_action( 'msradar_deactivated', [ $this, 'unschedule' ] );
+		add_action( 'msradar_upgraded', [ $this, 'on_upgraded' ] );
 		add_action( 'msradar_settings_updated', [ $this, 'on_settings_updated' ], 10, 2 );
 		add_action( 'admin_init', [ $this, 'ensure_scheduled' ] );
 	}
@@ -228,6 +229,17 @@ final class Queue {
 		if ( ! $done ) {
 			MainSite::schedule_once( self::HOOK_RECOMPUTE, MINUTE_IN_SECONDS );
 		}
+	}
+
+	/**
+	 * Après une mise à niveau du schéma, les nouvelles colonnes ne se remplissent qu'à l'analyse :
+	 * tout le réseau courant est marqué (la version 2 ajoute siteurl).
+	 *
+	 * @param mixed $version Version de schéma installée.
+	 */
+	public function on_upgraded( $version = 0 ): void {
+		$this->schedule();
+		$this->request_full_scan( get_current_network_id() );
 	}
 
 	/**

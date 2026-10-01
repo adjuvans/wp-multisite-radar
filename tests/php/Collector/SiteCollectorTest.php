@@ -221,7 +221,7 @@ final class SiteCollectorTest extends TestCase {
 
 		$record = $this->collect( $site_id );
 
-		$this->assertSame( sprintf( 'Site #%d', $site_id ), $record->name );
+		$this->assertSame( '', $record->name, 'The fallback name is applied when reading, in the reader’s language.' );
 		$this->assertSame( [], $record->data['plugins_local'] );
 		$this->assertSame( RegistryProbe::STATUS_MISSING, $record->registry_status );
 	}
@@ -254,5 +254,12 @@ final class SiteCollectorTest extends TestCase {
 
 	public function test_unknown_site_returns_null(): void {
 		$this->assertNull( ( new SiteCollector( $this->plugin()->settings() ) )->collect( 999999 ) );
+	}
+
+	public function test_the_wordpress_address_is_stored_in_its_own_column(): void {
+		$site_id = self::factory()->blog->create();
+		update_blog_option( $site_id, 'siteurl', 'https://example.test/wp' );
+
+		$this->assertSame( 'https://example.test/wp', $this->collect( $site_id )->siteurl );
 	}
 }

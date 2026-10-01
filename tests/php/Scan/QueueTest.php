@@ -351,4 +351,16 @@ final class QueueTest extends TestCase {
 
 		$this->assertSame( 0, $this->plugin()->sites()->count_dirty( $network ), 'The same types in another order are not a change.' );
 	}
+
+	public function test_a_schema_upgrade_requests_a_full_analysis(): void {
+		$network = get_current_network_id();
+		$this->plugin()->sites()->seed_from_blogs( $network );
+		$this->mark_all_clean();
+		wp_clear_scheduled_hook( Queue::HOOK_CONTINUE );
+
+		do_action( 'msradar_upgraded', 2 );
+
+		$this->assertSame( $this->plugin()->sites()->count_all( $network ), $this->plugin()->sites()->count_dirty( $network ) );
+		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_CONTINUE ) );
+	}
 }

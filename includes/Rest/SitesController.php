@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Rest;
 
+use MultisiteRadar\Alerts\Severity;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Storage\SitesRepository;
 use WP_Error;
@@ -88,7 +89,7 @@ final class SitesController extends Controller {
 				'default' => [],
 				'items'   => [
 					'type' => 'string',
-					'enum' => array_keys( SitesQuery::ALERT_LEVELS ),
+					'enum' => Severity::names(),
 				],
 			],
 			'status'          => [
@@ -215,7 +216,7 @@ final class SitesController extends Controller {
 				'last_activity_gmt' => $date,
 				'alert_level'       => [
 					'type' => 'string',
-					'enum' => array_keys( SitesQuery::ALERT_LEVELS ),
+					'enum' => Severity::names(),
 				],
 				'alerts_count'      => $int,
 				'alert_rules'       => [

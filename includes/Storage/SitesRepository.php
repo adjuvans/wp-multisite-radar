@@ -26,6 +26,11 @@ final class SitesRepository {
 		'scanned_at'    => 'scanned_at',
 	];
 
+	/**
+	 * Colonnes lues par les listes : tout sauf data, le JSON détaillé, lu seulement par find() et find_many().
+	 */
+	private const LIST_COLUMNS = 'site_id, network_id, name, url, siteurl, is_public, is_archived, is_spam, is_deleted, theme_stylesheet, theme_template, users_count, admins_count, content_count, media_count, disk_bytes, disk_is_estimate, db_bytes, autoload_bytes, last_activity_gmt, alert_level, alerts_count, alert_rules, registry_status, dirty, dirty_since, scanned_at';
+
 	private const STATUS_CLAUSES = [
 		'public'   => '(is_public = 1 AND is_archived = 0 AND is_spam = 0 AND is_deleted = 0)',
 		'private'  => 'is_public = 0',
@@ -75,8 +80,12 @@ final class SitesRepository {
 	 * un marquage posé pendant l'analyse du site survit à l'enregistrement du résultat.
 	 *
 	 * @throws \RuntimeException Si l'écriture échoue.
+	 * @throws \LogicException Si l'enregistrement vient d'une liste.
 	 */
 	public function save( SiteRecord $record ): void {
+		if ( $record->partial ) {
+			throw new \LogicException( 'A partial site record (read from a list) cannot be written back.' );
+		}
 		global $wpdb;
 		$row = $record->to_row();
 		if ( $this->exists( $record->site_id ) ) {
@@ -90,7 +99,13 @@ final class SitesRepository {
 		}
 	}
 
+	/**
+	 * @throws \LogicException Si l'enregistrement vient d'une liste.
+	 */
 	public function save_alerts( SiteRecord $record ): void {
+		if ( $record->partial ) {
+			throw new \LogicException( 'A partial site record (read from a list) cannot be written back.' );
+		}
 		global $wpdb;
 		$wpdb->update(
 			Schema::sites_table(),
@@ -305,6 +320,7 @@ final class SitesRepository {
 		}
 
 		$table    = Schema::sites_table();
+		$columns  = self::LIST_COLUMNS;
 		$where    = implode( ' AND ', $clauses );
 		$column   = self::ORDERBY[ $args['orderby'] ] ?? 'name';
 		$order    = 'desc' === $args['order'] ? 'DESC' : 'ASC';
@@ -317,7 +333,7 @@ final class SitesRepository {
 		);
 		$rows  = $wpdb->get_results(
 			$wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Parameters are spread via array_merge ; placeholders match.
-				"SELECT * FROM %i WHERE {$where} ORDER BY %i {$order}, site_id ASC LIMIT %d OFFSET %d",
+				"SELECT {$columns} FROM %i WHERE {$where} ORDER BY %i {$order}, site_id ASC LIMIT %d OFFSET %d",
 				array_merge( [ $table ], $params, [ $column, $per_page, $offset ] )
 			),
 			ARRAY_A
