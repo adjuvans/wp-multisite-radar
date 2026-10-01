@@ -14,6 +14,8 @@ const { splitChunks } = defaultConfig.optimization;
 // La feuille de style de DataViews est importée par les points d'entrée : l'extraction de dépendances la
 // prendrait pour un script WordPress (« wp-dataviews/build-style/style.css »), qui n'existe pas. `false` la
 // laisse dans le bundle, d'où elle sort dans admin/<vue>.css.
+// `instanceof` ne reconnaît que l'instance de @wordpress/scripts : le paquet est épinglé en devDependency pour
+// qu'une seule copie (hissée) existe.
 const plugins = defaultConfig.plugins.map( ( plugin ) =>
 	plugin instanceof DependencyExtractionWebpackPlugin
 		? new DependencyExtractionWebpackPlugin( {

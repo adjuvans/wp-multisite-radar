@@ -1,5 +1,5 @@
 import { beforeEach, expect, test, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import apiFetch from '@wordpress/api-fetch';
@@ -41,6 +41,12 @@ function site( id, name, level = 'none' ) {
 		dirty: false,
 		scanned_at_gmt: '2026-09-02T10:00:00',
 	};
+}
+
+async function settle() {
+	await act( async () => {
+		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+	} );
 }
 
 function renderView( extraPreload = {} ) {
@@ -98,12 +104,13 @@ beforeEach( () => {
 	);
 } );
 
-test( 'renders the preloaded list without any request (spec 1.4, criterion 2)', () => {
+test( 'renders the preloaded list without any request (spec 1.4, criterion 2)', async () => {
 	renderView();
 
 	expect( screen.getByText( 'Blog RH' ) ).toBeInTheDocument();
 	expect( screen.getByText( 'Site vide' ) ).toBeInTheDocument();
 	expect( screen.getByText( 'Error · 1 alert' ) ).toBeInTheDocument();
+	await settle();
 	expect( apiFetch ).not.toHaveBeenCalled();
 } );
 
@@ -136,7 +143,7 @@ test( 'only managers can start an analysis', () => {
 	expect( ids( false ) ).toEqual( [ 'open', 'admin', 'visit', 'export' ] );
 } );
 
-test( 'a search with apostrophe, plus, percent, accents and a non-breaking space hits the preloaded path', () => {
+test( 'a search with apostrophe, plus, percent, accents and a non-breaking space hits the preloaded path', async () => {
 	const search = "O'Brien + 100% été\u00A0";
 	window.history.replaceState(
 		null,
@@ -159,5 +166,6 @@ test( 'a search with apostrophe, plus, percent, accents and a non-breaking space
 	} );
 
 	expect( screen.getByText( "Chez O'Brien" ) ).toBeInTheDocument();
+	await settle();
 	expect( apiFetch ).not.toHaveBeenCalled();
 } );
