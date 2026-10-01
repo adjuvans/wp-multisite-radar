@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Tests\Rest;
 
+use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Tests\RestTestCase;
 
 final class ScanControllerTest extends RestTestCase {
@@ -119,5 +120,87 @@ final class ScanControllerTest extends RestTestCase {
 
 		$this->assertSame( 500, $response->get_status() );
 		$this->assertSame( 'msradar_storage_error', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Trois sites du réseau courant, déjà analysés ; les deux derniers attendent une nouvelle analyse (arriéré du réseau).
+	 *
+	 * @return int[]
+	 */
+	private function backlog(): array {
+		$ids = self::factory()->blog->create_many( 3 );
+		$this->plugin()->sites()->seed_from_blogs( get_current_network_id() );
+		foreach ( $ids as $id ) {
+			$this->plugin()->runner()->scan_site( $id );
+		}
+		$this->mark_all_clean();
+		$this->plugin()->sites()->mark_dirty( [ $ids[1], $ids[2] ] );
+		return $ids;
+	}
+
+	public function test_a_batch_with_ids_scans_only_those_sites_and_reports_only_them(): void {
+		$this->login_as_super_admin();
+		[ $chosen, $older, $oldest ] = $this->backlog();
+		$this->request( 'POST', '/scan', [ 'scope' => 'ids', 'ids' => [ $chosen ] ] );
+		$untargeted = array_keys( $this->request( 'GET', '/scan/status' )->get_data() );
+
+		$batch = $this->request( 'POST', '/scan/batch', [ 'ids' => [ $chosen ] ] )->get_data();
+
+		$this->assertSame( 1, $batch['processed'] );
+		$this->assertSame( 0, $batch['remaining'], 'Only the requested sites are counted.' );
+		$this->assertTrue( $batch['done'] );
+		$this->assertFalse( $batch['locked'] );
+		$this->assertSame( array_merge( $untargeted, [ 'processed', 'done' ] ), array_keys( $batch ), 'Same shape as an untargeted batch.' );
+		$this->assertFalse( $this->plugin()->sites()->find( $chosen )->dirty );
+		$this->assertTrue( $this->plugin()->sites()->find( $older )->dirty, 'The network backlog is left to the cron.' );
+		$this->assertTrue( $this->plugin()->sites()->find( $oldest )->dirty );
+	}
+
+	public function test_remaining_counts_only_the_requested_sites(): void {
+		$this->login_as_super_admin();
+		[ $chosen, $older ] = $this->backlog();
+		$this->plugin()->sites()->mark_dirty( [ $chosen ] );
+		$this->assertTrue( $this->plugin()->lock()->acquire() );
+		try {
+			$batch = $this->request( 'POST', '/scan/batch', [ 'ids' => [ $chosen, $older ] ] )->get_data();
+		} finally {
+			$this->plugin()->lock()->release();
+		}
+
+		$this->assertTrue( $batch['locked'] );
+		$this->assertSame( 0, $batch['processed'] );
+		$this->assertSame( 2, $batch['remaining'], 'Three sites of the network are dirty, two of them were requested.' );
+		$this->assertFalse( $batch['done'] );
+	}
+
+	public function test_a_batch_ignores_requested_sites_of_other_networks(): void {
+		$this->login_as_super_admin();
+		[ $chosen ] = $this->backlog();
+		$this->plugin()->sites()->mark_dirty( [ $chosen ] );
+		$this->make_record( 9002, [ 'dirty' => true, 'network_id' => self::factory()->network->create() ] );
+
+		$batch = $this->request( 'POST', '/scan/batch', [ 'ids' => [ 9002, $chosen ] ] )->get_data();
+
+		$this->assertSame( 1, $batch['processed'] );
+		$this->assertSame( 0, $batch['remaining'] );
+		$this->assertTrue( $this->plugin()->sites()->find( 9002 )->dirty );
+	}
+
+	public function test_a_batch_without_any_requested_site_of_the_network_is_rejected(): void {
+		$this->login_as_super_admin();
+		$this->make_record( 702, [ 'network_id' => 2 ] );
+
+		foreach ( [ [], [ 702 ], [ 999999 ] ] as $ids ) {
+			$response = $this->request( 'POST', '/scan/batch', [ 'ids' => $ids ] );
+			$this->assertSame( 400, $response->get_status() );
+			$this->assertSame( 'msradar_no_sites', $response->get_data()['code'] );
+		}
+	}
+
+	public function test_batch_ids_are_validated(): void {
+		$this->login_as_super_admin();
+
+		$this->assertSame( 400, $this->request( 'POST', '/scan/batch', [ 'ids' => [ 0 ] ] )->get_status() );
+		$this->assertSame( 400, $this->request( 'POST', '/scan/batch', [ 'ids' => range( 1, SitesQuery::MAX_INCLUDE + 1 ) ] )->get_status() );
 	}
 }

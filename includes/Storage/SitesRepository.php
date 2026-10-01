@@ -216,6 +216,29 @@ final class SitesRepository {
 		return array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT site_id FROM %i WHERE dirty = 1 AND network_id = %d ORDER BY site_id ASC', Schema::sites_table(), $network_id ) ) );
 	}
 
+	/**
+	 * Sites encore marqués parmi ceux demandés (analyse ciblée), les plus anciennement marqués d'abord.
+	 *
+	 * @param int[] $site_ids
+	 * @return int[]
+	 * @throws \RuntimeException Si la lecture échoue.
+	 */
+	public function dirty_among( array $site_ids, int $network_id ): array {
+		$ids = self::ids( $site_ids );
+		if ( [] === $ids ) {
+			return [];
+		}
+		global $wpdb;
+		$found = $wpdb->get_col(
+			$wpdb->prepare(
+				'SELECT site_id FROM %i WHERE dirty = 1 AND network_id = %d AND site_id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ') ORDER BY dirty_since ASC, site_id ASC',
+				array_merge( [ Schema::sites_table(), $network_id ], $ids )
+			)
+		);
+		self::check_read();
+		return array_map( 'intval', (array) $found );
+	}
+
 	public function count_dirty( ?int $network_id = null ): int {
 		global $wpdb;
 		if ( null === $network_id ) {

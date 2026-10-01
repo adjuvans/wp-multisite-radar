@@ -146,6 +146,46 @@ test( 'only managers can start an analysis', () => {
 	expect( ids( false ) ).toEqual( [ 'open', 'admin', 'visit', 'export' ] );
 } );
 
+test( '"Analyse again" is disabled while an analysis runs', () => {
+	const rescan = ( isScanning ) =>
+		getSitesActions( {
+			canManage: true,
+			isScanning,
+			onOpen() {},
+			onRescan() {},
+			onExport() {},
+		} ).find( ( action ) => action.id === 'rescan' );
+
+	expect( rescan( false ).disabled ).toBe( false );
+	expect( rescan( true ).disabled ).toBe( true );
+} );
+
+test( 'the row action "Analyse again" is disabled once an analysis has started', async () => {
+	renderView();
+	const openActions = () =>
+		fireEvent.click(
+			screen.getAllByRole( 'button', { name: 'Actions' } )[ 0 ]
+		);
+
+	openActions();
+	const rescan = await screen.findByRole( 'menuitem', {
+		name: 'Analyse again',
+	} );
+	expect( rescan ).not.toHaveAttribute( 'aria-disabled', 'true' );
+	fireEvent.click( rescan );
+	await settle();
+	expect( apiFetch ).toHaveBeenCalledWith( {
+		path: '/multisite-radar/v1/scan',
+		method: 'POST',
+		data: { scope: 'ids', ids: [ 1 ] },
+	} );
+
+	openActions();
+	expect(
+		await screen.findByRole( 'menuitem', { name: 'Analyse again' } )
+	).toHaveAttribute( 'aria-disabled', 'true' );
+} );
+
 test( 'a search with apostrophe, plus, percent, accents and a non-breaking space hits the preloaded path', async () => {
 	const search = "O'Brien + 100% été\u00A0";
 	window.history.replaceState(

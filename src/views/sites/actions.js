@@ -5,12 +5,19 @@ import { download, external, info, update, wordpress } from '@wordpress/icons';
  * Actions de ligne et actions groupées de la liste des sites. « Analyse again » n'existe que pour msradar_manage.
  *
  * @param {Object}                    options
- * @param {boolean}                   options.canManage Droit de lancer une analyse.
- * @param {( item: Object ) => void}  options.onOpen    Ouvre la fiche d'un site.
- * @param {( ids: number[] ) => void} options.onRescan  Reçoit les identifiants à réanalyser.
- * @param {( ids: number[] ) => void} options.onExport  Reçoit les identifiants à exporter.
+ * @param {boolean}                   options.canManage  Droit de lancer une analyse.
+ * @param {boolean}                   options.isScanning Une analyse est en cours : « Analyse again » est désactivée.
+ * @param {( item: Object ) => void}  options.onOpen     Ouvre la fiche d'un site.
+ * @param {( ids: number[] ) => void} options.onRescan   Reçoit les identifiants à réanalyser.
+ * @param {( ids: number[] ) => void} options.onExport   Reçoit les identifiants à exporter.
  */
-export function getSitesActions( { canManage, onOpen, onRescan, onExport } ) {
+export function getSitesActions( {
+	canManage,
+	isScanning = false,
+	onOpen,
+	onRescan,
+	onExport,
+} ) {
 	const actions = [
 		{
 			id: 'open',
@@ -48,6 +55,7 @@ export function getSitesActions( { canManage, onOpen, onRescan, onExport } ) {
 			label: __( 'Analyse again', 'multisite-radar' ),
 			icon: update,
 			supportsBulk: true,
+			disabled: isScanning,
 			callback: ( items ) => onRescan( items.map( ( item ) => item.id ) ),
 		} );
 	}

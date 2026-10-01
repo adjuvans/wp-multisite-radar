@@ -46,6 +46,7 @@ export default function SitesView() {
 	);
 	const scan = useScan();
 	const startScan = scan.start;
+	const isScanning = scan.running;
 
 	const rules = summary.data?.by_rule;
 	const fields = useMemo( () => getSitesFields( rules || [] ), [ rules ] );
@@ -63,6 +64,7 @@ export default function SitesView() {
 		() =>
 			getSitesActions( {
 				canManage,
+				isScanning,
 				onOpen: openSite,
 				onRescan: ( ids ) => startScan( { scope: 'ids', ids } ),
 				onExport: ( ids ) =>
@@ -70,7 +72,7 @@ export default function SitesView() {
 						exportUrl( 'csv', state, view.fields, ids )
 					),
 			} ),
-		[ canManage, openSite, startScan, state, view.fields ]
+		[ canManage, isScanning, openSite, startScan, state, view.fields ]
 	);
 
 	const onChangeView = ( next ) => {

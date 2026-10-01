@@ -24,6 +24,8 @@ function wait( ms ) {
  * Analyse pilotée par l'interface : POST /scan marque les sites, puis POST /scan/batch traite des lots bornés
  * jusqu'à ce qu'il n'en reste plus. Un lot sans progrès (le cron détient le verrou) fait attendre puis réessayer ;
  * après maxWaits essais sans progrès, l'interface s'arrête et annonce que l'analyse continue en arrière-plan.
+ * Une analyse ciblée ({ scope: 'ids', ids }) passe ses ids à chaque lot : seuls ces sites sont traités et comptés,
+ * l'arriéré du réseau reste au cron. Une seule analyse à la fois : start() pendant qu'elle tourne renvoie sa promesse.
  *
  * @param {Object} options          Réglages (raccourcis par les tests).
  * @param {number} options.waitMs   Attente entre deux lots sans progrès.
@@ -32,6 +34,7 @@ function wait( ms ) {
 export function useScan( { waitMs = 3000, maxWaits = 20 } = {} ) {
 	const [ progress, setProgress ] = useState( IDLE );
 	const mounted = useRef( true );
+	const active = useRef( null );
 	useEffect( () => {
 		mounted.current = true;
 		return () => {
@@ -48,35 +51,39 @@ export function useScan( { waitMs = 3000, maxWaits = 20 } = {} ) {
 		}
 	}, [] );
 
-	const start = useCallback(
+	const run = useCallback(
 		async ( request ) => {
+			const ids = request?.scope === 'ids' ? request.ids : null;
 			update( { ...IDLE, running: true } );
 			speak( __( 'Analysis started.', 'multisite-radar' ) );
 			try {
-				let status = await apiFetch( {
+				const marked = await apiFetch( {
 					path: buildPath( '/scan' ),
 					method: 'POST',
 					data: request,
 				} );
+				// La réponse de POST /scan compte tout le réseau : une analyse ciblée ne suit que ses sites.
+				let remaining = ids ? ids.length : marked.remaining;
 				let processed = 0;
-				let total = status.remaining;
+				let total = remaining;
 				let waits = 0;
 				let spokenAt = Date.now();
-				update( { total, remaining: status.remaining } );
+				update( { total, remaining } );
 
 				while (
 					mounted.current &&
-					status.remaining > 0 &&
+					remaining > 0 &&
 					waits <= maxWaits
 				) {
 					const batch = await apiFetch( {
 						path: buildPath( '/scan/batch' ),
 						method: 'POST',
+						...( ids ? { data: { ids } } : {} ),
 					} );
 					processed += batch.processed;
-					total = Math.max( total, processed + batch.remaining );
-					status = batch;
-					update( { processed, total, remaining: batch.remaining } );
+					remaining = batch.remaining;
+					total = Math.max( total, processed + remaining );
+					update( { processed, total, remaining } );
 					if ( batch.processed > 0 ) {
 						waits = 0;
 					} else {
@@ -100,7 +107,7 @@ export function useScan( { waitMs = 3000, maxWaits = 20 } = {} ) {
 				}
 
 				invalidate( NAMESPACE );
-				const deferred = status.remaining > 0;
+				const deferred = remaining > 0;
 				const message = deferred
 					? __(
 							'The analysis continues in the background.',
@@ -114,6 +121,8 @@ export function useScan( { waitMs = 3000, maxWaits = 20 } = {} ) {
 				speak( message );
 				update( { running: false, deferred } );
 			} catch ( error ) {
+				// Les sites analysés avant l'échec doivent apparaître à jour.
+				invalidate( NAMESPACE );
 				createErrorNotice(
 					error?.message ||
 						__(
@@ -134,6 +143,18 @@ export function useScan( { waitMs = 3000, maxWaits = 20 } = {} ) {
 			createInfoNotice,
 			createErrorNotice,
 		]
+	);
+
+	const start = useCallback(
+		( request ) => {
+			if ( ! active.current ) {
+				active.current = run( request ).finally( () => {
+					active.current = null;
+				} );
+			}
+			return active.current;
+		},
+		[ run ]
 	);
 
 	return { ...progress, start };
