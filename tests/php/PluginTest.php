@@ -6,7 +6,7 @@ use MultisiteRadar\Plugin;
 final class PluginTest extends TestCase {
 
 	public function test_constants_are_defined(): void {
-		$this->assertSame( '2.0.0-dev', MSRADAR_VERSION );
+		$this->assertSame( '2.0.0-alpha.1', MSRADAR_VERSION );
 		$this->assertFileExists( MSRADAR_FILE );
 		$this->assertStringEndsWith( '/', MSRADAR_DIR );
 	}

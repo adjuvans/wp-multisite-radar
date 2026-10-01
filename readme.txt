@@ -3,7 +3,7 @@ Tags: multisite, network, audit, inventory, admin
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.0-dev
+Stable tag: 2.0.0-alpha.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -19,5 +19,5 @@ Source code: https://github.com/adjuvans/wp-network-plugin-utilities
 
 == Changelog ==
 
-= 2.0.0-dev =
-* Complete rewrite (in progress).
+= 2.0.0-alpha.1 =
+* First alpha of the complete rewrite: background collection, alerts, REST API and WP-CLI commands. No admin interface yet.
