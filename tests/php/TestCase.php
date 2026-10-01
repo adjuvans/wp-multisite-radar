@@ -37,6 +37,18 @@ abstract class TestCase extends \WP_UnitTestCase {
 		return $record;
 	}
 
+	/**
+	 * Construit un enregistrement en mémoire (non sauvegardé), déjà analysé.
+	 */
+	protected function build_record( array $props = [] ): SiteRecord {
+		$record             = new SiteRecord();
+		$record->scanned_at = '2026-09-01 00:00:00';
+		foreach ( $props as $property => $value ) {
+			$record->$property = $value;
+		}
+		return $record;
+	}
+
 	protected function mark_all_clean(): void {
 		global $wpdb;
 		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET dirty = 0, dirty_since = NULL', Schema::sites_table() ) );

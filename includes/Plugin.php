@@ -1,6 +1,9 @@
 <?php
 namespace MultisiteRadar;
 
+use MultisiteRadar\Alerts\AlertEvaluator;
+use MultisiteRadar\Alerts\AlertFormatter;
+use MultisiteRadar\Alerts\RuleRegistry;
 use MultisiteRadar\Collector\RegistryProbe;
 use MultisiteRadar\Collector\SiteCollector;
 use MultisiteRadar\Install\Installer;
@@ -26,6 +29,12 @@ final class Plugin {
 	private ?RegistryProbe $probe = null;
 
 	private ?SiteCollector $collector = null;
+
+	private ?RuleRegistry $rules = null;
+
+	private ?AlertEvaluator $evaluator = null;
+
+	private ?AlertFormatter $formatter = null;
 
 	public static function instance(): self {
 		if ( null === self::$instance ) {
@@ -71,6 +80,18 @@ final class Plugin {
 		return $this->collector ??= new SiteCollector( $this->settings() );
 	}
 
+	public function rules(): RuleRegistry {
+		return $this->rules ??= RuleRegistry::create_default();
+	}
+
+	public function evaluator(): AlertEvaluator {
+		return $this->evaluator ??= new AlertEvaluator( $this->rules(), $this->settings() );
+	}
+
+	public function formatter(): AlertFormatter {
+		return $this->formatter ??= new AlertFormatter( $this->rules() );
+	}
+
 	public function extensions(): ExtensionsRepository {
 		return $this->extensions ??= new ExtensionsRepository();
 	}
@@ -81,6 +102,9 @@ final class Plugin {
 	public function reset_caches(): void {
 		if ( null !== $this->settings ) {
 			$this->settings->reset_cache();
+		}
+		if ( null !== $this->evaluator ) {
+			$this->evaluator->reset();
 		}
 	}
 }
