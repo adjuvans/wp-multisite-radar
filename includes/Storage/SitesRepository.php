@@ -49,16 +49,21 @@ final class SitesRepository {
 	/**
 	 * Insère ou met à jour une ligne. Sur une ligne existante, dirty et dirty_since ne sont jamais écrasés :
 	 * un marquage posé pendant l'analyse du site survit à l'enregistrement du résultat.
+	 *
+	 * @throws \RuntimeException Si l'écriture échoue.
 	 */
 	public function save( SiteRecord $record ): void {
 		global $wpdb;
 		$row = $record->to_row();
 		if ( $this->exists( $record->site_id ) ) {
 			unset( $row['site_id'], $row['dirty'], $row['dirty_since'] );
-			$wpdb->update( Schema::sites_table(), $row, [ 'site_id' => $record->site_id ] );
-			return;
+			$result = $wpdb->update( Schema::sites_table(), $row, [ 'site_id' => $record->site_id ] );
+		} else {
+			$result = $wpdb->insert( Schema::sites_table(), $row );
 		}
-		$wpdb->insert( Schema::sites_table(), $row );
+		if ( false === $result ) {
+			throw new \RuntimeException( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not output.
+		}
 	}
 
 	public function save_alerts( SiteRecord $record ): void {

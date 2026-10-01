@@ -22,8 +22,8 @@ final class SchemaTest extends TestCase {
 	}
 
 	public function test_install_is_idempotent(): void {
-		Schema::install();
-		Schema::install();
+		$this->assertTrue( Schema::install() );
+		$this->assertTrue( Schema::install() );
 
 		$this->assertTrue( Schema::is_current() );
 	}

@@ -14,6 +14,18 @@ final class SiteRecord {
 	private const STRING_FIELDS          = [ 'name', 'url', 'theme_stylesheet', 'theme_template', 'alert_rules', 'registry_status' ];
 	private const NULLABLE_STRING_FIELDS = [ 'last_activity_gmt', 'dirty_since', 'scanned_at' ];
 
+	/**
+	 * Largeur des colonnes VARCHAR, identique à Schema.
+	 */
+	private const STRING_WIDTHS = [
+		'name'             => 255,
+		'url'              => 255,
+		'theme_stylesheet' => 191,
+		'theme_template'   => 191,
+		'alert_rules'      => 255,
+		'registry_status'  => 20,
+	];
+
 	public int $site_id               = 0;
 	public int $network_id            = 1;
 	public string $name               = '';
@@ -72,8 +84,11 @@ final class SiteRecord {
 
 	public function to_row(): array {
 		$row = [];
-		foreach ( array_merge( self::INT_FIELDS, self::NULLABLE_INT_FIELDS, self::STRING_FIELDS, self::NULLABLE_STRING_FIELDS ) as $field ) {
+		foreach ( array_merge( self::INT_FIELDS, self::NULLABLE_INT_FIELDS, self::NULLABLE_STRING_FIELDS ) as $field ) {
 			$row[ $field ] = $this->$field;
+		}
+		foreach ( self::STRING_FIELDS as $field ) {
+			$row[ $field ] = mb_substr( $this->$field, 0, self::STRING_WIDTHS[ $field ] );
 		}
 		foreach ( self::BOOL_FIELDS as $field ) {
 			$row[ $field ] = $this->$field ? 1 : 0;

@@ -127,4 +127,22 @@ final class SitesRepositoryTest extends TestCase {
 		$this->assertSame( [ 'no_users' ], $found->alert_rule_ids() );
 		$this->assertSame( 'Keep me', $found->name );
 	}
+
+	public function test_save_truncates_overlong_strings_instead_of_losing_the_record(): void {
+		$this->sites->insert_pending( 1201, 1, 'e.test/' );
+		$record          = new SiteRecord();
+		$record->site_id = 1201;
+		$record->name    = str_repeat( 'n', 300 );
+		$record->dirty   = false;
+		$this->sites->save( $record );
+
+		$this->assertSame( str_repeat( 'n', 255 ), $this->sites->find( 1201 )->name );
+
+		$new          = new SiteRecord();
+		$new->site_id = 1202;
+		$new->name    = str_repeat( 'é', 300 );
+		$this->sites->save( $new );
+
+		$this->assertSame( str_repeat( 'é', 255 ), $this->sites->find( 1202 )->name );
+	}
 }

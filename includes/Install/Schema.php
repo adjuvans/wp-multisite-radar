@@ -28,7 +28,10 @@ final class Schema {
 		return [ self::sites_table(), self::extensions_table() ];
 	}
 
-	public static function install(): void {
+	/**
+	 * @return bool False si une table n'a pas pu être créée (la version n'est alors pas enregistrée).
+	 */
+	public static function install(): bool {
 		global $wpdb;
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
@@ -86,7 +89,14 @@ KEY type_slug (type,slug)
 ) {$charset_collate};"
 		);
 
+		foreach ( self::tables() as $table ) {
+			if ( null === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) ) ) {
+				return false;
+			}
+		}
+
 		update_site_option( self::OPTION, self::VERSION );
+		return true;
 	}
 
 	public static function is_current(): bool {
