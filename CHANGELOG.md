@@ -10,7 +10,7 @@ Réécriture complète sous le nom **Multisite Radar** (slug `multisite-radar`).
 - Moteur d'alertes réglable (règles `no_users`, `inactive`, `high_media`).
 - Multi-réseau : chaque réseau analyse ses propres sites et recalcule leurs alertes avec ses propres réglages (cron, `POST /scan/batch`, WP-CLI) ; le verrou d'analyse reste commun.
 - API REST `multisite-radar/v1` (sites, analyse, réglages, synthèse des alertes).
-- Commandes `wp multisite-radar scan|probe|sites list`.
+- Commandes `wp multisite-radar scan|probe|sites list`. `scan` exige exactement une option parmi `--all`, `--dirty` et `--site=<id>` ; `--site` n'analyse (et, avec `--probe`, ne relève) que ce site, sans vider le reste de la file.
 - Migration automatique des réglages et des éléments de menu de la 1.x.
 - Outillage : PHPUnit multisite, WPCS, PHPStan niveau 6, CI GitHub Actions, Plugin Check.
 
