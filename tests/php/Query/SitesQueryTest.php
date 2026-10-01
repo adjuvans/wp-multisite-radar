@@ -123,8 +123,22 @@ final class SitesQueryTest extends TestCase {
 		$this->plugin()->settings()->update( [ 'scan' => [ 'analysis_plugins' => [ 'acme' ] ] ] );
 		$this->assertSame( [ 'post', 'event' ], wp_list_pluck( $this->query->get( 201 )['post_types'], 'name' ) );
 
+		$this->assertNull( $detail['scan_error'] );
+		$this->make_record( 203, [ 'data' => [ 'scan_error' => [ 'message' => 'Boom <b>', 'at_gmt' => '2026-09-02 03:04:05', 'extra' => 'x' ] ] ] );
+		$this->assertSame( [ 'message' => 'Boom <b>', 'at_gmt' => '2026-09-02T03:04:05' ], $this->query->get( 203 )['scan_error'] );
+
 		$this->assertNull( $this->query->get( 999999 ) );
 		$this->make_record( 202, [ 'network_id' => 2 ] );
 		$this->assertNull( $this->query->get( 202 ), 'Sites of another network are hidden.' );
+	}
+
+	public function test_summary_makes_urls_absolute_and_names_non_empty_for_unscanned_sites(): void {
+		$this->make_record( 205, [ 'url' => 'example.test/sub/', 'name' => '' ] );
+
+		$summary = $this->query->get( 205 );
+
+		$this->assertMatchesRegularExpression( '#^https?://example\.test/sub/$#', $summary['url'] );
+		$this->assertMatchesRegularExpression( '#^https?://example\.test/sub/wp-admin/$#', $summary['admin_url'] );
+		$this->assertSame( 'Site #205', $summary['name'] );
 	}
 }

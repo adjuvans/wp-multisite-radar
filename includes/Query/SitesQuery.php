@@ -109,21 +109,29 @@ final class SitesQuery {
 				'options'      => is_array( $data['options'] ?? null ) ? $data['options'] : [],
 				'alerts'       => $this->formatter->format( (array) ( $data['alerts'] ?? [] ) ),
 				'extensions'   => $this->extensions_for( $record ),
-				'scan_error'   => is_array( $data['scan_error'] ?? null ) ? $data['scan_error'] : null,
+				'scan_error'   => is_array( $data['scan_error'] ?? null ) ? [
+					'message' => (string) ( $data['scan_error']['message'] ?? '' ),
+					'at_gmt'  => self::date( (string) ( $data['scan_error']['at_gmt'] ?? '' ) ),
+				] : null,
 			]
 		);
 	}
 
 	public function summary( SiteRecord $record ): array {
 		$siteurl = (string) ( $record->data['options']['siteurl'] ?? '' );
-		$base    = '' !== $siteurl ? $siteurl : $record->url;
+		$base    = self::absolute( '' !== $siteurl ? $siteurl : $record->url );
+		$name    = $record->name;
+		if ( '' === trim( $name ) ) {
+			/* translators: %d: site ID. */
+			$name = sprintf( __( 'Site #%d', 'multisite-radar' ), $record->site_id );
+		}
 
 		$level = array_search( $record->alert_level, self::ALERT_LEVELS, true );
 
 		return [
 			'id'                => $record->site_id,
-			'name'              => $record->name,
-			'url'               => $record->url,
+			'name'              => $name,
+			'url'               => self::absolute( $record->url ),
 			'admin_url'         => '' !== $base ? trailingslashit( $base ) . 'wp-admin/' : '',
 			'status'            => [
 				'public'   => $record->is_public,
@@ -151,6 +159,16 @@ final class SitesQuery {
 			'dirty'             => $record->dirty,
 			'scanned_at_gmt'    => self::date( (string) $record->scanned_at ),
 		];
+	}
+
+	/**
+	 * Les lignes jamais analysées stockent domaine + chemin sans schéma.
+	 */
+	private static function absolute( string $url ): string {
+		if ( '' === $url || false !== strpos( $url, '://' ) ) {
+			return $url;
+		}
+		return set_url_scheme( 'http://' . $url );
 	}
 
 	private static function date( string $gmt ): ?string {
