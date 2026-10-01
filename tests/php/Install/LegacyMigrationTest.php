@@ -69,6 +69,7 @@ final class LegacyMigrationTest extends TestCase {
 	}
 
 	public function test_a_fresh_install_has_nothing_to_migrate(): void {
+		add_filter( 'msradar_legacy_core_loaded', '__return_false' );
 		$this->migrate();
 
 		$this->assertNotFalse( get_site_option( LegacyMigration::DONE ) );
@@ -105,14 +106,28 @@ final class LegacyMigrationTest extends TestCase {
 		grant_super_admin( $user_id );
 		wp_set_current_user( $user_id );
 
+		add_filter( 'msradar_legacy_core_loaded', '__return_false' );
 		ob_start();
 		$this->migration->render_coexistence_notice();
 		$this->assertSame( '', ob_get_clean() );
 
-		require_once dirname( __DIR__ ) . '/fixtures/legacy/npu-core-stub.php';
+		remove_filter( 'msradar_legacy_core_loaded', '__return_false' );
+		add_filter( 'msradar_legacy_core_loaded', '__return_true' );
 		ob_start();
 		$this->migration->render_coexistence_notice();
 		$this->assertStringContainsString( 'Network Plugin Utilities 1.x is still loaded', (string) ob_get_clean() );
+	}
+
+	public function test_default_detection_uses_the_loaded_1x_class(): void {
+		$user_id = self::factory()->user->create();
+		grant_super_admin( $user_id );
+		wp_set_current_user( $user_id );
+		require_once dirname( __DIR__ ) . '/fixtures/legacy/npu-core-stub.php';
+
+		ob_start();
+		$this->migration->render_coexistence_notice();
+
+		$this->assertStringContainsString( 'still loaded', (string) ob_get_clean() );
 	}
 
 	public function test_an_invalid_legacy_value_does_not_drop_the_valid_ones(): void {
@@ -202,7 +217,7 @@ final class LegacyMigrationTest extends TestCase {
 	}
 
 	public function test_a_1x_install_with_defaults_is_recognised_from_the_loaded_core(): void {
-		require_once dirname( __DIR__ ) . '/fixtures/legacy/npu-core-stub.php';
+		add_filter( 'msradar_legacy_core_loaded', '__return_true' );
 
 		$this->migrate();
 

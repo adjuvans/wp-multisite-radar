@@ -76,7 +76,7 @@ final class LegacyMigration {
 			}
 		}
 		$transients = $this->delete_legacy_transients();
-		$found      = [] !== $values || $transients > 0 || class_exists( 'NPU_Core', false );
+		$found      = [] !== $values || $transients > 0 || $this->legacy_core_loaded();
 		// En 1.x, le menu était actif tant que l'option n'avait pas été enregistrée.
 		$menu_enabled = ! isset( $values['npu_enable_network_menu'] ) || (bool) $values['npu_enable_network_menu'];
 
@@ -218,13 +218,21 @@ final class LegacyMigration {
 	}
 
 	public function render_coexistence_notice(): void {
-		if ( ! class_exists( 'NPU_Core', false ) || ! current_user_can( Capabilities::MANAGE ) ) {
+		if ( ! $this->legacy_core_loaded() || ! current_user_can( Capabilities::MANAGE ) ) {
 			return;
 		}
 		printf(
 			'<div class="notice notice-warning"><p>%s</p></div>',
 			esc_html__( 'Network Plugin Utilities 1.x is still loaded. Remove it: Multisite Radar replaces it and has taken over its settings.', 'multisite-radar' )
 		);
+	}
+
+	/**
+	 * Whether the 1.x code is loaded. Filter `msradar_legacy_core_loaded` lets tests (or a host) override the
+	 * default `class_exists( 'NPU_Core', false )` detection.
+	 */
+	private function legacy_core_loaded(): bool {
+		return (bool) apply_filters( 'msradar_legacy_core_loaded', class_exists( 'NPU_Core', false ) );
 	}
 
 	private function finish( array $cursor ): void {
