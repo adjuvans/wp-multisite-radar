@@ -79,6 +79,24 @@ final class SitesRepositoryTest extends TestCase {
 		$this->assertSame( 1, $this->sites->count_dirty( $network_id + 1000 ) );
 	}
 
+	public function test_queue_lookups_can_be_scoped_to_a_network(): void {
+		$network_id = get_current_network_id();
+		$other      = $network_id + 1000;
+		$this->make_record( 811, [ 'dirty' => true ] );
+		$this->make_record( 812, [ 'dirty' => true, 'network_id' => $other ] );
+		$this->make_record( 813, [ 'network_id' => $other ] );
+		$this->make_record( 814 );
+
+		$this->assertSame( [ 811, 812 ], $this->sites->next_dirty( 10 ) );
+		$this->assertSame( [ 811 ], $this->sites->next_dirty( 10, $network_id ) );
+		$this->assertSame( [ 812 ], $this->sites->next_dirty( 10, $other ) );
+		$this->assertSame( [ 811, 812 ], $this->sites->dirty_ids() );
+		$this->assertSame( [ 812 ], $this->sites->dirty_ids( $other ) );
+		$this->assertSame( [ 812, 813, 814 ], $this->sites->ids_after( 811, 10 ) );
+		$this->assertSame( [ 811, 814 ], $this->sites->ids_after( 0, 10, $network_id ) );
+		$this->assertSame( [ 813 ], $this->sites->ids_after( 812, 10, $other ) );
+	}
+
 	public function test_save_never_overwrites_a_mark_set_during_the_scan(): void {
 		$this->sites->insert_pending( 701, 1, 'c.test/' );
 

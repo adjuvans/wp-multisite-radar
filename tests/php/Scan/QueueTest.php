@@ -3,6 +3,7 @@ namespace MultisiteRadar\Tests\Scan;
 
 use MultisiteRadar\Scan\Lock;
 use MultisiteRadar\Scan\Queue;
+use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Support\MainSite;
 use MultisiteRadar\Tests\TestCase;
 
@@ -122,6 +123,29 @@ final class QueueTest extends TestCase {
 		$this->assertSame( 1, $this->queue->recompute_alerts() );
 		$this->assertSame( 3, $this->plugin()->sites()->find( 3001 )->alert_level );
 		$this->assertSame( 0, $this->plugin()->sites()->find( 3002 )->alert_level );
+	}
+
+	public function test_recompute_alerts_touches_only_the_current_network_with_its_settings(): void {
+		$other  = self::factory()->network->create();
+		$months = static fn ( int $months ): array => [ 'alerts' => [ 'rules' => [ 'inactive' => [ 'params' => [ 'months' => $months ] ] ] ] ];
+		$props  = [
+			'users_count'       => 1,
+			'scanned_at'        => '2026-09-01 00:00:00',
+			'last_activity_gmt' => gmdate( 'Y-m-d H:i:s', time() - 100 * DAY_IN_SECONDS ),
+		];
+		update_site_option( Settings::OPTION, $months( 2 ) );
+		update_network_option( $other, Settings::OPTION, $months( 12 ) );
+		$this->make_record( 3101, $props );
+		$this->make_record( 3102, array_merge( $props, [ 'network_id' => $other ] ) );
+
+		$this->assertSame( 1, $this->queue->recompute_alerts() );
+		$this->assertSame( [ 'inactive' ], $this->plugin()->sites()->find( 3101 )->alert_rule_ids() );
+		$this->assertSame( [], $this->plugin()->sites()->find( 3102 )->alert_rule_ids() );
+
+		$this->plugin()->sites()->save_alerts( $this->build_record( [ 'site_id' => 3102, 'alert_level' => 2, 'alert_rules' => ',inactive,' ] ) );
+		$this->assertSame( 1, $this->as_network( $other, fn (): int => $this->queue->recompute_alerts() ) );
+		$this->assertSame( [], $this->plugin()->sites()->find( 3102 )->alert_rule_ids(), 'Its own 12-month threshold applies.' );
+		$this->assertSame( [ 'inactive' ], $this->plugin()->sites()->find( 3101 )->alert_rule_ids(), 'The first network is left alone.' );
 	}
 
 	public function test_recompute_is_deferred_while_another_process_holds_the_lock(): void {

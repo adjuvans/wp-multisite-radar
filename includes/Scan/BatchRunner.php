@@ -59,15 +59,19 @@ final class BatchRunner {
 	}
 
 	/**
+	 * Traite les sites marqués du réseau courant uniquement : la collecte et les alertes
+	 * utilisent les réglages de ce réseau. Le verrou, lui, est commun à tous les réseaux.
+	 *
 	 * @param float         $budget  Secondes disponibles ; au moins un site est toujours traité.
 	 * @param callable|null $on_site Appelé après chaque site avec ( int $site_id, bool $ok ).
-	 * @return array{processed: int, remaining: int, locked: bool}
+	 * @return array{processed: int, remaining: int, locked: bool} remaining : sites encore marqués sur le réseau courant.
 	 */
 	public function run( float $budget, ?callable $on_site = null ): array {
+		$network_id = get_current_network_id();
 		if ( ! $this->lock->acquire() ) {
 			return [
 				'processed' => 0,
-				'remaining' => $this->sites->count_dirty(),
+				'remaining' => $this->sites->count_dirty( $network_id ),
 				'locked'    => true,
 			];
 		}
@@ -77,7 +81,7 @@ final class BatchRunner {
 		$seen      = [];
 		try {
 			while ( true ) {
-				$ids = array_values( array_diff( $this->sites->next_dirty( self::CHUNK ), $seen ) );
+				$ids = array_values( array_diff( $this->sites->next_dirty( self::CHUNK, $network_id ), $seen ) );
 				if ( [] === $ids ) {
 					break;
 				}
@@ -103,7 +107,7 @@ final class BatchRunner {
 
 		return [
 			'processed' => $processed,
-			'remaining' => $this->sites->count_dirty(),
+			'remaining' => $this->sites->count_dirty( $network_id ),
 			'locked'    => false,
 		];
 	}

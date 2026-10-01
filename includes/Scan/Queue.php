@@ -9,7 +9,7 @@ use MultisiteRadar\Support\MainSite;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Planification sur le site principal :
+ * Planification sur le site principal de chaque réseau, qui ne traite que ses propres sites, avec ses propres réglages :
  * - traitement de la file toutes les 5 minutes, avec relance immédiate tant qu'il reste des sites ;
  * - passage quotidien : sites manquants, lignes orphelines, analyse complète périodique, recalcul des alertes.
  */
@@ -128,7 +128,7 @@ final class Queue {
 		$days = max( 1, (int) $this->settings->get( 'scan.full_rescan_days', 7 ) );
 		if ( (int) get_site_option( self::LAST_FULL_SCAN, 0 ) < time() - $days * DAY_IN_SECONDS ) {
 			$this->request_full_scan( $network_id );
-		} elseif ( $this->sites->count_dirty() > 0 ) {
+		} elseif ( $this->sites->count_dirty( $network_id ) > 0 ) {
 			$this->continue_soon();
 		}
 
@@ -136,17 +136,18 @@ final class Queue {
 	}
 
 	/**
-	 * Recalcule les alertes de tous les sites déjà analysés, à partir des données stockées.
+	 * Recalcule les alertes des sites déjà analysés du réseau courant (avec ses réglages), à partir des données stockées.
 	 *
 	 * @param Lock|null $lock Verrou détenu à rafraîchir entre deux lots.
 	 * @return int Nombre de sites recalculés.
 	 */
 	public function recompute_alerts( ?Lock $lock = null ): int {
-		$now   = time();
-		$after = 0;
-		$count = 0;
+		$network_id = get_current_network_id();
+		$now        = time();
+		$after      = 0;
+		$count      = 0;
 		do {
-			$ids = $this->sites->ids_after( $after, self::RECOMPUTE_CHUNK );
+			$ids = $this->sites->ids_after( $after, self::RECOMPUTE_CHUNK, $network_id );
 			foreach ( $this->sites->find_many( $ids ) as $record ) {
 				if ( null === $record->scanned_at ) {
 					continue;

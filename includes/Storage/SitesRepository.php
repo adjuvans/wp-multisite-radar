@@ -178,25 +178,27 @@ final class SitesRepository {
 	}
 
 	/**
+	 * @param int|null $network_id Réseau à traiter ; null pour tous.
 	 * @return int[] Sites à analyser, les plus anciennement marqués d'abord.
 	 */
-	public function next_dirty( int $limit ): array {
+	public function next_dirty( int $limit, ?int $network_id = null ): array {
 		global $wpdb;
-		return array_map(
-			'intval',
-			$wpdb->get_col( $wpdb->prepare( 'SELECT site_id FROM %i WHERE dirty = 1 ORDER BY dirty_since ASC, site_id ASC LIMIT %d', Schema::sites_table(), $limit ) )
-		);
+		if ( null === $network_id ) {
+			return array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT site_id FROM %i WHERE dirty = 1 ORDER BY dirty_since ASC, site_id ASC LIMIT %d', Schema::sites_table(), $limit ) ) );
+		}
+		return array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT site_id FROM %i WHERE dirty = 1 AND network_id = %d ORDER BY dirty_since ASC, site_id ASC LIMIT %d', Schema::sites_table(), $network_id, $limit ) ) );
 	}
 
 	/**
+	 * @param int|null $network_id Réseau à traiter ; null pour tous.
 	 * @return int[]
 	 */
-	public function dirty_ids(): array {
+	public function dirty_ids( ?int $network_id = null ): array {
 		global $wpdb;
-		return array_map(
-			'intval',
-			$wpdb->get_col( $wpdb->prepare( 'SELECT site_id FROM %i WHERE dirty = 1 ORDER BY site_id ASC', Schema::sites_table() ) )
-		);
+		if ( null === $network_id ) {
+			return array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT site_id FROM %i WHERE dirty = 1 ORDER BY site_id ASC', Schema::sites_table() ) ) );
+		}
+		return array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT site_id FROM %i WHERE dirty = 1 AND network_id = %d ORDER BY site_id ASC', Schema::sites_table(), $network_id ) ) );
 	}
 
 	public function count_dirty( ?int $network_id = null ): int {
@@ -231,14 +233,15 @@ final class SitesRepository {
 	}
 
 	/**
+	 * @param int|null $network_id Réseau à parcourir ; null pour tous.
 	 * @return int[] Identifiants strictement supérieurs à $after_id, croissants.
 	 */
-	public function ids_after( int $after_id, int $limit ): array {
+	public function ids_after( int $after_id, int $limit, ?int $network_id = null ): array {
 		global $wpdb;
-		return array_map(
-			'intval',
-			$wpdb->get_col( $wpdb->prepare( 'SELECT site_id FROM %i WHERE site_id > %d ORDER BY site_id ASC LIMIT %d', Schema::sites_table(), $after_id, $limit ) )
-		);
+		if ( null === $network_id ) {
+			return array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT site_id FROM %i WHERE site_id > %d ORDER BY site_id ASC LIMIT %d', Schema::sites_table(), $after_id, $limit ) ) );
+		}
+		return array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT site_id FROM %i WHERE site_id > %d AND network_id = %d ORDER BY site_id ASC LIMIT %d', Schema::sites_table(), $after_id, $network_id, $limit ) ) );
 	}
 
 	/**

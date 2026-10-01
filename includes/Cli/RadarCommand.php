@@ -63,10 +63,10 @@ final class RadarCommand {
 		}
 
 		if ( isset( $assoc_args['probe'] ) ) {
-			$this->probe_sites( $sites->dirty_ids() );
+			$this->probe_sites( $sites->dirty_ids( $network_id ) );
 		}
 
-		$total = $sites->count_dirty();
+		$total = $sites->count_dirty( $network_id );
 		if ( 0 === $total ) {
 			WP_CLI::success( 'Nothing to scan.' );
 			return;

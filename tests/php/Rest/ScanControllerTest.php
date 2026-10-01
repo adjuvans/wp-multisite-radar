@@ -50,6 +50,20 @@ final class ScanControllerTest extends RestTestCase {
 		$this->assertSame( 0, $status['remaining'] );
 	}
 
+	public function test_a_batch_processes_only_the_current_network(): void {
+		$this->login_as_super_admin();
+		$other = self::factory()->network->create();
+		$there = self::factory()->blog->create( [ 'network_id' => $other ] );
+		$this->plugin()->sites()->seed_from_blogs( get_current_network_id() );
+		$this->plugin()->sites()->seed_from_blogs( $other );
+
+		$batch = $this->request( 'POST', '/scan/batch' )->get_data();
+
+		$this->assertTrue( $batch['done'] );
+		$this->assertSame( 0, $batch['remaining'] );
+		$this->assertTrue( $this->plugin()->sites()->find( $there )->dirty, 'Left to its own network.' );
+	}
+
 	public function test_status_shape(): void {
 		$this->login_as_super_admin();
 

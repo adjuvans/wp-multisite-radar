@@ -2,6 +2,7 @@
 namespace MultisiteRadar\Tests\Scan;
 
 use MultisiteRadar\Scan\Lock;
+use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Tests\TestCase;
 
 final class BatchRunnerTest extends TestCase {
@@ -213,6 +214,44 @@ final class BatchRunnerTest extends TestCase {
 		$this->assertArrayHasKey( 'scan_error', $record->data );
 		$this->assertNull( $record->scanned_at );
 		$this->assertNotNull( $this->plugin()->sites()->find( $healthy )->scanned_at );
+	}
+
+	public function test_run_scans_only_the_current_networks_sites_with_that_networks_settings(): void {
+		$other = self::factory()->network->create();
+		$here  = self::factory()->blog->create();
+		$there = self::factory()->blog->create( [ 'network_id' => $other ] );
+		$this->age_content( $here, 100 );
+		$this->age_content( $there, 100 );
+		update_site_option( Settings::OPTION, self::inactive_after( 2 ) );
+		update_network_option( $other, Settings::OPTION, self::inactive_after( 12 ) );
+		$this->seed();
+		$this->plugin()->sites()->seed_from_blogs( $other );
+
+		$result = $this->plugin()->runner()->run( 60.0 );
+
+		$this->assertSame( 0, $result['remaining'] );
+		$this->assertContains( 'inactive', $this->plugin()->sites()->find( $here )->alert_rule_ids() );
+		$this->assertTrue( $this->plugin()->sites()->find( $there )->dirty, 'The other network keeps its queue.' );
+		$this->assertNull( $this->plugin()->sites()->find( $there )->scanned_at );
+
+		$result = $this->as_network( $other, fn (): array => $this->plugin()->runner()->run( 60.0 ) );
+
+		$this->assertSame( 0, $result['remaining'] );
+		$this->assertNotNull( $this->plugin()->sites()->find( $there )->scanned_at );
+		$this->assertNotContains( 'inactive', $this->plugin()->sites()->find( $there )->alert_rule_ids(), 'Its own 12-month threshold applies.' );
+	}
+
+	/**
+	 * Fait remonter tout le contenu du site à $days jours.
+	 */
+	private function age_content( int $site_id, int $days ): void {
+		global $wpdb;
+		$date = gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS );
+		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET post_date_gmt = %s, post_modified_gmt = %s', $wpdb->get_blog_prefix( $site_id ) . 'posts', $date, $date ) );
+	}
+
+	private static function inactive_after( int $months ): array {
+		return [ 'alerts' => [ 'rules' => [ 'inactive' => [ 'params' => [ 'months' => $months ] ] ] ] ];
 	}
 
 	public function test_a_site_that_vanishes_during_a_failing_collection_is_not_recreated(): void {

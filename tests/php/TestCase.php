@@ -55,6 +55,23 @@ abstract class TestCase extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Exécute un callback comme si la requête visait un autre réseau (réglages, file et curseurs de ce réseau).
+	 *
+	 * @return mixed Valeur renvoyée par le callback.
+	 */
+	protected function as_network( int $network_id, callable $callback ) {
+		$previous                = $GLOBALS['current_site'];
+		$GLOBALS['current_site'] = get_network( $network_id );
+		$this->plugin()->reset_caches();
+		try {
+			return $callback();
+		} finally {
+			$GLOBALS['current_site'] = $previous;
+			$this->plugin()->reset_caches();
+		}
+	}
+
+	/**
 	 * Nombre d'événements cron planifiés pour un hook, toutes échéances confondues.
 	 */
 	protected function count_cron_events( string $hook ): int {
