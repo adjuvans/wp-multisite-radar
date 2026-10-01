@@ -58,6 +58,29 @@ final class AssetsTest extends RestTestCase {
 		$this->assertContains( '</script><script>alert(1)</script>', wp_list_pluck( $list['body'], 'name' ), 'The name survives intact once decoded.' );
 	}
 
+	public function test_a_throwing_preload_leaves_the_page_working_without_that_response(): void {
+		$this->login_as_super_admin();
+		// Filtre tiers défaillant sur une des réponses préchargées.
+		add_filter(
+			'rest_post_dispatch',
+			static function ( $response, $server, $request ) {
+				if ( '/multisite-radar/v1/alerts/summary' === $request->get_route() ) {
+					throw new \Error( 'third-party filter' );
+				}
+				return $response;
+			},
+			10,
+			3
+		);
+		$errors = did_action( 'msradar_error' );
+
+		$config = $this->assets()->config( 'overview' );
+
+		$this->assertSame( 'overview', $config['view'] );
+		$this->assertSame( [ '/multisite-radar/v1/preferences', '/multisite-radar/v1/scan/status' ], array_keys( $config['preload'] ) );
+		$this->assertSame( $errors + 1, did_action( 'msradar_error' ) );
+	}
+
 	public function test_a_missing_build_shows_a_notice_instead_of_a_broken_page(): void {
 		$assets = $this->assets();
 

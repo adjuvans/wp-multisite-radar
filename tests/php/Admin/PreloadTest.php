@@ -39,4 +39,35 @@ final class PreloadTest extends RestTestCase {
 		$this->assertArrayHasKey( 'X-WP-Total', $list['headers'] );
 		$this->assertArrayNotHasKey( '/multisite-radar/v1/sites/999999', $data, 'A 404 is not preloaded: the client shows its own error.' );
 	}
+
+	public function test_a_route_that_throws_is_not_preloaded_and_is_reported(): void {
+		$this->login_as_super_admin();
+		$this->server->register_route(
+			'msradar-test/v1',
+			'/msradar-test/v1/boom',
+			[
+				[
+					'methods'             => 'GET',
+					'callback'            => static function (): void {
+						throw new \Error( 'boom' );
+					},
+					'permission_callback' => '__return_true',
+				],
+			]
+		);
+		$errors = [];
+		add_action(
+			'msradar_error',
+			static function ( string $context, \Throwable $error ) use ( &$errors ): void {
+				$errors[] = [ $context, $error->getMessage() ];
+			},
+			10,
+			2
+		);
+
+		$data = Preload::run( [ '/multisite-radar/v1/preferences', '/msradar-test/v1/boom', '/multisite-radar/v1/settings' ] );
+
+		$this->assertSame( [ '/multisite-radar/v1/preferences', '/multisite-radar/v1/settings' ], array_keys( $data ), 'The other paths are still preloaded.' );
+		$this->assertSame( [ [ Preload::class . '::run', 'boom' ] ], $errors );
+	}
 }
