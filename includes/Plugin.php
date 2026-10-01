@@ -1,6 +1,9 @@
 <?php
 namespace MultisiteRadar;
 
+use MultisiteRadar\Admin\Assets;
+use MultisiteRadar\Admin\Menu;
+use MultisiteRadar\Admin\Privacy;
 use MultisiteRadar\Alerts\AlertEvaluator;
 use MultisiteRadar\Alerts\AlertFormatter;
 use MultisiteRadar\Alerts\RuleRegistry;
@@ -74,6 +77,12 @@ final class Plugin {
 
 	private ?ExportHandler $export = null;
 
+	private ?Menu $admin_menu = null;
+
+	private ?Assets $assets = null;
+
+	private ?Privacy $privacy = null;
+
 	private ?SitesListCache $sites_list_cache = null;
 
 	private ?SitesMenuModule $sites_menu = null;
@@ -102,6 +111,9 @@ final class Plugin {
 
 		if ( is_admin() ) {
 			$this->export()->register();
+			$this->admin_menu()->register();
+			$this->assets()->register();
+			$this->privacy()->register();
 		}
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
@@ -226,5 +238,17 @@ final class Plugin {
 
 	public function export(): ExportHandler {
 		return $this->export ??= new ExportHandler( $this->sites_query() );
+	}
+
+	public function admin_menu(): Menu {
+		return $this->admin_menu ??= new Menu();
+	}
+
+	public function assets(): Assets {
+		return $this->assets ??= new Assets( $this->admin_menu(), $this->preferences(), MSRADAR_DIR . 'build/', MSRADAR_URL . 'build/' );
+	}
+
+	public function privacy(): Privacy {
+		return $this->privacy ??= new Privacy();
 	}
 }

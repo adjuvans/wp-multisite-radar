@@ -1,0 +1,65 @@
+[
+	{
+		"name": "sites: defaults",
+		"view": "sites",
+		"query": {},
+		"prefs": {},
+		"args": { "page": 1, "per_page": 20, "orderby": "name", "order": "asc" }
+	},
+	{
+		"name": "sites: every parameter",
+		"view": "sites",
+		"query": { "s": "  blog  ", "orderby": "users_count", "order": "desc", "paged": "3", "alert_level": "error,bogus,warning", "status": "archived", "registry_status": "missing , stale", "rule": "inactive", "layout": "grid", "site": "12" },
+		"prefs": { "sites": { "per_page": 50 } },
+		"args": { "page": 3, "per_page": 50, "orderby": "users_count", "order": "desc", "search": "blog", "alert_level": "warning,error", "status": "archived", "registry_status": "stale,missing", "rule": "inactive" }
+	},
+	{
+		"name": "sites: invalid values fall back to the defaults",
+		"view": "sites",
+		"query": { "orderby": "data", "order": "sideways", "paged": "-4", "rule": "Bad Rule", "alert_level": ",,", "status": "Public" },
+		"prefs": { "sites": { "per_page": 7 } },
+		"args": { "page": 1, "per_page": 20, "orderby": "name", "order": "asc" }
+	},
+	{
+		"name": "sites: pages are digits only and per_page must be an integer",
+		"view": "sites",
+		"query": { "paged": "1e3" },
+		"prefs": { "sites": { "per_page": "50" } },
+		"args": { "page": 1, "per_page": 20, "orderby": "name", "order": "asc" }
+	},
+	{
+		"name": "sites: a huge page is capped",
+		"view": "sites",
+		"query": { "paged": "99999999999999999999" },
+		"prefs": {},
+		"args": { "page": 100000, "per_page": 20, "orderby": "name", "order": "asc" }
+	},
+	{
+		"name": "sites: search keeps quotes, plus and percent signs, accents and non-breaking spaces",
+		"view": "sites",
+		"query": { "s": " O'Brien + 100% été " },
+		"prefs": { "sites": { "per_page": 100 } },
+		"args": { "page": 1, "per_page": 100, "orderby": "name", "order": "asc", "search": "O'Brien + 100% été " }
+	},
+	{
+		"name": "alerts: defaults",
+		"view": "alerts",
+		"query": {},
+		"prefs": {},
+		"args": { "page": 1, "per_page": 20, "orderby": "rule", "order": "asc" }
+	},
+	{
+		"name": "alerts: every parameter",
+		"view": "alerts",
+		"query": { "s": "rh", "severity": "info,error", "rule": "no_users,inactive,no_users,Bad Rule", "orderby": "severity", "order": "desc", "paged": "2" },
+		"prefs": { "alerts": { "per_page": 100 } },
+		"args": { "page": 2, "per_page": 100, "orderby": "severity", "order": "desc", "search": "rh", "severity": "error,info", "rule": "inactive,no_users" }
+	},
+	{
+		"name": "alerts: invalid values fall back to the defaults",
+		"view": "alerts",
+		"query": { "orderby": "site_id", "severity": "fatal", "rule": ",,," },
+		"prefs": { "sites": { "per_page": 50 } },
+		"args": { "page": 1, "per_page": 20, "orderby": "rule", "order": "asc" }
+	}
+]
