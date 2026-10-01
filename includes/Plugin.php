@@ -9,6 +9,10 @@ use MultisiteRadar\Collector\SiteCollector;
 use MultisiteRadar\Install\Installer;
 use MultisiteRadar\Query\AlertsQuery;
 use MultisiteRadar\Query\SitesQuery;
+use MultisiteRadar\Rest\AlertsController;
+use MultisiteRadar\Rest\ScanController;
+use MultisiteRadar\Rest\SettingsController;
+use MultisiteRadar\Rest\SitesController;
 use MultisiteRadar\Scan\BatchRunner;
 use MultisiteRadar\Scan\Invalidation;
 use MultisiteRadar\Scan\Lock;
@@ -72,6 +76,20 @@ final class Plugin {
 		$this->probe()->register();
 		$this->queue()->register();
 		$this->invalidation()->register();
+		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
+	}
+
+	public function register_rest_routes(): void {
+		Installer::maybe_upgrade();
+		$controllers = [
+			new SitesController( $this->sites_query() ),
+			new ScanController( $this->sites(), $this->runner(), $this->queue(), $this->lock() ),
+			new SettingsController( $this->settings(), $this->rules() ),
+			new AlertsController( $this->alerts_query() ),
+		];
+		foreach ( $controllers as $controller ) {
+			$controller->register_routes();
+		}
 	}
 
 	public function render_multisite_notice(): void {
