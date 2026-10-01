@@ -40,6 +40,16 @@ final class ScanControllerTest extends RestTestCase {
 		$this->assertNotNull( $status['last_full_scan_gmt'] );
 	}
 
+	public function test_remaining_ignores_dirty_sites_of_other_networks(): void {
+		$this->login_as_super_admin();
+		$other_network = self::factory()->network->create();
+		$this->make_record( 9001, [ 'dirty' => true, 'network_id' => $other_network ] );
+
+		$status = $this->request( 'GET', '/scan/status' )->get_data();
+
+		$this->assertSame( 0, $status['remaining'] );
+	}
+
 	public function test_status_shape(): void {
 		$this->login_as_super_admin();
 

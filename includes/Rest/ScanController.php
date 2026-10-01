@@ -121,7 +121,7 @@ final class ScanController extends Controller {
 		$next       = Queue::next_run();
 		return [
 			'total'              => $this->sites->count_all( $network_id ),
-			'remaining'          => $this->sites->count_dirty(),
+			'remaining'          => $this->sites->count_dirty( $network_id ),
 			'pending'            => $this->sites->count_pending( $network_id ),
 			'locked'             => $this->lock->is_locked(),
 			'last_full_scan_gmt' => $last > 0 ? gmdate( 'Y-m-d\TH:i:s', $last ) : null,

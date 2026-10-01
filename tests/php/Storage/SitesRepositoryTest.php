@@ -69,6 +69,16 @@ final class SitesRepositoryTest extends TestCase {
 		$this->assertSame( 2, $this->sites->count_dirty() );
 	}
 
+	public function test_count_dirty_can_be_scoped_to_a_network(): void {
+		$network_id = get_current_network_id();
+		$this->make_record( 801, [ 'dirty' => true ] );
+		$this->make_record( 802, [ 'dirty' => true, 'network_id' => $network_id + 1000 ] );
+
+		$this->assertSame( 2, $this->sites->count_dirty() );
+		$this->assertSame( 1, $this->sites->count_dirty( $network_id ) );
+		$this->assertSame( 1, $this->sites->count_dirty( $network_id + 1000 ) );
+	}
+
 	public function test_save_never_overwrites_a_mark_set_during_the_scan(): void {
 		$this->sites->insert_pending( 701, 1, 'c.test/' );
 

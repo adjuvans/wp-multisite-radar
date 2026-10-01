@@ -199,9 +199,12 @@ final class SitesRepository {
 		);
 	}
 
-	public function count_dirty(): int {
+	public function count_dirty( ?int $network_id = null ): int {
 		global $wpdb;
-		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE dirty = 1', Schema::sites_table() ) );
+		if ( null === $network_id ) {
+			return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE dirty = 1', Schema::sites_table() ) );
+		}
+		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE dirty = 1 AND network_id = %d', Schema::sites_table(), $network_id ) );
 	}
 
 	public function count_all( int $network_id ): int {
