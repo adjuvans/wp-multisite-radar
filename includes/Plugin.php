@@ -8,7 +8,9 @@ use MultisiteRadar\Collector\RegistryProbe;
 use MultisiteRadar\Collector\SiteCollector;
 use MultisiteRadar\Install\Installer;
 use MultisiteRadar\Scan\BatchRunner;
+use MultisiteRadar\Scan\Invalidation;
 use MultisiteRadar\Scan\Lock;
+use MultisiteRadar\Scan\Queue;
 use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Storage\ExtensionsRepository;
 use MultisiteRadar\Storage\SitesRepository;
@@ -42,6 +44,10 @@ final class Plugin {
 
 	private ?BatchRunner $runner = null;
 
+	private ?Queue $queue = null;
+
+	private ?Invalidation $invalidation = null;
+
 	public static function instance(): self {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
@@ -58,6 +64,8 @@ final class Plugin {
 		Capabilities::register();
 		add_action( 'admin_init', [ Installer::class, 'maybe_upgrade' ] );
 		$this->probe()->register();
+		$this->queue()->register();
+		$this->invalidation()->register();
 	}
 
 	public function render_multisite_notice(): void {
@@ -120,5 +128,13 @@ final class Plugin {
 		if ( null !== $this->evaluator ) {
 			$this->evaluator->reset();
 		}
+	}
+
+	public function queue(): Queue {
+		return $this->queue ??= new Queue( $this->runner(), $this->sites(), $this->evaluator(), $this->settings() );
+	}
+
+	public function invalidation(): Invalidation {
+		return $this->invalidation ??= new Invalidation( $this->sites(), $this->extensions(), $this->settings() );
 	}
 }
