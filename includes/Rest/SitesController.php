@@ -2,9 +2,11 @@
 namespace MultisiteRadar\Rest;
 
 use MultisiteRadar\Alerts\Severity;
+use MultisiteRadar\Query\SiteUsersQuery;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Storage\SitesRepository;
 use WP_Error;
+use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
@@ -19,8 +21,11 @@ final class SitesController extends Controller {
 
 	private SitesQuery $query;
 
-	public function __construct( SitesQuery $query ) {
+	private SiteUsersQuery $users;
+
+	public function __construct( SitesQuery $query, SiteUsersQuery $users ) {
 		$this->query = $query;
+		$this->users = $users;
 	}
 
 	public function register_routes(): void {
@@ -53,6 +58,53 @@ final class SitesController extends Controller {
 					],
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
+			]
+		);
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/users',
+			[
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_users' ],
+					'permission_callback' => [ $this, 'can_view' ],
+					'args'                => [
+						'id'       => [
+							'type'    => 'integer',
+							'minimum' => 1,
+						],
+						'page'     => [
+							'type'    => 'integer',
+							'default' => 1,
+							'minimum' => 1,
+						],
+						'per_page' => [
+							'type'    => 'integer',
+							'default' => 20,
+							'minimum' => 1,
+							'maximum' => 100,
+						],
+						'search'   => [
+							'type'    => 'string',
+							'default' => '',
+						],
+						'role'     => [
+							'type'    => 'string',
+							'default' => '',
+							'pattern' => '^[a-z0-9_-]{0,60}$',
+						],
+						'orderby'  => [
+							'type'    => 'string',
+							'default' => 'login',
+							'enum'    => SiteUsersQuery::ORDERBY,
+						],
+						'order'    => [
+							'type'    => 'string',
+							'default' => 'asc',
+							'enum'    => [ 'asc', 'desc' ],
+						],
+					],
+				],
 			]
 		);
 	}
@@ -185,6 +237,28 @@ final class SitesController extends Controller {
 		$item['options']          = (object) $item['options'];
 		$item['users']['by_role'] = (object) ( $item['users']['by_role'] ?? [] );
 		return new WP_REST_Response( $item );
+	}
+
+	/**
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_users( WP_REST_Request $request ) {
+		$per_page = (int) $request['per_page'];
+		$result   = $this->users->list(
+			(int) $request['id'],
+			[
+				'page'     => (int) $request['page'],
+				'per_page' => $per_page,
+				'search'   => (string) $request['search'],
+				'role'     => (string) $request['role'],
+				'orderby'  => (string) $request['orderby'],
+				'order'    => (string) $request['order'],
+			]
+		);
+		if ( null === $result ) {
+			return new WP_Error( 'msradar_site_not_found', __( 'Site not found.', 'multisite-radar' ), [ 'status' => 404 ] );
+		}
+		return $this->paginated( $result['items'], $result['total'], $per_page );
 	}
 
 	public function get_item_schema(): array {

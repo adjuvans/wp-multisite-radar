@@ -10,6 +10,7 @@ use MultisiteRadar\Collector\SiteCollector;
 use MultisiteRadar\Install\Installer;
 use MultisiteRadar\Install\LegacyMigration;
 use MultisiteRadar\Query\AlertsQuery;
+use MultisiteRadar\Query\SiteUsersQuery;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Rest\AlertsController;
 use MultisiteRadar\Rest\ScanController;
@@ -58,6 +59,8 @@ final class Plugin {
 
 	private ?SitesQuery $sites_query = null;
 
+	private ?SiteUsersQuery $site_users_query = null;
+
 	private ?AlertsQuery $alerts_query = null;
 
 	private ?LegacyMigration $legacy = null;
@@ -91,7 +94,7 @@ final class Plugin {
 	public function register_rest_routes(): void {
 		Installer::maybe_upgrade();
 		$controllers = [
-			new SitesController( $this->sites_query() ),
+			new SitesController( $this->sites_query(), $this->site_users_query() ),
 			new ScanController( $this->sites(), $this->runner(), $this->queue(), $this->lock() ),
 			new SettingsController( $this->settings(), $this->rules() ),
 			new AlertsController( $this->alerts_query() ),
@@ -176,6 +179,10 @@ final class Plugin {
 
 	public function invalidation(): Invalidation {
 		return $this->invalidation ??= new Invalidation( $this->sites(), $this->extensions(), $this->settings() );
+	}
+
+	public function site_users_query(): SiteUsersQuery {
+		return $this->site_users_query ??= new SiteUsersQuery();
 	}
 
 	public function sites_query(): SitesQuery {

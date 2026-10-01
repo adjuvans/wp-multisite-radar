@@ -142,4 +142,23 @@ final class SitesControllerTest extends RestTestCase {
 		$this->assertSame( 500, $response->get_status() );
 		$this->assertSame( 'msradar_storage_error', $response->get_data()['code'] );
 	}
+
+	public function test_site_users_route(): void {
+		$site_id = self::factory()->blog->create();
+		// La fabrique ne rattache aucun utilisateur : l'utilisateur 1 (« admin ») devient le seul membre du site.
+		add_user_to_blog( $site_id, 1, 'administrator' );
+
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertSame( 403, $this->request( 'GET', "/sites/{$site_id}/users" )->get_status() );
+
+		$this->login_as_super_admin();
+		$response = $this->request( 'GET', "/sites/{$site_id}/users", [ 'per_page' => 1 ] );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( '1', $response->get_headers()['X-WP-Total'] );
+		$this->assertSame( 'admin', $response->get_data()[0]['login'] );
+
+		$this->assertSame( 404, $this->request( 'GET', '/sites/999999/users' )->get_status() );
+		$this->assertSame( 400, $this->request( 'GET', "/sites/{$site_id}/users", [ 'orderby' => 'email' ] )->get_status() );
+		$this->assertSame( 400, $this->request( 'GET', "/sites/{$site_id}/users", [ 'role' => 'Bad Role' ] )->get_status() );
+	}
 }
