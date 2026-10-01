@@ -114,17 +114,28 @@ final class ExportHandlerTest extends TestCase {
 		$this->handler->handle();
 	}
 
-	public function test_a_failed_read_while_streaming_ends_with_wp_die_and_reports_the_error(): void {
+	private function break_sites_reads( int $after = 0 ): callable {
+		global $wpdb;
+		$seen = 0;
+		return static function ( string $query ) use ( $wpdb, &$seen, $after ): string {
+			if ( false !== strpos( $query, $wpdb->base_prefix . 'msradar_sites' ) && 0 === strpos( ltrim( $query ), 'SELECT' ) && ++$seen > $after ) {
+				return 'SELECT * FROM msradar_no_such_table';
+			}
+			return $query;
+		};
+	}
+
+	public function test_a_failed_first_read_is_a_real_500_before_any_output(): void {
 		global $wpdb;
 		$this->login_as( true );
 		$_REQUEST['_wpnonce'] = wp_create_nonce( ExportHandler::ACTION );
-		$_GET                 = [ 'format' => 'json' ];
+		$_GET                 = [ 'format' => 'csv' ];
 		$reported             = [];
-		$report               = static function ( string $context, \Throwable $error ) use ( &$reported ): void {
+		$report               = static function ( string $context ) use ( &$reported ): void {
 			$reported[] = $context;
 		};
-		$guard                = static fn ( string $query ): string => false !== strpos( $query, $wpdb->base_prefix . 'msradar_sites' ) ? 'SELECT * FROM msradar_no_such_table' : $query;
-		add_action( 'msradar_error', $report, 10, 2 );
+		$guard                = $this->break_sites_reads();
+		add_action( 'msradar_error', $report );
 		add_filter( 'query', $guard );
 		$previous = $wpdb->suppress_errors( true );
 		ob_start();
@@ -133,16 +144,65 @@ final class ExportHandlerTest extends TestCase {
 			$this->handler->handle();
 			$this->fail( 'wp_die() was expected.' );
 		} catch ( WPDieException $die ) {
-			$this->assertStringContainsString( 'interrupted', $die->getMessage() );
+			$this->assertSame( 500, $die->getCode() );
+			$this->assertStringContainsString( 'could not be read', $die->getMessage() );
 		} finally {
-			ob_end_clean();
+			$output = ob_get_clean();
 			$wpdb->suppress_errors( $previous );
 			remove_filter( 'query', $guard );
-			remove_action( 'msradar_error', $report, 10 );
+			remove_action( 'msradar_error', $report );
 			$_GET = [];
 		}
 
+		$this->assertSame( '', $output, 'No BOM, header row or markup was written.' );
 		$this->assertSame( [ ExportHandler::class . '::handle' ], $reported );
+	}
+
+	/**
+	 * @dataProvider formats
+	 */
+	public function test_a_failure_from_the_second_chunk_stops_without_any_markup( string $format ): void {
+		global $wpdb;
+		$params = $this->handler->params( [ 'format' => $format, 'fields' => 'id' ] );
+		$stream = fopen( 'php://memory', 'w+b' );
+		$fired  = [];
+		$report = static function ( string $context ) use ( &$fired ): void {
+			$fired[] = $context;
+		};
+		$guard  = $this->break_sites_reads( 1 );
+		add_action( 'msradar_error', $report );
+		add_filter( 'query', $guard );
+		$previous = $wpdb->suppress_errors( true );
+
+		try {
+			$completed = $this->handler->stream( $params, $stream, 1 );
+		} finally {
+			$wpdb->suppress_errors( $previous );
+			remove_filter( 'query', $guard );
+			remove_action( 'msradar_error', $report );
+		}
+		rewind( $stream );
+		$output = (string) stream_get_contents( $stream );
+
+		$this->assertFalse( $completed );
+		$this->assertNotSame( '', $output, 'The first chunk was streamed before the failure.' );
+		$this->assertSame( [ ExportHandler::class . '::stream' ], $fired );
+		$this->assertStringNotContainsString( '<', $output );
+		$this->assertStringNotContainsString( 'wp-die', $output );
+	}
+
+	public static function formats(): array {
+		return [
+			'csv'  => [ 'csv' ],
+			'json' => [ 'json' ],
+		];
+	}
+
+	public function test_nested_arrays_in_list_parameters_are_ignored(): void {
+		$params = $this->handler->params( [ 'fields' => [ [ 'x' ], 'id' ], 'alert_level' => [ [ 'x' ], 'error' ] ] );
+
+		$this->assertSame( [ 'id' ], $params['fields'] );
+		$this->assertSame( [ 'alert_level' => [ 'error' ] ], $params['filters'] );
 	}
 
 	private function login_as( bool $super_admin ): void {

@@ -40,4 +40,19 @@ final class JsonWriterTest extends TestCase {
 
 		$this->assertSame( [ 'meta' => [], 'items' => [] ], json_decode( (string) stream_get_contents( $stream ), true ) );
 	}
+
+	public function test_a_value_that_cannot_be_encoded_throws_instead_of_corrupting_the_document(): void {
+		$stream = fopen( 'php://memory', 'w+b' );
+		$json   = new JsonWriter( $stream );
+		$json->begin( [] );
+		$json->item( [ 'id' => 1 ] );
+		$written = ftell( $stream );
+
+		try {
+			$json->item( [ 'ratio' => NAN ] );
+			$this->fail( 'A RuntimeException was expected.' );
+		} catch ( \RuntimeException $error ) {
+			$this->assertSame( $written, ftell( $stream ), 'Nothing, not even a comma, is written for the bad item.' );
+		}
+	}
 }

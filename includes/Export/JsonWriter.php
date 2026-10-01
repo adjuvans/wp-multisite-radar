@@ -35,8 +35,15 @@ final class JsonWriter {
 		$this->put( ']}' );
 	}
 
+	/**
+	 * @throws \RuntimeException Si une valeur n'est pas encodable.
+	 */
 	private static function encode( array $value ): string {
-		return (string) wp_json_encode( $value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+		$json = wp_json_encode( $value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+		if ( false === $json ) {
+			throw new \RuntimeException( 'A value could not be encoded as JSON.' ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not output.
+		}
+		return $json;
 	}
 
 	private function put( string $chunk ): void {

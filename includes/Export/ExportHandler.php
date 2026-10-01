@@ -40,6 +40,14 @@ final class ExportHandler {
 			wp_die( esc_html( $params->get_error_message() ), '', [ 'response' => 400 ] );
 		}
 
+		// Premier accès aux données avant tout en-tête et tout octet : un échec donne encore un vrai 500.
+		try {
+			$this->sites->list( array_merge( $params['filters'], [ 'per_page' => 1 ] ) );
+		} catch ( \RuntimeException $error ) {
+			do_action( 'msradar_error', __METHOD__, $error );
+			wp_die( esc_html__( 'The export could not be read from the database.', 'multisite-radar' ), '', [ 'response' => 500 ] );
+		}
+
 		if ( ! headers_sent() ) {
 			nocache_headers();
 			header( 'Content-Type: ' . ( 'csv' === $params['format'] ? 'text/csv' : 'application/json' ) . '; charset=utf-8' );
@@ -50,15 +58,27 @@ final class ExportHandler {
 		if ( false === $stream ) {
 			wp_die( esc_html__( 'The export could not be started.', 'multisite-radar' ), '', [ 'response' => 500 ] );
 		}
-		try {
-			$this->write( $params, $stream );
-		} catch ( \RuntimeException $error ) {
-			do_action( 'msradar_error', __METHOD__, $error );
-			fclose( $stream ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- streamed export.
-			wp_die( esc_html__( 'The export was interrupted by a database error.', 'multisite-radar' ), '', [ 'response' => 500 ] );
-		}
+		$this->stream( $params, $stream );
 		fclose( $stream ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- streamed export.
 		exit;
+	}
+
+	/**
+	 * Écrit l'export ; si une lecture échoue en cours de route (la sortie est déjà partie), signale l'erreur et s'arrête sans rien ajouter.
+	 *
+	 * @param array    $params Résultat de params().
+	 * @param resource $stream Flux de sortie.
+	 * @param int      $chunk  Taille des tranches de lecture.
+	 * @return bool Faux si l'export a été interrompu.
+	 */
+	public function stream( array $params, $stream, int $chunk = 500 ): bool {
+		try {
+			$this->write( $params, $stream, $chunk );
+			return true;
+		} catch ( \RuntimeException $error ) {
+			do_action( 'msradar_error', __METHOD__, $error );
+			return false;
+		}
 	}
 
 	/**
@@ -101,9 +121,10 @@ final class ExportHandler {
 	/**
 	 * @param array    $params Résultat de params().
 	 * @param resource $stream Flux de sortie.
+	 * @param int      $chunk  Taille des tranches de lecture.
 	 * @return int Nombre de sites exportés.
 	 */
-	public function write( array $params, $stream ): int {
+	public function write( array $params, $stream, int $chunk = 500 ): int {
 		$keys    = (array) $params['fields'];
 		$columns = SitesColumns::all();
 
@@ -114,7 +135,8 @@ final class ExportHandler {
 				(array) $params['filters'],
 				static function ( array $item ) use ( $csv, $keys ): void {
 					$csv->row( SitesColumns::row( $item, $keys ) );
-				}
+				},
+				$chunk
 			);
 		}
 
@@ -133,7 +155,8 @@ final class ExportHandler {
 			(array) $params['filters'],
 			static function ( array $item ) use ( $json, $keys ): void {
 				$json->item( SitesColumns::row( $item, $keys ) );
-			}
+			},
+			$chunk
 		);
 		$json->end();
 		return $count;
@@ -149,6 +172,6 @@ final class ExportHandler {
 	 */
 	private static function to_list( $value ): array {
 		$items = is_array( $value ) ? $value : explode( ',', (string) $value );
-		return array_values( array_filter( array_map( 'trim', array_map( 'strval', $items ) ), static fn ( string $item ): bool => '' !== $item ) );
+		return array_values( array_filter( array_map( 'trim', array_map( 'strval', array_filter( $items, 'is_scalar' ) ) ), static fn ( string $item ): bool => '' !== $item ) );
 	}
 }
