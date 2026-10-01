@@ -7,6 +7,7 @@ use MultisiteRadar\Alerts\RuleRegistry;
 use MultisiteRadar\Collector\RegistryProbe;
 use MultisiteRadar\Collector\SiteCollector;
 use MultisiteRadar\Install\Installer;
+use MultisiteRadar\Install\LegacyMigration;
 use MultisiteRadar\Query\AlertsQuery;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Rest\AlertsController;
@@ -58,6 +59,8 @@ final class Plugin {
 
 	private ?AlertsQuery $alerts_query = null;
 
+	private ?LegacyMigration $legacy = null;
+
 	public static function instance(): self {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
@@ -77,6 +80,7 @@ final class Plugin {
 		$this->queue()->register();
 		$this->invalidation()->register();
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
+		$this->legacy()->register();
 	}
 
 	public function register_rest_routes(): void {
@@ -100,6 +104,10 @@ final class Plugin {
 			'<div class="notice notice-error"><p>%s</p></div>',
 			esc_html__( 'Multisite Radar requires a WordPress Multisite network. It does nothing on a single site.', 'multisite-radar' )
 		);
+	}
+
+	public function legacy(): LegacyMigration {
+		return $this->legacy ??= new LegacyMigration( $this->settings() );
 	}
 
 	public function settings(): Settings {
