@@ -176,3 +176,84 @@
 .msradar-list li {
 	margin-bottom: 8px;
 }
+
+.msradar-tiles {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 16px;
+	margin: 0 0 24px;
+	padding: 0;
+	list-style: none;
+}
+
+.msradar-tile {
+	margin: 0;
+	border: 1px solid #dcdcde;
+	border-left-width: 4px;
+	border-radius: 2px;
+	background: #fff;
+
+	&--error {
+		border-left-color: #d63638;
+	}
+
+	&--warning {
+		border-left-color: #dba617;
+	}
+
+	&--info {
+		border-left-color: #2271b1;
+	}
+
+	&__link {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		padding: 16px;
+		color: inherit;
+		text-decoration: none;
+
+		&:focus {
+			box-shadow: 0 0 0 2px var(--wp-admin-theme-color, #3858e9);
+			outline: none;
+		}
+	}
+
+	&__value {
+		font-size: 28px;
+		font-weight: 600;
+		line-height: 1.2;
+	}
+
+	&__detail {
+		color: #50575e;
+		font-size: 12px;
+	}
+}
+
+.msradar-overview__columns {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: 16px;
+	align-items: start;
+}
+
+.msradar-to-review__list li {
+	margin-bottom: 8px;
+}
+
+.msradar-first-run {
+	margin: 0 0 24px;
+}
+
+.msradar-progress {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 12px 0;
+
+	progress {
+		flex: 1;
+		max-width: 320px;
+	}
+}
