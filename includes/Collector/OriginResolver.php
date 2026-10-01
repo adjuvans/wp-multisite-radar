@@ -37,6 +37,34 @@ final class OriginResolver {
 		foreach ( (array) $wp_plugin_paths as $dir => $real_dir ) {
 			$aliases[ (string) $real_dir ] = (string) $dir;
 		}
+
+		// Add symlink aliases for theme roots.
+		$aliases = array_merge( $aliases, self::realpath_aliases( $theme_dirs ) );
+
+		// Add symlink aliases for WordPress directories.
+		$dirs_to_check = [ WPMU_PLUGIN_DIR, get_stylesheet_directory(), get_template_directory() ];
+		$aliases       = array_merge( $aliases, self::realpath_aliases( $dirs_to_check ) );
+
+		// Add symlink aliases for entries within WPMU_PLUGIN_DIR.
+		if ( is_dir( WPMU_PLUGIN_DIR ) ) {
+			$mu_entries = [];
+			$entries    = @scandir( WPMU_PLUGIN_DIR ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- directory may not exist
+			if ( is_array( $entries ) ) {
+				foreach ( $entries as $entry ) {
+					if ( '.' === $entry || '..' === $entry ) {
+						continue;
+					}
+					$path = WPMU_PLUGIN_DIR . '/' . $entry;
+					if ( is_link( $path ) ) {
+						$mu_entries[] = $path;
+					}
+				}
+			}
+			if ( ! empty( $mu_entries ) ) {
+				$aliases = array_merge( $aliases, self::realpath_aliases( $mu_entries ) );
+			}
+		}
+
 		return new self( WP_PLUGIN_DIR, WPMU_PLUGIN_DIR, $theme_dirs, MSRADAR_DIR, $aliases );
 	}
 
@@ -86,6 +114,27 @@ final class OriginResolver {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Extracts realpath => path mappings for symlinked directories.
+	 *
+	 * @param string[] $paths Paths to check.
+	 * @return array<string, string> Realpath => normalized path for symlinks only.
+	 */
+	public static function realpath_aliases( array $paths ): array {
+		$aliases = [];
+		foreach ( $paths as $path ) {
+			$path = (string) $path;
+			if ( ! is_dir( $path ) ) {
+				continue;
+			}
+			$real = (string) realpath( $path );
+			if ( $real && wp_normalize_path( $real ) !== wp_normalize_path( $path ) ) {
+				$aliases[ self::dir( $real ) ] = self::dir( $path );
+			}
+		}
+		return $aliases;
 	}
 
 	/**

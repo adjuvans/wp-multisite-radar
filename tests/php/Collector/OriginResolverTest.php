@@ -58,4 +58,40 @@ final class OriginResolverTest extends TestCase {
 		$this->assertSame( [ 'kind' => 'plugin', 'slug' => 'akismet' ], $resolver->resolve_file( WP_PLUGIN_DIR . '/akismet/akismet.php' ) );
 		$this->assertSame( [ 'kind' => 'theme', 'slug' => 'twentytwentyfive' ], $resolver->resolve_file( get_theme_root() . '/twentytwentyfive/functions.php' ) );
 	}
+
+	public function test_realpath_aliases_extracts_symlinks(): void {
+		$temp_dir      = get_temp_dir();
+		$real_dir      = rtrim( $temp_dir, '/' ) . '/real-dir-' . wp_generate_uuid4();
+		$symlink_dir   = rtrim( $temp_dir, '/' ) . '/symlink-dir-' . wp_generate_uuid4();
+		$regular_dir   = rtrim( $temp_dir, '/' ) . '/regular-dir-' . wp_generate_uuid4();
+		$nonexistent   = rtrim( $temp_dir, '/' ) . '/nonexistent-' . wp_generate_uuid4();
+
+		wp_mkdir_p( $real_dir );
+		wp_mkdir_p( $regular_dir );
+		symlink( $real_dir, $symlink_dir );
+
+		$paths   = [ $real_dir, $symlink_dir, $regular_dir, $nonexistent ];
+		$aliases = OriginResolver::realpath_aliases( $paths );
+
+		$this->assertArrayHasKey( trailingslashit( wp_normalize_path( $real_dir ) ), $aliases );
+		$this->assertSame( trailingslashit( wp_normalize_path( $symlink_dir ) ), $aliases[ trailingslashit( wp_normalize_path( $real_dir ) ) ] );
+		$this->assertCount( 1, $aliases );
+
+		// Cleanup.
+		@unlink( $symlink_dir );
+		@rmdir( $real_dir );
+		@rmdir( $regular_dir );
+	}
+
+	public function test_resolve_symlinked_theme(): void {
+		$resolver = new OriginResolver(
+			'/srv/wp/wp-content/plugins',
+			'/srv/wp/wp-content/mu-plugins',
+			[ '/srv/wp/wp-content/themes' ],
+			'/srv/wp/wp-content/plugins/multisite-radar',
+			[ '/src/my-theme' => '/srv/wp/wp-content/themes/my-theme' ]
+		);
+
+		$this->assertSame( [ 'kind' => 'theme', 'slug' => 'my-theme' ], $resolver->resolve_file( '/src/my-theme/functions.php' ) );
+	}
 }
