@@ -133,6 +133,7 @@ Préfixe `{$wpdb->base_prefix}msradar_`. Créées et mises à jour par `dbDelta`
 | `last_activity_gmt` | DATETIME NULL | indexé |
 | `alert_level` | TINYINT UNSIGNED | 0 aucune, 1 info, 2 avertissement, 3 erreur ; indexé |
 | `alerts_count` | SMALLINT UNSIGNED | |
+| `alert_rules` | VARCHAR(255) | identifiants des règles déclenchées, encadrés de virgules (`,no_users,inactive,`) : comptage et filtrage par règle en SQL portable (MySQL 5.5+), sans décoder le JSON |
 | `registry_status` | VARCHAR(20) | `fresh` / `stale` / `missing` |
 | `data` | LONGTEXT | JSON détaillé (§3.2) |
 | `dirty` | TINYINT(1) | indexé ; + `dirty_since` DATETIME NULL |
@@ -148,6 +149,8 @@ Préfixe `{$wpdb->base_prefix}msradar_`. Créées et mises à jour par `dbDelta`
 | `role` | VARCHAR(10) | `local` (plugin), `active` / `parent` (thème) |
 
 Clé primaire `(site_id, type, slug)`, index `(type, slug)`. Les plugins activés sur le réseau ne sont pas répétés par site : la couche Query les connaît via `active_sitewide_plugins`.
+
+Les tables `msradar_events` et `msradar_snapshots` ne sont créées qu'au jalon M6 (version de schéma 2), pour ne pas livrer de tables vides.
 
 **`msradar_events`** — lot 3
 
@@ -261,10 +264,12 @@ interface RuleInterface {
     public function default_severity(): string;        // error|warning|info
     public function params_schema(): array;            // JSON Schema → DataForm
     public function default_params(): array;
-    public function evaluate( SiteRecord $site, array $params ): ?Alert;
+    public function evaluate( SiteRecord $site, array $params, int $now ): ?Alert;
+    public function message( array $args ): string;    // message traduit, construit à la lecture
 }
 ```
 
+- `$now` (timestamp Unix) est injecté par l'évaluateur, ce qui rend les règles temporelles testables.
 - Une règle n'exécute aucune requête : elle lit le `SiteRecord` stocké (et, pour les mises à jour, l'état des transients de mise à jour fourni par le contexte de l'évaluateur).
 - `RuleRegistry` réunit les règles internes et celles ajoutées via `msradar_alert_rules`.
 - `AlertEvaluator` applique les réglages (activée, gravité éventuellement surchargée, paramètres), puis calcule `alert_level`, `alerts_count` et `data.alerts`.
