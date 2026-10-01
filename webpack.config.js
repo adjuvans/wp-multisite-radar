@@ -5,13 +5,43 @@
  */
 const path = require( 'path' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
+const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 
 const VIEWS = [ 'overview', 'sites', 'alerts', 'settings' ];
 
 const { splitChunks } = defaultConfig.optimization;
 
+// La feuille de style de DataViews est importée par les points d'entrée : l'extraction de dépendances la
+// prendrait pour un script WordPress (« wp-dataviews/build-style/style.css »), qui n'existe pas. `false` la
+// laisse dans le bundle, d'où elle sort dans admin/<vue>.css.
+const plugins = defaultConfig.plugins.map( ( plugin ) =>
+	plugin instanceof DependencyExtractionWebpackPlugin
+		? new DependencyExtractionWebpackPlugin( {
+				requestToExternal: ( request ) =>
+					request.endsWith( '/build-style/style.css' )
+						? false
+						: undefined,
+		  } )
+		: plugin
+);
+
 module.exports = {
 	...defaultConfig,
+	plugins,
+	// DataViews est embarqué dans le bundle de la vue (non fourni par WordPress) : l'alerte de taille est attendue.
+	performance: { hints: false },
+	module: {
+		...defaultConfig.module,
+		rules: [
+			// Le paquet dataviews se déclare sans effet de bord (« sideEffects: false ») : sans cette règle, webpack
+			// supprime l'import de sa feuille de style en production.
+			{
+				test: /@wordpress[\\/]dataviews[\\/]build-style[\\/].*\.css$/,
+				sideEffects: true,
+			},
+			...defaultConfig.module.rules,
+		],
+	},
 	optimization: {
 		...defaultConfig.optimization,
 		splitChunks: {

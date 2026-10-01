@@ -55,3 +55,34 @@
 		left: 16px;
 	}
 }
+
+.msradar-site-title {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+
+	&__name {
+		font-weight: 600;
+		overflow-wrap: anywhere;
+	}
+
+	&__url {
+		color: #50575e;
+		font-size: 12px;
+		overflow-wrap: anywhere;
+	}
+}
+
+.msradar-pending {
+	color: #50575e;
+	font-style: italic;
+}
+
+.msradar-empty {
+	padding: 24px;
+	text-align: center;
+}
+
+.msradar-inline-status {
+	margin: 12px 0 0;
+}
