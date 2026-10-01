@@ -13,7 +13,7 @@ Network-wide audit for WordPress Multisite: sites, content types, users, plugins
 
 Multisite Radar gives network administrators a single, always up-to-date view of every site in a WordPress Multisite network: content types and their origin, users, active plugins and theme, activity and health alerts.
 
-Data is collected in the background with lightweight SQL queries, so the network admin screens stay fast on networks with thousands of sites. The Overview, Sites, Alerts and Settings screens open instantly and offer CSV and JSON exports; an optional "network sites" block, shortcode and menu items replace the 1.x menu. Nothing is sent to external services.
+Data is collected in the background with lightweight SQL queries, so the network admin screens stay fast on networks with thousands of sites. The Overview, Sites, Alerts and Settings screens open instantly, and the Sites screen exports the current view as CSV or JSON; an optional "network sites" block, shortcode and menu items replace the 1.x menu. Nothing is sent to external services.
 
 Source code: https://github.com/adjuvans/wp-network-plugin-utilities
 
