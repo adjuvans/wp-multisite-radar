@@ -3,6 +3,8 @@ import { expect, test } from '@wordpress/e2e-test-utils-playwright';
 const PAGES = [
 	[ 'multisite-radar', 'To review' ],
 	[ 'multisite-radar-sites', 'Blog RH' ],
+	// Recherche avec apostrophe : la clé préchargée par PHP doit être celle que demande le client.
+	[ "multisite-radar-sites&s=L'atelier", "L'atelier R&D" ],
 	[ 'multisite-radar-alerts', 'Site vide' ],
 	[ 'multisite-radar-settings', 'Save settings' ],
 ];

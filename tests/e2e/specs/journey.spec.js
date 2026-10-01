@@ -55,6 +55,34 @@ test.describe( 'Overview → filtered sites → site panel → export (spec 11.2
 		expect( csv ).not.toContain( 'Blog RH' );
 	} );
 
+	test( 'a site name with an apostrophe and an ampersand is shown as typed and can be searched', async ( {
+		admin,
+		page,
+	} ) => {
+		await admin.visitAdminPage(
+			'network/admin.php',
+			"page=multisite-radar-sites&s=L'atelier"
+		);
+		const app = page.locator( '#msradar-app' );
+		await expect(
+			app.getByText( "L'atelier R&D", { exact: true } )
+		).toBeVisible();
+		await expect( app.getByText( '&#039;' ) ).toHaveCount( 0 );
+		await expect( app.getByText( '&amp;' ) ).toHaveCount( 0 );
+
+		await app
+			.getByRole( 'searchbox', { name: 'Search sites' } )
+			.fill( 'R&D' );
+		await expect( page ).toHaveURL( /[?&]s=R%26D/ );
+		await expect( app.getByText( 'Blog RH', { exact: true } ) ).toHaveCount(
+			0
+		);
+		await app.getByText( "L'atelier R&D", { exact: true } ).click();
+		await expect(
+			page.getByRole( 'dialog', { name: "L'atelier R&D" } )
+		).toBeVisible();
+	} );
+
 	test( 'the content types of a site are read in the context of that site (spec 1.4, criterion 1)', async ( {
 		admin,
 		page,

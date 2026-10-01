@@ -20,4 +20,9 @@ if ! wp site list --field=path | grep -qx '/vide/'; then
 	wp eval 'remove_user_from_blog( 1, get_current_blog_id() );' --url="$URL/vide/"
 fi
 
+# Apostrophe et esperluette : le cœur enregistre ce titre échappé (L&#039;atelier R&amp;D).
+if ! wp site list --field=path | grep -qx '/atelier/'; then
+	wp site create --slug=atelier --title="L'atelier R&D"
+fi
+
 wp multisite-radar scan --all --probe
