@@ -16,6 +16,7 @@ final class Module {
 	private Settings $settings;
 	private SitesListCache $cache;
 	private ?Shortcode $shortcode = null;
+	private ?NavMenu $nav_menu    = null;
 
 	public function __construct( Settings $settings, SitesListCache $cache ) {
 		$this->settings = $settings;
@@ -24,6 +25,7 @@ final class Module {
 
 	public function register(): void {
 		$this->cache->register();
+		$this->nav_menu()->register_items();
 		add_action( 'init', [ $this, 'init' ] );
 	}
 
@@ -41,6 +43,7 @@ final class Module {
 		}
 		$legacy = $this->legacy();
 		$this->shortcode()->register( $legacy );
+		$this->nav_menu()->register_editor();
 		if ( $legacy ) {
 			require_once __DIR__ . '/legacy-functions.php';
 		}
@@ -48,5 +51,9 @@ final class Module {
 
 	public function shortcode(): Shortcode {
 		return $this->shortcode ??= new Shortcode( $this->cache );
+	}
+
+	public function nav_menu(): NavMenu {
+		return $this->nav_menu ??= new NavMenu( $this->cache );
 	}
 }
