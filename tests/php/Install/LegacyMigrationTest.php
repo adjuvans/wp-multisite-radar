@@ -127,4 +127,86 @@ final class LegacyMigrationTest extends TestCase {
 		$this->assertSame( $default, $settings->get( 'scan.activity_post_types' ) );
 		$this->assertFalse( get_site_option( 'npu_analysis_plugins' ) );
 	}
+
+	private function create_menu_item( int $site_id ): int {
+		switch_to_blog( $site_id );
+		$item_id = self::factory()->post->create( [ 'post_type' => 'nav_menu_item', 'post_status' => 'publish' ] );
+		update_post_meta( $item_id, '_menu_item_type', 'network_site' );
+		update_post_meta( $item_id, '_menu_item_object', 'network_site' );
+		restore_current_blog();
+		return $item_id;
+	}
+
+	private function item_type( int $site_id, int $item_id ): string {
+		switch_to_blog( $site_id );
+		$type = (string) get_post_meta( $item_id, '_menu_item_type', true );
+		restore_current_blog();
+		return $type;
+	}
+
+	public function test_an_interrupted_migration_is_rescheduled_by_a_network_admin(): void {
+		update_site_option( LegacyMigration::CURSOR, [ 'after' => 0, 'menu_items' => 0, 'attempts' => 0 ] );
+		wp_clear_scheduled_hook( LegacyMigration::HOOK );
+		$user_id = self::factory()->user->create();
+		grant_super_admin( $user_id );
+		wp_set_current_user( $user_id );
+
+		$this->migration->maybe_start();
+
+		$this->assertNotFalse( wp_next_scheduled( LegacyMigration::HOOK ) );
+	}
+
+	public function test_evidence_is_persisted_before_any_batch_runs(): void {
+		update_site_option( 'npu_analysis_plugins', [ 'acme' ] );
+
+		$this->migration->start();
+
+		$this->assertSame( 1, (int) get_site_option( LegacyMigration::ALIASES ) );
+		$this->assertTrue( $this->plugin()->settings()->get( 'sites_menu.enabled' ) );
+	}
+
+	public function test_another_networks_menu_items_are_left_untouched(): void {
+		$network_id = self::factory()->network->create();
+		$other_site = self::factory()->blog->create( [ 'site_id' => $network_id ] );
+		$item_id    = $this->create_menu_item( $other_site );
+
+		$this->migrate();
+
+		$this->assertSame( 'network_site', $this->item_type( $other_site, $item_id ) );
+	}
+
+	public function test_a_failed_update_is_retried_without_advancing_the_cursor(): void {
+		$site_id = self::factory()->blog->create();
+		$item_id = $this->create_menu_item( $site_id );
+		$prefix  = $GLOBALS['wpdb']->get_blog_prefix( $site_id );
+		$fail    = static function ( $query ) use ( $prefix ) {
+			return ( 0 === strpos( $query, 'UPDATE' ) && false !== strpos( $query, $prefix . 'postmeta' ) ) ? 'SELECT * FROM msradar_missing_table' : $query;
+		};
+		wp_clear_scheduled_hook( LegacyMigration::HOOK );
+		add_filter( 'query', $fail );
+
+		$this->migration->start();
+		wp_clear_scheduled_hook( LegacyMigration::HOOK );
+		$this->migration->run_menu_batch();
+		remove_filter( 'query', $fail );
+
+		$cursor = get_site_option( LegacyMigration::CURSOR );
+		$this->assertIsArray( $cursor );
+		$this->assertLessThan( $site_id, $cursor['after'] );
+		$this->assertSame( 'network_site', $this->item_type( $site_id, $item_id ) );
+		$this->assertNotFalse( wp_next_scheduled( LegacyMigration::HOOK ) );
+
+		$this->migration->run_menu_batch();
+
+		$this->assertSame( LegacyMigration::MENU_TYPE, $this->item_type( $site_id, $item_id ) );
+	}
+
+	public function test_a_1x_install_with_defaults_is_recognised_from_the_loaded_core(): void {
+		require_once dirname( __DIR__ ) . '/fixtures/legacy/npu-core-stub.php';
+
+		$this->migrate();
+
+		$this->assertSame( 1, (int) get_site_option( LegacyMigration::ALIASES ) );
+		$this->assertTrue( $this->plugin()->settings()->get( 'sites_menu.enabled' ) );
+	}
 }

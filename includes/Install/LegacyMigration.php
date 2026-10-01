@@ -20,6 +20,7 @@ final class LegacyMigration {
 	public const MENU_TYPE = 'msradar_site';
 
 	private const BATCH          = 50;
+	private const MAX_ATTEMPTS   = 3;
 	private const LEGACY_TYPE    = 'network_site';
 	private const LEGACY_OPTIONS = [ 'npu_enable_network_menu', 'npu_activity_post_types', 'npu_analysis_plugins' ];
 
@@ -37,23 +38,27 @@ final class LegacyMigration {
 	}
 
 	public function maybe_start(): void {
-		if ( is_main_site() ) {
+		if ( is_main_site() && current_user_can( Capabilities::MANAGE ) ) {
 			$this->start();
 		}
 	}
 
 	public function start(): void {
-		if ( false !== get_site_option( self::DONE, false ) || false !== get_site_option( self::CURSOR, false ) ) {
+		if ( false !== get_site_option( self::DONE, false ) ) {
 			return;
 		}
-		$found = $this->migrate_options();
+		if ( false !== get_site_option( self::CURSOR, false ) ) {
+			// Migration interrupted (plugin deactivated, fatal batch): make sure an event is pending again.
+			$this->schedule_next();
+			return;
+		}
+		$this->migrate_options();
 		update_site_option(
 			self::CURSOR,
 			[
-				'after'         => 0,
-				'menu_items'    => 0,
-				'options_found' => $found['found'],
-				'menu_enabled'  => $found['menu_enabled'],
+				'after'      => 0,
+				'menu_items' => 0,
+				'attempts'   => 0,
 			]
 		);
 		$this->schedule_next();
@@ -70,9 +75,12 @@ final class LegacyMigration {
 				$values[ $name ] = $value;
 			}
 		}
-		$this->delete_legacy_transients();
+		$transients = $this->delete_legacy_transients();
+		$found      = [] !== $values || $transients > 0 || class_exists( 'NPU_Core', false );
+		// En 1.x, le menu était actif tant que l'option n'avait pas été enregistrée.
+		$menu_enabled = ! isset( $values['npu_enable_network_menu'] ) || (bool) $values['npu_enable_network_menu'];
 
-		if ( [] === $values ) {
+		if ( ! $found ) {
 			return [
 				'found'        => false,
 				'menu_enabled' => true,
@@ -98,10 +106,15 @@ final class LegacyMigration {
 			delete_site_option( $name );
 		}
 
+		// Evidence persisted right away, with additive writes (safe against concurrent or replayed runs).
+		update_site_option( self::ALIASES, 1 );
+		if ( $menu_enabled ) {
+			$this->settings->update( [ 'sites_menu' => [ 'enabled' => true ] ] );
+		}
+
 		return [
 			'found'        => true,
-			// En 1.x, le menu était actif tant que l'option n'avait pas été enregistrée.
-			'menu_enabled' => ! isset( $values['npu_enable_network_menu'] ) || (bool) $values['npu_enable_network_menu'],
+			'menu_enabled' => $menu_enabled,
 		];
 	}
 
@@ -112,13 +125,42 @@ final class LegacyMigration {
 		}
 
 		global $wpdb;
-		$site_ids = array_map(
+		$site_ids  = array_map(
 			'intval',
-			$wpdb->get_col( $wpdb->prepare( 'SELECT blog_id FROM %i WHERE blog_id > %d ORDER BY blog_id ASC LIMIT %d', $wpdb->blogs, (int) $cursor['after'], self::BATCH ) )
+			$wpdb->get_col(
+				$wpdb->prepare(
+					'SELECT blog_id FROM %i WHERE site_id = %d AND blog_id > %d ORDER BY blog_id ASC LIMIT %d',
+					$wpdb->blogs,
+					get_current_network_id(),
+					(int) $cursor['after'],
+					self::BATCH
+				)
+			)
 		);
+		$converted = false;
 		foreach ( $site_ids as $site_id ) {
-			$cursor['menu_items'] = (int) $cursor['menu_items'] + $this->convert_menu_items( $site_id );
+			$count = $this->convert_menu_items( $site_id );
+			if ( $count < 0 ) {
+				$cursor['attempts'] = (int) ( $cursor['attempts'] ?? 0 ) + 1;
+				if ( $cursor['attempts'] >= self::MAX_ATTEMPTS ) {
+					// Give up on this site: advance past it.
+					$cursor['attempts'] = 0;
+					$cursor['after']    = $site_id;
+					continue;
+				}
+				// Keep `after` on the last fully processed site so this one is retried.
+				update_site_option( self::CURSOR, $cursor );
+				MainSite::schedule_once( self::HOOK, MINUTE_IN_SECONDS );
+				return;
+			}
+			$cursor['attempts']   = 0;
+			$cursor['menu_items'] = (int) $cursor['menu_items'] + $count;
 			$cursor['after']      = $site_id;
+			$converted            = $converted || $count > 0;
+		}
+		if ( $converted ) {
+			update_site_option( self::ALIASES, 1 );
+			$this->settings->update( [ 'sites_menu' => [ 'enabled' => true ] ] );
 		}
 
 		if ( self::BATCH === count( $site_ids ) ) {
@@ -130,7 +172,9 @@ final class LegacyMigration {
 	}
 
 	/**
-	 * @return int Nombre d'éléments de menu convertis sur ce site.
+	 * Returns -1 (rather than throwing) when the UPDATE fails, so the caller can retry the site later.
+	 *
+	 * @return int Nombre d'éléments de menu convertis sur ce site, ou -1 en cas d'échec.
 	 */
 	public function convert_menu_items( int $site_id ): int {
 		global $wpdb;
@@ -146,8 +190,9 @@ final class LegacyMigration {
 				)
 			)
 		);
+		$updated  = true;
 		if ( [] !== $post_ids ) {
-			$wpdb->query(
+			$updated = false !== $wpdb->query(
 				$wpdb->prepare(
 					"UPDATE %i SET meta_value = %s WHERE meta_key IN ('_menu_item_type', '_menu_item_object') AND meta_value = %s",
 					$table,
@@ -158,6 +203,9 @@ final class LegacyMigration {
 		}
 		$wpdb->suppress_errors( $suppress );
 
+		if ( ! $updated ) {
+			return -1;
+		}
 		if ( [] === $post_ids ) {
 			return 0;
 		}
@@ -180,25 +228,22 @@ final class LegacyMigration {
 	}
 
 	private function finish( array $cursor ): void {
-		$menu_items = (int) $cursor['menu_items'];
-		if ( ! empty( $cursor['options_found'] ) || $menu_items > 0 ) {
-			update_site_option( self::ALIASES, 1 );
-			if ( $menu_items > 0 || ! empty( $cursor['menu_enabled'] ) ) {
-				$this->settings->update( [ 'sites_menu' => [ 'enabled' => true ] ] );
-			}
-		}
 		update_site_option( self::DONE, time() );
 		delete_site_option( self::CURSOR );
 	}
 
-	private function delete_legacy_transients(): void {
+	/**
+	 * @return int Nombre de transients 1.x supprimés.
+	 */
+	private function delete_legacy_transients(): int {
 		global $wpdb;
 		$keys = $wpdb->get_col(
-			$wpdb->prepare( 'SELECT meta_key FROM %i WHERE meta_key LIKE %s', $wpdb->sitemeta, $wpdb->esc_like( '_site_transient_npu_' ) . '%' )
+			$wpdb->prepare( 'SELECT meta_key FROM %i WHERE site_id = %d AND meta_key LIKE %s', $wpdb->sitemeta, get_current_network_id(), $wpdb->esc_like( '_site_transient_npu_' ) . '%' )
 		);
 		foreach ( $keys as $key ) {
 			delete_site_transient( substr( (string) $key, strlen( '_site_transient_' ) ) );
 		}
+		return count( $keys );
 	}
 
 	private function schedule_next(): void {
