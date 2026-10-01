@@ -17,6 +17,7 @@ final class Module {
 	private SitesListCache $cache;
 	private ?Shortcode $shortcode = null;
 	private ?NavMenu $nav_menu    = null;
+	private ?Block $block         = null;
 
 	public function __construct( Settings $settings, SitesListCache $cache ) {
 		$this->settings = $settings;
@@ -44,6 +45,7 @@ final class Module {
 		$legacy = $this->legacy();
 		$this->shortcode()->register( $legacy );
 		$this->nav_menu()->register_editor();
+		$this->block()->register();
 		if ( $legacy ) {
 			require_once __DIR__ . '/legacy-functions.php';
 		}
@@ -55,5 +57,9 @@ final class Module {
 
 	public function nav_menu(): NavMenu {
 		return $this->nav_menu ??= new NavMenu( $this->cache );
+	}
+
+	public function block(): Block {
+		return $this->block ??= new Block( $this->cache, MSRADAR_DIR . 'build/blocks/sites-list/' );
 	}
 }

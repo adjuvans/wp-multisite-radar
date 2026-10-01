@@ -1,0 +1,16 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "multisite-radar/sites-list",
+	"title": "Network sites",
+	"category": "widgets",
+	"textdomain": "multisite-radar",
+	"attributes": {
+		"include": { "type": "array", "items": { "type": "integer" }, "default": [] },
+		"exclude": { "type": "array", "items": { "type": "integer" }, "default": [] },
+		"orderBy": { "type": "string", "enum": [ "name", "id", "registered" ], "default": "name" },
+		"order": { "type": "string", "enum": [ "asc", "desc" ], "default": "asc" },
+		"layout": { "type": "string", "enum": [ "list", "inline" ], "default": "list" }
+	},
+	"supports": { "html": false }
+}
