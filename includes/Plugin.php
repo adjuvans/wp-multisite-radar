@@ -4,6 +4,7 @@ namespace MultisiteRadar;
 use MultisiteRadar\Alerts\AlertEvaluator;
 use MultisiteRadar\Alerts\AlertFormatter;
 use MultisiteRadar\Alerts\RuleRegistry;
+use MultisiteRadar\Cli\RadarCommand;
 use MultisiteRadar\Collector\RegistryProbe;
 use MultisiteRadar\Collector\SiteCollector;
 use MultisiteRadar\Install\Installer;
@@ -81,6 +82,10 @@ final class Plugin {
 		$this->invalidation()->register();
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 		$this->legacy()->register();
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			RadarCommand::register( $this );
+		}
 	}
 
 	public function register_rest_routes(): void {
