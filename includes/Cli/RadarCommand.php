@@ -139,8 +139,13 @@ final class RadarCommand {
 			WP_CLI::error( 'Another scan is running. Try again in a minute.' );
 		}
 		if ( ! $scanned ) {
-			$record = $sites->find( $site_id );
-			$error  = null !== $record ? (string) ( $record->data['scan_error']['message'] ?? '' ) : '';
+			try {
+				$record = $sites->find( $site_id );
+			} catch ( \RuntimeException $failure ) {
+				do_action( 'msradar_error', __METHOD__, $failure );
+				$record = null;
+			}
+			$error = null !== $record ? (string) ( $record->data['scan_error']['message'] ?? '' ) : '';
 			WP_CLI::error( sprintf( 'Site %d could not be scanned%s', $site_id, '' !== $error ? ': ' . $error : '.' ) );
 		}
 		WP_CLI::success( sprintf( 'Site %d scanned.', $site_id ) );

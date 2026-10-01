@@ -406,4 +406,26 @@ final class QueueTest extends TestCase {
 		$this->assertSame( $dirty, $this->plugin()->sites()->count_dirty(), 'No site is scanned against an outdated schema.' );
 		$this->assertSame( 0, $this->plugin()->sites()->find( 3001 )->alert_level, 'No alert is recomputed against an outdated schema.' );
 	}
+
+	public function test_a_failed_read_during_the_recompute_is_reported_and_retried(): void {
+		global $wpdb;
+		$this->make_record( 3001, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		wp_clear_scheduled_hook( Queue::HOOK_RECOMPUTE );
+		$errors   = did_action( 'msradar_error' );
+		$break    = static function ( string $query ): string {
+			return 0 === strpos( ltrim( $query ), 'SELECT * FROM' ) && false !== strpos( $query, Schema::sites_table() ) ? 'SELECT * FROM msradar_missing_table' : $query;
+		};
+		$suppress = $wpdb->suppress_errors( true );
+		add_filter( 'query', $break );
+		try {
+			$this->queue->run_recompute();
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $suppress );
+		}
+
+		$this->assertSame( $errors + 1, did_action( 'msradar_error' ) );
+		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_RECOMPUTE ), 'Retried later rather than reported as done.' );
+		$this->assertFalse( $this->plugin()->lock()->is_locked() );
+	}
 }

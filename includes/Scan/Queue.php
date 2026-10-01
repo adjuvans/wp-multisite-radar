@@ -158,6 +158,7 @@ final class Queue {
 	 * @param Lock|null  $lock   Verrou détenu à rafraîchir entre deux lots.
 	 * @param float|null $budget Secondes disponibles ; BatchRunner::default_budget() par défaut.
 	 * @return int Nombre de sites évalués pendant cet appel, que leurs alertes aient changé (et été réécrites) ou non.
+	 * @throws \RuntimeException Si la lecture des sites échoue.
 	 */
 	public function recompute_alerts( ?Lock $lock = null, ?float $budget = null ): int {
 		$network_id = get_current_network_id();
@@ -229,11 +230,17 @@ final class Queue {
 			return; // La mise à niveau relancera une analyse complète, qui réévalue les alertes de chaque site.
 		}
 		$this->processed = true;
-		$done            = $this->runner->locked(
-			function ( Lock $lock ): void {
-				$this->recompute_alerts( $lock );
-			}
-		);
+		try {
+			$done = $this->runner->locked(
+				function ( Lock $lock ): void {
+					$this->recompute_alerts( $lock );
+				}
+			);
+		} catch ( \RuntimeException $error ) {
+			// Lecture en échec : le recalcul reprendra à son curseur.
+			do_action( 'msradar_error', __METHOD__, $error );
+			$done = false;
+		}
 		if ( ! $done ) {
 			MainSite::schedule_once( self::HOOK_RECOMPUTE, MINUTE_IN_SECONDS );
 		}

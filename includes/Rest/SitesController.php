@@ -229,14 +229,18 @@ final class SitesController extends Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
-		$item = $this->query->get( (int) $request['id'] );
-		if ( null === $item ) {
-			return new WP_Error( 'msradar_site_not_found', __( 'Site not found.', 'multisite-radar' ), [ 'status' => 404 ] );
-		}
-		// Des tableaux associatifs vides seraient encodés [] : le client attend des objets.
-		$item['options']          = (object) $item['options'];
-		$item['users']['by_role'] = (object) ( $item['users']['by_role'] ?? [] );
-		return new WP_REST_Response( $item );
+		return $this->guard(
+			function () use ( $request ) {
+				$item = $this->query->get( (int) $request['id'] );
+				if ( null === $item ) {
+					return new WP_Error( 'msradar_site_not_found', __( 'Site not found.', 'multisite-radar' ), [ 'status' => 404 ] );
+				}
+				// Des tableaux associatifs vides seraient encodés [] : le client attend des objets.
+				$item['options']          = (object) $item['options'];
+				$item['users']['by_role'] = (object) ( $item['users']['by_role'] ?? [] );
+				return new WP_REST_Response( $item );
+			}
+		);
 	}
 
 	/**

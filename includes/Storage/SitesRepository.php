@@ -39,15 +39,20 @@ final class SitesRepository {
 		'deleted'  => 'is_deleted = 1',
 	];
 
+	/**
+	 * @throws \RuntimeException Si la lecture échoue (un site introuvable renvoie null).
+	 */
 	public function find( int $site_id ): ?SiteRecord {
 		global $wpdb;
 		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE site_id = %d', Schema::sites_table(), $site_id ), ARRAY_A );
+		self::check_read();
 		return is_array( $row ) ? SiteRecord::from_row( $row ) : null;
 	}
 
 	/**
 	 * @param int[] $site_ids
 	 * @return array<int, SiteRecord> Indexés par site_id, dans l'ordre croissant.
+	 * @throws \RuntimeException Si la lecture échoue.
 	 */
 	public function find_many( array $site_ids ): array {
 		$ids = self::ids( $site_ids );
@@ -62,6 +67,7 @@ final class SitesRepository {
 			),
 			ARRAY_A
 		);
+		self::check_read();
 		$records = [];
 		foreach ( (array) $rows as $row ) {
 			$record                      = SiteRecord::from_row( $row );

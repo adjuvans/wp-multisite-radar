@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Tests\Rest;
 
+use MultisiteRadar\Install\Schema;
 use MultisiteRadar\Tests\RestTestCase;
 
 final class AlertsControllerTest extends RestTestCase {
@@ -60,5 +61,32 @@ final class AlertsControllerTest extends RestTestCase {
 		foreach ( [ [ 'severity' => [ 'fatal' ] ], [ 'rule' => [ 'Bad,Rule' ] ], [ 'orderby' => 'site_id' ], [ 'per_page' => 101 ] ] as $params ) {
 			$this->assertSame( 400, $this->request( 'GET', '/alerts', $params )->get_status() );
 		}
+	}
+
+	public function test_a_failed_read_of_the_alerting_sites_is_a_500_not_an_empty_page(): void {
+		global $wpdb;
+		$this->login_as_super_admin();
+		$this->make_record(
+			612,
+			[
+				'scanned_at'  => '2026-09-01 00:00:00',
+				'alert_level' => 3,
+				'alert_rules' => ',no_users,',
+			]
+		);
+		$break    = static function ( string $query ): string {
+			return 0 === strpos( ltrim( $query ), 'SELECT * FROM' ) && false !== strpos( $query, Schema::sites_table() ) && false !== strpos( $query, 'IN (' ) ? 'SELECT * FROM msradar_missing_table' : $query;
+		};
+		$suppress = $wpdb->suppress_errors( true );
+		add_filter( 'query', $break );
+		try {
+			$response = $this->request( 'GET', '/alerts' );
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $suppress );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'msradar_storage_error', $response->get_data()['code'] );
 	}
 }

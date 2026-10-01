@@ -156,6 +156,25 @@ final class SitesControllerTest extends RestTestCase {
 		$this->assertSame( 'msradar_storage_error', $response->get_data()['code'] );
 	}
 
+	public function test_a_failed_site_read_is_a_500_not_a_404(): void {
+		global $wpdb;
+		$this->login_as_super_admin();
+		$break    = static function ( string $query ): string {
+			return 0 === strpos( ltrim( $query ), 'SELECT * FROM' ) && false !== strpos( $query, Schema::sites_table() ) ? 'SELECT * FROM msradar_missing_table' : $query;
+		};
+		$suppress = $wpdb->suppress_errors( true );
+		add_filter( 'query', $break );
+		try {
+			$response = $this->request( 'GET', '/sites/101' );
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $suppress );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'msradar_storage_error', $response->get_data()['code'] );
+	}
+
 	public function test_site_users_route(): void {
 		$site_id = self::factory()->blog->create();
 		// La fabrique ne rattache aucun utilisateur : l'utilisateur 1 (« admin ») devient le seul membre du site.
