@@ -8,6 +8,7 @@ use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Storage\ExtensionsRepository;
 use MultisiteRadar\Storage\SiteRecord;
 use MultisiteRadar\Storage\SitesRepository;
+use MultisiteRadar\Support\PlainText;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -155,12 +156,13 @@ final class SitesQuery {
 	/**
 	 * Identité d'un site, commune aux listes, à la fiche et aux alertes.
 	 * Le nom de repli est construit ici, dans la langue du lecteur : le collecteur stocke le nom brut, même vide.
+	 * Le nom est décodé aussi ici : les lignes enregistrées avant la 2.0.0-beta.2 gardent le titre échappé par le cœur.
 	 *
 	 * @return array{id: int, name: string, url: string, admin_url: string}
 	 */
 	public static function identity( SiteRecord $record ): array {
 		$base = self::absolute( '' !== $record->siteurl ? $record->siteurl : $record->url );
-		$name = $record->name;
+		$name = PlainText::from_html( $record->name );
 		if ( '' === trim( $name ) ) {
 			/* translators: %d: site ID. */
 			$name = sprintf( __( 'Site #%d', 'multisite-radar' ), $record->site_id );
@@ -290,7 +292,7 @@ final class SitesQuery {
 			];
 		}
 		return [
-			'name'      => (string) $theme->get( 'Name' ),
+			'name'      => PlainText::from_html( wp_strip_all_tags( (string) $theme->get( 'Name' ) ) ),
 			'version'   => (string) $theme->get( 'Version' ),
 			'installed' => true,
 		];

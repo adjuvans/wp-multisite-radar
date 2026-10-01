@@ -3,6 +3,7 @@ namespace MultisiteRadar\Collector;
 
 use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Storage\SiteRecord;
+use MultisiteRadar\Support\PlainText;
 use RuntimeException;
 
 defined( 'ABSPATH' ) || exit;
@@ -71,7 +72,7 @@ final class SiteCollector {
 		$record                    = new SiteRecord();
 		$record->site_id           = $site_id;
 		$record->network_id        = (int) $site->site_id; // WP_Site::$site_id contient l'ID du réseau.
-		$record->name              = self::string_option( $options, 'blogname' );
+		$record->name              = PlainText::from_html( self::string_option( $options, 'blogname' ) );
 		$record->siteurl           = $siteurl;
 		$record->url               = '' !== $home ? $home : ( '' !== $siteurl ? $siteurl : 'http://' . $site->domain . $site->path );
 		$record->is_public         = '1' === (string) $site->public;

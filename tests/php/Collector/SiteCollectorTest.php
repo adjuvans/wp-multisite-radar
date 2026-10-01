@@ -57,6 +57,18 @@ final class SiteCollectorTest extends TestCase {
 		$this->assertNotNull( $after->scanned_at );
 	}
 
+	public function test_the_site_name_is_stored_as_plain_text_not_as_the_escaped_option(): void {
+		$site_id = self::factory()->blog->create( [ 'title' => "L'atelier R&D" ] );
+		$this->assertSame( 'L&#039;atelier R&amp;D', get_blog_option( $site_id, 'blogname' ), 'Core stores the site title escaped.' );
+
+		$this->assertSame( "L'atelier R&D", $this->collect( $site_id )->name );
+
+		switch_to_blog( $site_id );
+		update_option( 'blogname', 'Café <Lab> "Ouest"' );
+		restore_current_blog();
+		$this->assertSame( 'Café <Lab> "Ouest"', $this->collect( $site_id )->name );
+	}
+
 	public function test_counts_users_by_role_and_lists_privileged_accounts(): void {
 		$site_id = self::factory()->blog->create();
 		$before  = $this->collect( $site_id );

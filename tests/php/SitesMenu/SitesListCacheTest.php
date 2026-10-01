@@ -26,6 +26,14 @@ final class SitesListCacheTest extends TestCase {
 		$this->assertSame( [ 'id', 'name', 'url', 'registered' ], array_keys( $entry ) );
 	}
 
+	public function test_names_are_plain_text(): void {
+		$site_id = self::factory()->blog->create( [ 'title' => "L'atelier R&D" ] );
+
+		$sites = ( new SitesListCache() )->build( get_current_network_id() );
+
+		$this->assertSame( "L'atelier R&D", $sites[ array_search( $site_id, wp_list_pluck( $sites, 'id' ), true ) ]['name'] );
+	}
+
 	public function test_a_site_whose_tables_are_missing_is_skipped(): void {
 		global $wpdb;
 		$healthy = self::factory()->blog->create( [ 'title' => 'Healthy' ] );

@@ -143,6 +143,43 @@ final class SitesQueryTest extends TestCase {
 		$this->assertSame( 'Site #205', $summary['name'] );
 	}
 
+	public function test_names_stored_escaped_before_2_0_0_beta_2_are_served_as_plain_text(): void {
+		$record = $this->build_record(
+			[
+				'site_id' => 206,
+				'name'    => 'L&#039;atelier R&amp;D &quot;Ouest&quot;',
+			]
+		);
+
+		$this->assertSame( "L'atelier R&D \"Ouest\"", SitesQuery::identity( $record )['name'] );
+	}
+
+	public function test_theme_names_are_served_as_plain_text(): void {
+		global $wp_theme_directories;
+		$directories = $wp_theme_directories;
+		register_theme_directory( dirname( __DIR__ ) . '/fixtures/themes' );
+		delete_site_transient( 'theme_roots' );
+		search_theme_directories( true );
+		try {
+			$this->make_record(
+				207,
+				[
+					'theme_stylesheet' => 'msradar-fixture-theme',
+					'theme_template'   => 'msradar-fixture-theme',
+				]
+			);
+
+			$theme = $this->query->get( 207 )['extensions']['theme'];
+
+			$this->assertTrue( $theme['installed'] );
+			$this->assertSame( 'R&D Studio', $theme['name'] );
+		} finally {
+			$wp_theme_directories = $directories; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restores the test's own change.
+			delete_site_transient( 'theme_roots' );
+			search_theme_directories( true );
+		}
+	}
+
 	public function test_admin_links_use_the_wordpress_address_when_it_differs_from_home(): void {
 		$this->make_record(
 			206,

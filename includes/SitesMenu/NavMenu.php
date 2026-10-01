@@ -96,7 +96,8 @@ final class NavMenu {
 		}
 		$item->url = (string) $site['url'];
 		if ( '' === trim( (string) ( $item->title ?? '' ) ) ) {
-			$item->title = Renderer::label( $site );
+			// Le titre d'un élément de menu est du HTML (Walker_Nav_Menu l'affiche tel quel) ; le nom est du texte brut.
+			$item->title = esc_html( Renderer::label( $site ) );
 		}
 		return $item;
 	}

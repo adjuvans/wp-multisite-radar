@@ -54,6 +54,16 @@ final class BlockTest extends TestCase {
 		$this->assertLessThan( strpos( $html, 'Bravo' ), strpos( $html, 'Alpha' ), 'Sorted by name by default.' );
 	}
 
+	public function test_site_names_are_escaped_exactly_once(): void {
+		$site_id = self::factory()->blog->create( [ 'title' => "L'atelier R&D" ] );
+
+		$html = $this->render( [ 'include' => [ $site_id ] ] );
+
+		$this->assertStringContainsString( '>L&#039;atelier R&amp;D</a>', $html );
+		$this->assertStringNotContainsString( '&amp;#039;', $html );
+		$this->assertStringNotContainsString( '&amp;amp;', $html );
+	}
+
 	public function test_attributes_exclude_order_and_lay_out_the_list(): void {
 		$bravo = self::factory()->blog->create( [ 'title' => 'Bravo' ] );
 		$alpha = self::factory()->blog->create( [ 'title' => 'Alpha' ] );

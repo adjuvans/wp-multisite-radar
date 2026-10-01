@@ -91,6 +91,19 @@ final class SitesControllerTest extends RestTestCase {
 		$this->assertSame( 'msradar_site_not_found', $missing->get_data()['code'] );
 	}
 
+	public function test_a_site_created_through_wordpress_is_listed_decoded_and_found_by_apostrophe_and_ampersand_searches(): void {
+		$this->login_as_super_admin();
+		$site_id = self::factory()->blog->create( [ 'title' => "L'atelier R&D" ] );
+		$this->plugin()->runner()->scan_site( $site_id );
+
+		foreach ( [ "L'atelier", 'R&D', "L'atelier R&D" ] as $search ) {
+			$items = $this->request( 'GET', '/sites', [ 'search' => $search ] )->get_data();
+			$this->assertSame( [ $site_id ], wp_list_pluck( $items, 'id' ), $search );
+			$this->assertSame( "L'atelier R&D", $items[0]['name'] );
+		}
+		$this->assertSame( "L'atelier R&D", $this->request( 'GET', '/sites/' . $site_id )->get_data()['name'] );
+	}
+
 	public function test_include_selects_sites(): void {
 		$this->login_as_super_admin();
 

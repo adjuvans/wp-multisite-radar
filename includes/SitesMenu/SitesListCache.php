@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\SitesMenu;
 
+use MultisiteRadar\Support\PlainText;
 use WP_Site;
 
 defined( 'ABSPATH' ) || exit;
@@ -50,6 +51,8 @@ final class SitesListCache {
 	}
 
 	/**
+	 * Les noms sont en texte brut (le cœur stocke le titre échappé) : le rendu les échappe.
+	 *
 	 * @throws \RuntimeException Si la lecture de wp_blogs échoue.
 	 * @return array<int, array{id: int, name: string, url: string, registered: string}>
 	 */
@@ -80,7 +83,7 @@ final class SitesListCache {
 				$home    = (string) ( $options[ $id ]['home'] ?? '' );
 				$sites[] = [
 					'id'         => $id,
-					'name'       => (string) ( $options[ $id ]['blogname'] ?? '' ),
+					'name'       => PlainText::from_html( (string) ( $options[ $id ]['blogname'] ?? '' ) ),
 					'url'        => '' !== $home ? $home : set_url_scheme( 'http://' . $blog['domain'] . $blog['path'] ),
 					'registered' => (string) $blog['registered'],
 				];

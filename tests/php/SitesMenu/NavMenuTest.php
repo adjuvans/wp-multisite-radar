@@ -38,6 +38,15 @@ final class NavMenuTest extends TestCase {
 		$this->assertTrue( wp_setup_nav_menu_item( get_post( $item ) )->_invalid );
 	}
 
+	public function test_the_default_title_is_the_site_name_escaped_as_html(): void {
+		$site = self::factory()->blog->create( [ 'title' => "L'atelier <R&D>" ] );
+		$menu = wp_create_nav_menu( 'Escaped' );
+		$item = $this->add_item( $menu, $site, '' );
+
+		// Les titres d'éléments de menu sont du HTML, affiché tel quel par Walker_Nav_Menu.
+		$this->assertSame( 'L&#039;atelier &lt;R&amp;D&gt;', wp_setup_nav_menu_item( get_post( $item ) )->title );
+	}
+
 	public function test_a_migrated_1x_item_pointing_to_a_deleted_site_is_invalid(): void {
 		$menu = wp_create_nav_menu( 'Legacy' );
 		$item = $this->add_item( $menu, 999999, 'Gone' );
