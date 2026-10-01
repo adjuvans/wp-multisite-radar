@@ -56,9 +56,8 @@ final class LegacyMigration {
 		update_site_option(
 			self::CURSOR,
 			[
-				'after'      => 0,
-				'menu_items' => 0,
-				'attempts'   => 0,
+				'after'    => 0,
+				'attempts' => 0,
 			]
 		);
 		$this->schedule_next();
@@ -153,14 +152,14 @@ final class LegacyMigration {
 				MainSite::schedule_once( self::HOOK, MINUTE_IN_SECONDS );
 				return;
 			}
-			$cursor['attempts']   = 0;
-			$cursor['menu_items'] = (int) $cursor['menu_items'] + $count;
-			$cursor['after']      = $site_id;
-			$converted            = $converted || $count > 0;
-		}
-		if ( $converted ) {
-			update_site_option( self::ALIASES, 1 );
-			$this->settings->update( [ 'sites_menu' => [ 'enabled' => true ] ] );
+			$cursor['attempts'] = 0;
+			$cursor['after']    = $site_id;
+			if ( $count > 0 && ! $converted ) {
+				// Persist the evidence right away: a later failure or fatal must not lose it.
+				$converted = true;
+				update_site_option( self::ALIASES, 1 );
+				$this->settings->update( [ 'sites_menu' => [ 'enabled' => true ] ] );
+			}
 		}
 
 		if ( self::BATCH === count( $site_ids ) ) {
@@ -168,7 +167,7 @@ final class LegacyMigration {
 			$this->schedule_next();
 			return;
 		}
-		$this->finish( $cursor );
+		$this->finish();
 	}
 
 	/**
@@ -235,7 +234,7 @@ final class LegacyMigration {
 		return (bool) apply_filters( 'msradar_legacy_core_loaded', class_exists( 'NPU_Core', false ) );
 	}
 
-	private function finish( array $cursor ): void {
+	private function finish(): void {
 		update_site_option( self::DONE, time() );
 		delete_site_option( self::CURSOR );
 	}

@@ -224,4 +224,51 @@ final class LegacyMigrationTest extends TestCase {
 		$this->assertSame( 1, (int) get_site_option( LegacyMigration::ALIASES ) );
 		$this->assertTrue( $this->plugin()->settings()->get( 'sites_menu.enabled' ) );
 	}
+
+	private function fail_updates_for( int $site_id ): callable {
+		$prefix = $GLOBALS['wpdb']->get_blog_prefix( $site_id );
+		$fail   = static function ( $query ) use ( $prefix ) {
+			return ( 0 === strpos( $query, 'UPDATE' ) && false !== strpos( $query, $prefix . 'postmeta' ) ) ? 'SELECT * FROM msradar_missing_table' : $query;
+		};
+		add_filter( 'query', $fail );
+		return $fail;
+	}
+
+	public function test_evidence_survives_a_later_site_failing_in_the_same_batch(): void {
+		add_filter( 'msradar_legacy_core_loaded', '__return_false' );
+		$site_a = self::factory()->blog->create();
+		$site_b = self::factory()->blog->create();
+		$this->create_menu_item( $site_a );
+		$item_b = $this->create_menu_item( $site_b );
+		$fail   = $this->fail_updates_for( $site_b );
+		$this->migration->start();
+		delete_site_option( LegacyMigration::ALIASES );
+		$this->plugin()->settings()->update( [ 'sites_menu' => [ 'enabled' => false ] ] );
+		wp_clear_scheduled_hook( LegacyMigration::HOOK );
+
+		$this->migration->run_menu_batch();
+		remove_filter( 'query', $fail );
+
+		$this->assertSame( 1, (int) get_site_option( LegacyMigration::ALIASES ) );
+		$this->assertTrue( $this->plugin()->settings()->get( 'sites_menu.enabled' ) );
+		$this->assertSame( $site_a, get_site_option( LegacyMigration::CURSOR )['after'] );
+		$this->assertSame( 'network_site', $this->item_type( $site_b, $item_b ) );
+		$this->assertNotFalse( wp_next_scheduled( LegacyMigration::HOOK ) );
+	}
+
+	public function test_a_site_failing_three_times_is_skipped(): void {
+		$site_id = self::factory()->blog->create();
+		$item_id = $this->create_menu_item( $site_id );
+		$fail    = $this->fail_updates_for( $site_id );
+		$this->migration->start();
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$this->migration->run_menu_batch();
+		}
+		remove_filter( 'query', $fail );
+
+		$this->assertFalse( get_site_option( LegacyMigration::CURSOR ), 'The migration finished.' );
+		$this->assertNotFalse( get_site_option( LegacyMigration::DONE ) );
+		$this->assertSame( 'network_site', $this->item_type( $site_id, $item_id ) );
+	}
 }
