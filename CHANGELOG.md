@@ -1,5 +1,19 @@
 # Changelog — Multisite Radar
 
+## [2.0.0-beta.1] - 2026-10-01
+
+### Jalon M2 — Interface
+- Interface d'administration réseau en React : Vue d'ensemble (tuiles, « À traiter », analyse pilotée par l'interface), Sites (DataViews, filtres, tri, recherche, état dans l'URL, fiche latérale avec lien profond), Alertes (site × règle, regroupées par règle), Réglages (DataForm).
+- Première vue sans indicateur de chargement : données préchargées par PHP et cache `msradar/core` hydraté au démarrage ; un point d'entrée et une feuille de style par vue.
+- Préférences d'affichage par utilisateur (`GET/POST /preferences`), exports CSV (UTF-8 avec BOM, formules neutralisées) et JSON en flux ; en cas d'échec avant la première sortie l'export renvoie une vraie erreur 500, et il s'arrête proprement en cours de flux.
+- REST : `GET /alerts`, `GET /sites/{id}/users` (sans e-mail), sélection `include`, erreurs 500 sur lecture en échec, filtre `inactive_since` aligné sur la règle « inactive ».
+- Réglages : un slug d'extension obsolète ne bloque plus l'enregistrement.
+- Module « menu des sites » : cache par réseau, shortcode `[msradar_sites]`, metabox des menus, bloc `multisite-radar/sites-list`, alias 1.x pour les installations migrées. La metabox « Network sites » est masquée par défaut pour les utilisateurs qui n'ont jamais enregistré les Options de l'écran des menus (comportement de WordPress) : l'activer dans Options de l'écran.
+- Socle : un seul budget de travail par requête cron, curseur de recalcul lié aux réglages d'alertes, schéma v2 (colonne `siteurl`, listes sans la colonne `data`), action `msradar_error` pour les erreurs de stockage attrapées dans les hooks.
+- Outillage : `@wordpress/scripts` 36, Vitest, Playwright sur wp-env multisite avec audit axe, synchronisation des versions (`npm run version:check`).
+
+---
+
 ## [2.0.0-alpha.1] - 2026-10-01
 
 Réécriture complète sous le nom **Multisite Radar** (slug `multisite-radar`). Voir la spec dans `docs/superpowers/specs/`.

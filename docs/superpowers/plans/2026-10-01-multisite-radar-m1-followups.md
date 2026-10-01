@@ -1,5 +1,14 @@
 # Multisite Radar — Jalon M1 : points reportés
 
+> **Mise à jour M2 :** les points suivants sont traités par le plan `2026-10-01-multisite-radar-m2-interface.md` :
+> - les résidus (a), (b) et la désactivation ;
+> - les points M1, M2, M3, M4, M5, M6, M8, M9, M10, M11, M12 et M13 ;
+> - les points T10 (`msradar_upgraded`), T11 (page énorme, erreurs SQL avalées, `{}`) et T12 (`scope=ids`, `rest_parse_date`).
+>
+> Les autres restent ouverts, notamment :
+> - M7 (registre autoloadé), prévu pour M4 avec la règle `heavy_autoload` ;
+> - les points de WP-CLI, prévus pour M5.
+
 Points relevés pendant l'exécution du plan M1 et volontairement laissés pour plus tard. Ils servent d'entrée à la planification de M2. Les points bloquants ont tous été corrigés sur la branche `v2` (revue finale : 7 points importants corrigés, aucun point critique).
 
 ## 1. Résidus de la revue finale

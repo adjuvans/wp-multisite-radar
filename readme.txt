@@ -3,7 +3,7 @@ Tags: multisite, network, audit, inventory, admin
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.0-alpha.1
+Stable tag: 2.0.0-beta.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -13,11 +13,16 @@ Network-wide audit for WordPress Multisite: sites, content types, users, plugins
 
 Multisite Radar gives network administrators a single, always up-to-date view of every site in a WordPress Multisite network: content types and their origin, users, active plugins and theme, activity and health alerts.
 
-Data is collected in the background with lightweight SQL queries, so the dashboard stays fast on networks with thousands of sites. Nothing is sent to external services.
+Data is collected in the background with lightweight SQL queries, so the network admin screens stay fast on networks with thousands of sites. The Overview, Sites, Alerts and Settings screens open instantly and offer CSV and JSON exports; an optional "network sites" block, shortcode and menu items replace the 1.x menu. Nothing is sent to external services.
 
 Source code: https://github.com/adjuvans/wp-network-plugin-utilities
 
 == Changelog ==
+
+= 2.0.0-beta.1 =
+* First beta: network admin screens (Overview, Sites with a side panel, Alerts, Settings), per-user display preferences, CSV and JSON exports.
+* Optional network sites menu: block, shortcode and navigation menu items, with the 1.x aliases kept for migrated sites.
+* REST: site users, alert list and preferences routes; failed reads now return an error instead of an empty list.
 
 = 2.0.0-alpha.1 =
 * First alpha of the complete rewrite: background collection, alerts, REST API and WP-CLI commands. No admin interface yet.

@@ -1,6 +1,6 @@
 {
 	"name": "multisite-radar",
-	"version": "2.0.0-alpha.1",
+	"version": "2.0.0-beta.1",
 	"private": true,
 	"description": "Network-wide audit for WordPress Multisite.",
 	"license": "GPL-3.0-or-later",
