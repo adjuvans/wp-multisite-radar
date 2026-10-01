@@ -148,6 +148,30 @@ test( 'shows the preloaded site with focus on its title', async () => {
 	expect( apiFetch ).not.toHaveBeenCalled();
 } );
 
+test( 'the number of administrators is pluralised', () => {
+	setup( {
+		siteId: 14,
+		preload: {
+			'/multisite-radar/v1/sites/12': { body: DETAIL, headers: {} },
+			'/multisite-radar/v1/sites/14': {
+				body: { ...DETAIL, id: 14, users_count: 4, admins_count: 2 },
+				headers: {},
+			},
+		},
+	} );
+	expect(
+		screen.getByText( '4, including 2 administrators' )
+	).toBeInTheDocument();
+} );
+
+test( 'a single administrator is singular', () => {
+	setup();
+
+	expect(
+		screen.getByText( '3, including 1 administrator' )
+	).toBeInTheDocument();
+} );
+
 test( 'the content tab shows origins and flags unverified types', () => {
 	setup();
 

@@ -1,5 +1,5 @@
 import { ExternalLink, Notice } from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { displayUrl, formatDateTime, formatNumber } from '../../utils/format';
 import { siteStatuses, statusLabels } from '../sites/labels';
 
@@ -54,8 +54,10 @@ export default function SummaryTab( { site } ) {
 				<dd>
 					{ sprintf(
 						/* translators: 1: number of users, 2: number of administrators. */
-						__(
+						_n(
+							'%1$s, including %2$s administrator',
 							'%1$s, including %2$s administrators',
+							site.admins_count,
 							'multisite-radar'
 						),
 						formatNumber( site.users_count ),
