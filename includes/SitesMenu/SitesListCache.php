@@ -39,17 +39,23 @@ final class SitesListCache {
 		if ( is_array( $cached ) ) {
 			return $cached;
 		}
-		$sites = $this->build( $network_id );
+		try {
+			$sites = $this->build( $network_id );
+		} catch ( \RuntimeException $error ) {
+			do_action( 'msradar_error', __METHOD__, $error );
+			return []; // Pas de mise en cache : une panne passagère ne doit pas vider le menu pendant un jour.
+		}
 		set_site_transient( self::name( $network_id ), $sites, DAY_IN_SECONDS );
 		return $sites;
 	}
 
 	/**
+	 * @throws \RuntimeException Si la lecture de wp_blogs échoue.
 	 * @return array<int, array{id: int, name: string, url: string, registered: string}>
 	 */
 	public function build( int $network_id ): array {
 		global $wpdb;
-		$blogs = (array) $wpdb->get_results(
+		$blogs = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT blog_id, domain, path, registered FROM %i WHERE site_id = %d AND public = 1 AND archived = '0' AND spam = 0 AND deleted = 0 ORDER BY blog_id ASC",
 				$wpdb->blogs,
@@ -57,6 +63,11 @@ final class SitesListCache {
 			),
 			ARRAY_A
 		);
+		// empty() et non une comparaison stricte avec '' : PHPStan type last_error sans chaîne vide.
+		if ( ! empty( $wpdb->last_error ) ) {
+			throw new \RuntimeException( 'Reading the sites table failed: ' . esc_html( $wpdb->last_error ) );
+		}
+		$blogs = (array) $blogs;
 
 		$sites = [];
 		foreach ( array_chunk( $blogs, self::CHUNK ) as $chunk ) {
@@ -121,11 +132,13 @@ final class SitesListCache {
 		$suppress = $wpdb->suppress_errors( true );
 		try {
 			$rows = (array) $wpdb->get_results( $wpdb->prepare( implode( ' UNION ALL ', $parts ), $params ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $parts only holds the fixed SELECT above, with placeholders.
+			// empty() et non une comparaison stricte avec '' : PHPStan type last_error sans chaîne vide.
 			if ( ! empty( $wpdb->last_error ) ) {
 				$rows = [];
 				foreach ( $blogs as $blog ) {
 					$id     = (int) $blog['blog_id'];
 					$single = $wpdb->get_results( $wpdb->prepare( $select, $id, $wpdb->get_blog_prefix( $id ) . 'options', 'blogname', 'home' ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed SELECT with placeholders.
+					// Même raison que plus haut : empty() plutôt que '' === last_error.
 					if ( empty( $wpdb->last_error ) ) {
 						$rows = array_merge( $rows, (array) $single );
 					}

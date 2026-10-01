@@ -72,4 +72,36 @@ final class SitesListCacheTest extends TestCase {
 		$new = self::factory()->blog->create( [ 'title' => 'Newcomer' ] );
 		$this->assertContains( $new, wp_list_pluck( $cache->get(), 'id' ) );
 	}
+
+	public function test_a_failing_sites_read_is_reported_and_not_cached(): void {
+		$cache   = $this->plugin()->sites_list_cache();
+		$network = get_current_network_id();
+		$site    = self::factory()->blog->create( [ 'title' => 'Survivor' ] );
+		$cache->flush( $network );
+
+		$errors = [];
+		$on_err = static function ( $context, $error ) use ( &$errors ): void {
+			$errors[] = [ $context, $error ];
+		};
+		$break  = static function ( $query ) {
+			return false !== strpos( $query, 'SELECT blog_id, domain, path, registered' ) ? 'SELECT * FROM msradar_missing_table' : $query;
+		};
+		global $wpdb;
+		$quiet = $wpdb->suppress_errors( true );
+		add_action( 'msradar_error', $on_err, 10, 2 );
+		add_filter( 'query', $break );
+		try {
+			$result = $cache->get();
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $quiet );
+			remove_action( 'msradar_error', $on_err, 10 );
+		}
+
+		$this->assertSame( [], $result );
+		$this->assertCount( 1, $errors );
+		$this->assertInstanceOf( \RuntimeException::class, $errors[0][1] );
+		$this->assertFalse( get_site_transient( SitesListCache::name( $network ) ), 'A failed build is not cached.' );
+		$this->assertContains( $site, wp_list_pluck( $cache->get(), 'id' ) );
+	}
 }
