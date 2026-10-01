@@ -68,11 +68,12 @@ test( 'renders the preloaded alerts without any request', async () => {
 		</RegistryProvider>
 	);
 
-	expect( screen.getAllByText( 'Site vide' ).length ).toBeGreaterThan( 0 );
+	expect( screen.getByText( 'Site vide' ) ).toBeInTheDocument();
+	// Sorted by rule: DataViews shows the group header.
+	expect( screen.getByText( 'Rule: no_users' ) ).toBeInTheDocument();
 	await act( async () => {
 		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 	} );
-	expect( screen.getAllByText( 'Site vide' )[ 0 ] ).toBeInTheDocument();
 	expect(
 		screen.getByText( 'No user is attached to this site.' )
 	).toBeInTheDocument();
