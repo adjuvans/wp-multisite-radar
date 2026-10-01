@@ -29,4 +29,7 @@ define( 'MSRADAR_URL', plugin_dir_url( __FILE__ ) );
 require_once MSRADAR_DIR . 'includes/Autoloader.php';
 MultisiteRadar\Autoloader::register( MSRADAR_DIR . 'includes/' );
 
+register_activation_hook( __FILE__, [ MultisiteRadar\Install\Installer::class, 'activate' ] );
+register_deactivation_hook( __FILE__, [ MultisiteRadar\Install\Installer::class, 'deactivate' ] );
+
 MultisiteRadar\Plugin::instance()->boot();

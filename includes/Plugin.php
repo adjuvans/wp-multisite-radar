@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar;
 
+use MultisiteRadar\Install\Installer;
 use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Storage\ExtensionsRepository;
 use MultisiteRadar\Storage\SitesRepository;
@@ -34,6 +35,7 @@ final class Plugin {
 		}
 
 		Capabilities::register();
+		add_action( 'admin_init', [ Installer::class, 'maybe_upgrade' ] );
 	}
 
 	public function render_multisite_notice(): void {
