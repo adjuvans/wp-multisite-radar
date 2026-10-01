@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar;
 
+use MultisiteRadar\Collector\RegistryProbe;
 use MultisiteRadar\Install\Installer;
 use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Storage\ExtensionsRepository;
@@ -21,6 +22,8 @@ final class Plugin {
 
 	private ?ExtensionsRepository $extensions = null;
 
+	private ?RegistryProbe $probe = null;
+
 	public static function instance(): self {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
@@ -36,6 +39,7 @@ final class Plugin {
 
 		Capabilities::register();
 		add_action( 'admin_init', [ Installer::class, 'maybe_upgrade' ] );
+		$this->probe()->register();
 	}
 
 	public function render_multisite_notice(): void {
@@ -54,6 +58,10 @@ final class Plugin {
 
 	public function sites(): SitesRepository {
 		return $this->sites ??= new SitesRepository();
+	}
+
+	public function probe(): RegistryProbe {
+		return $this->probe ??= new RegistryProbe( $this->sites() );
 	}
 
 	public function extensions(): ExtensionsRepository {

@@ -41,4 +41,15 @@ abstract class TestCase extends \WP_UnitTestCase {
 		global $wpdb;
 		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET dirty = 0, dirty_since = NULL', Schema::sites_table() ) );
 	}
+
+	/**
+	 * Nombre d'événements cron planifiés pour un hook, toutes échéances confondues.
+	 */
+	protected function count_cron_events( string $hook ): int {
+		$count = 0;
+		foreach ( (array) _get_cron_array() as $hooks ) {
+			$count += isset( $hooks[ $hook ] ) ? count( $hooks[ $hook ] ) : 0;
+		}
+		return $count;
+	}
 }
