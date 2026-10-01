@@ -2,6 +2,8 @@
 namespace MultisiteRadar;
 
 use MultisiteRadar\Settings\Settings;
+use MultisiteRadar\Storage\ExtensionsRepository;
+use MultisiteRadar\Storage\SitesRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -13,6 +15,10 @@ final class Plugin {
 	private static ?Plugin $instance = null;
 
 	private ?Settings $settings = null;
+
+	private ?SitesRepository $sites = null;
+
+	private ?ExtensionsRepository $extensions = null;
 
 	public static function instance(): self {
 		if ( null === self::$instance ) {
@@ -42,6 +48,14 @@ final class Plugin {
 
 	public function settings(): Settings {
 		return $this->settings ??= new Settings();
+	}
+
+	public function sites(): SitesRepository {
+		return $this->sites ??= new SitesRepository();
+	}
+
+	public function extensions(): ExtensionsRepository {
+		return $this->extensions ??= new ExtensionsRepository();
 	}
 
 	/**

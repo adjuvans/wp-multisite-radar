@@ -18,3 +18,5 @@ tests_add_filter(
 );
 
 require $msradar_tests_dir . '/includes/bootstrap.php';
+
+MultisiteRadar\Install\Schema::install();
