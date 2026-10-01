@@ -96,6 +96,10 @@ final class RegistryProbe {
 	}
 
 	public function run(): void {
+		// Sous switch_to_blog, les types en mémoire sont ceux du site d'origine : ils ne décrivent pas le site ciblé.
+		if ( ms_is_switched() ) {
+			return;
+		}
 		// Sans suivi, les origines sont inconnues : ne jamais écraser un bon relevé par des « unknown ».
 		if ( ! $this->tracking ) {
 			return;

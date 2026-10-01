@@ -83,23 +83,44 @@ final class RegistryProbeTest extends TestCase {
 
 	public function test_run_saves_an_autoloaded_option_and_marks_the_site(): void {
 		global $wpdb;
-		$site_id = self::factory()->blog->create();
+		$site_id = get_current_blog_id();
 		$sites   = $this->plugin()->sites();
 		$sites->insert_pending( $site_id, get_current_network_id(), 'probe.test/' );
 		$sites->clear_dirty( $site_id );
 
-		switch_to_blog( $site_id );
 		$probe = $this->probe();
 		$probe->start_tracking();
 		$probe->run();
 		$registry = get_option( RegistryProbe::OPTION );
 		$autoload = $wpdb->get_var( $wpdb->prepare( 'SELECT autoload FROM %i WHERE option_name = %s', $wpdb->options, RegistryProbe::OPTION ) );
-		restore_current_blog();
 
 		$this->assertIsArray( $registry );
 		$this->assertArrayHasKey( 'post', $registry['post_types'] );
 		$this->assertContains( $autoload, wp_autoload_values_to_autoload() );
 		$this->assertTrue( $sites->find( $site_id )->dirty );
+	}
+
+	public function test_a_run_under_switch_to_blog_writes_nothing(): void {
+		$main    = get_current_blog_id();
+		$site_id = self::factory()->blog->create();
+		$sites   = $this->plugin()->sites();
+		foreach ( [ $main, $site_id ] as $id ) {
+			$sites->insert_pending( $id, get_current_network_id(), 'switch.test/' );
+			$sites->clear_dirty( $id );
+		}
+		delete_option( RegistryProbe::OPTION );
+		$probe = $this->probe();
+		$probe->start_tracking();
+
+		switch_to_blog( $site_id );
+		$probe->run();
+		$on_target = get_option( RegistryProbe::OPTION );
+		restore_current_blog();
+
+		$this->assertFalse( $on_target, 'The types of this process are not the target site\'s.' );
+		$this->assertFalse( get_option( RegistryProbe::OPTION ) );
+		$this->assertFalse( $sites->find( $site_id )->dirty );
+		$this->assertFalse( $sites->find( $main )->dirty );
 	}
 
 	public function test_register_hooks_the_schedule_only_when_due(): void {
