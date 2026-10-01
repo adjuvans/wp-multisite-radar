@@ -29,6 +29,16 @@ final class FingerprintTest extends TestCase {
 		}
 	}
 
+	public function test_from_raw_normalises_corrupted_values_like_current_does(): void {
+		global $wp_version;
+
+		$this->assertSame(
+			Fingerprint::compute( [ 'a/a.php', 'b/b.php' ], [ 'n/n.php' ], 'child', '', $wp_version, MSRADAR_VERSION ),
+			Fingerprint::from_raw( [ 'b/b.php', 42, 'a/a.php' ], [ 'n/n.php' => 1, 0 => 'stray' ], 'child', [ 'not a string' ] )
+		);
+		$this->assertSame( Fingerprint::from_raw( [], [], '', '' ), Fingerprint::from_raw( 'corrupt', 'corrupt', null, false ) );
+	}
+
 	public function test_current_reads_the_current_site(): void {
 		global $wp_version;
 		$site_id = self::factory()->blog->create();

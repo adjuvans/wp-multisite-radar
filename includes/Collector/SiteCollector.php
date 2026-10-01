@@ -50,16 +50,15 @@ final class SiteCollector {
 			$wpdb->suppress_errors( $suppress );
 		}
 
-		$network_plugins = array_keys( (array) get_network_option( (int) $site->site_id, 'active_sitewide_plugins', [] ) );
-		$active_plugins  = isset( $options['active_plugins'] ) && is_array( $options['active_plugins'] )
-			? array_values( array_filter( $options['active_plugins'], 'is_string' ) )
-			: [];
+		$raw_sitewide    = get_network_option( (int) $site->site_id, 'active_sitewide_plugins', [] );
+		$network_plugins = Fingerprint::network_plugin_files( $raw_sitewide );
+		$active_plugins  = Fingerprint::plugin_files( $options['active_plugins'] ?? null );
 		$stylesheet      = self::string_option( $options, 'stylesheet' );
 		$template        = self::string_option( $options, 'template' );
 		$raw_registry    = $options[ RegistryProbe::OPTION ] ?? null;
 		$status          = RegistryProbe::status(
 			$raw_registry,
-			Fingerprint::compute( $active_plugins, $network_plugins, $stylesheet, $template, self::wp_version(), MSRADAR_VERSION ),
+			Fingerprint::from_raw( $options['active_plugins'] ?? null, $raw_sitewide, $options['stylesheet'] ?? null, $options['template'] ?? null ),
 			time()
 		);
 		$registry        = is_array( $raw_registry ) ? $raw_registry : [];
@@ -383,11 +382,6 @@ final class SiteCollector {
 
 	private static function string_option( array $options, string $name ): string {
 		return isset( $options[ $name ] ) && is_scalar( $options[ $name ] ) ? (string) $options[ $name ] : '';
-	}
-
-	private static function wp_version(): string {
-		global $wp_version;
-		return (string) $wp_version;
 	}
 
 	private function guard(): void {

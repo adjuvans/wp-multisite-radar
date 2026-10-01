@@ -27,6 +27,10 @@ final class RegistryProbe {
 		'taxonomy'  => [],
 	];
 	private bool $tracking = false;
+	/**
+	 * Empreinte calculée au chargement du plugin, avant les plugins du site et leurs filtres d'options.
+	 */
+	private ?string $fingerprint = null;
 
 	public function __construct( SitesRepository $sites, ?OriginResolver $resolver = null ) {
 		$this->sites    = $sites;
@@ -39,8 +43,10 @@ final class RegistryProbe {
 	public function register(): void {
 		add_action( self::CRON_HOOK, [ $this, 'run' ] );
 
+		$this->fingerprint = Fingerprint::current();
+
 		$cli = defined( 'WP_CLI' ) && WP_CLI;
-		$due = self::is_due( get_option( self::OPTION ), Fingerprint::current(), time() );
+		$due = self::is_due( get_option( self::OPTION ), $this->fingerprint, time() );
 
 		if ( $cli || ( $due && ( wp_doing_cron() || is_admin() ) ) ) {
 			$this->start_tracking();
@@ -110,7 +116,7 @@ final class RegistryProbe {
 		}
 
 		return [
-			'fingerprint' => Fingerprint::current(),
+			'fingerprint' => $this->fingerprint ?? Fingerprint::current(),
 			'built_at'    => time(),
 			'post_types'  => $post_types,
 			'taxonomies'  => $taxonomies,

@@ -4,6 +4,8 @@ namespace MultisiteRadar\Tests\Collector;
 use MultisiteRadar\Collector\Fingerprint;
 use MultisiteRadar\Collector\OriginResolver;
 use MultisiteRadar\Collector\RegistryProbe;
+use MultisiteRadar\Collector\SiteCollector;
+use MultisiteRadar\Storage\SiteRecord;
 use MultisiteRadar\Tests\TestCase;
 
 final class RegistryProbeTest extends TestCase {
@@ -165,6 +167,38 @@ final class RegistryProbeTest extends TestCase {
 		$probe->run();
 
 		$this->assertSame( 0, $this->count_cron_events( RegistryProbe::CRON_HOOK ) );
+	}
+
+	public function test_the_fingerprint_taken_at_plugin_load_is_stored_and_matches_the_collector(): void {
+		delete_option( RegistryProbe::OPTION );
+		$probe = $this->probe();
+		$probe->register();
+		$probe->start_tracking();
+		$late = static fn ( $plugins ): array => array_merge( (array) $plugins, [ 'late/late.php' ] );
+		add_filter( 'option_active_plugins', $late );
+		$probe->run();
+		remove_filter( 'option_active_plugins', $late );
+
+		$again = $this->probe();
+		$again->register();
+
+		$this->assertFalse( has_action( 'init', [ $again, 'schedule' ] ), 'No new probe is due.' );
+		$this->assertSame( RegistryProbe::STATUS_FRESH, $this->collect_current_site()->registry_status );
+	}
+
+	public function test_a_corrupted_network_plugin_list_gives_the_probe_and_the_collector_the_same_fingerprint(): void {
+		update_site_option( 'active_sitewide_plugins', 'corrupt' );
+		delete_option( RegistryProbe::OPTION );
+		$probe = $this->probe();
+		$probe->register();
+		$probe->start_tracking();
+		$probe->run();
+
+		$this->assertSame( RegistryProbe::STATUS_FRESH, $this->collect_current_site()->registry_status );
+	}
+
+	private function collect_current_site(): SiteRecord {
+		return ( new SiteCollector( $this->plugin()->settings() ) )->collect( get_current_blog_id() );
 	}
 
 	public function test_plugin_boot_registers_the_probe(): void {
