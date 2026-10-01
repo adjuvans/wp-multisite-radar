@@ -49,6 +49,8 @@ export function getSettingsFields( { postTypes = [], plugins = [] } ) {
 				'multisite-radar'
 			),
 			elements: plugins,
+			// Un plugin supprimé depuis l'enregistrement reste stocké : le serveur accepte tout slug.
+			isValid: { elements: false },
 		},
 		{
 			id: 'scan.full_rescan_days',

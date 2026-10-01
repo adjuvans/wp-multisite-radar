@@ -9,7 +9,7 @@ import {
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import apiFetch from '@wordpress/api-fetch';
-import { createCoreStore } from '../../../store';
+import { createCoreStore, STORE_NAME } from '../../../store';
 import { mergeDeep, toPayload } from '../fields';
 import SettingsView from '..';
 
@@ -33,10 +33,11 @@ const SETTINGS = {
 	retention: { events_days: 90, snapshots_days: 365 },
 };
 
-function setup() {
+function setup( settings = SETTINGS, extraPreload = {} ) {
 	const preload = {
 		'/multisite-radar/v1/preferences': { body: {}, headers: {} },
-		'/multisite-radar/v1/settings': { body: SETTINGS, headers: {} },
+		'/multisite-radar/v1/settings': { body: settings, headers: {} },
+		...extraPreload,
 	};
 	window.msradarAdmin = {
 		view: 'settings',
@@ -92,7 +93,11 @@ test( 'shows the preloaded settings and saves a change', async () => {
 		...SETTINGS,
 		sites_menu: { enabled: true },
 	} );
-	const registry = setup();
+	const SITES = '/multisite-radar/v1/sites?page=1';
+	const registry = setup( SETTINGS, {
+		[ SITES ]: { body: [], headers: {} },
+	} );
+	expect( registry.select( STORE_NAME ).getResponse( SITES ) ).not.toBeNull();
 	const save = screen.getByRole( 'button', { name: 'Save settings' } );
 	expect( save ).toBeDisabled();
 
@@ -118,6 +123,12 @@ test( 'shows the preloaded settings and saves a change', async () => {
 	await waitFor( () =>
 		expect( notices( registry ) ).toContain( 'Settings saved.' )
 	);
+	const stored = registry
+		.select( STORE_NAME )
+		.getResponse( '/multisite-radar/v1/settings' );
+	expect( stored.data.sites_menu ).toEqual( { enabled: true } );
+	expect( registry.select( STORE_NAME ).getResponse( SITES ) ).toBeNull();
+	await waitFor( () => expect( save ).toBeDisabled() );
 } );
 
 test( 'a rejected save is reported', async () => {
@@ -127,10 +138,11 @@ test( 'a rejected save is reported', async () => {
 			'settings[scan][full_rescan_days] must be between 1 (inclusive) and 90 (inclusive)',
 	} );
 	const registry = setup();
+	const toggle = screen.getByRole( 'checkbox', {
+		name: /network sites menu/,
+	} );
 
-	fireEvent.click(
-		screen.getByRole( 'checkbox', { name: /network sites menu/ } )
-	);
+	fireEvent.click( toggle );
 	await act( async () => {
 		fireEvent.click(
 			screen.getByRole( 'button', { name: 'Save settings' } )
@@ -141,6 +153,31 @@ test( 'a rejected save is reported', async () => {
 		expect( notices( registry ) ).toContain(
 			'settings[scan][full_rescan_days] must be between 1 (inclusive) and 90 (inclusive)'
 		)
+	);
+	const save = screen.getByRole( 'button', { name: 'Save settings' } );
+	expect( toggle ).toBeChecked();
+	await waitFor( () => expect( save ).toBeEnabled() );
+	expect( save ).not.toHaveAttribute( 'aria-busy', 'true' );
+} );
+
+test( 'a stored plugin slug that is no longer installed does not block saving', async () => {
+	apiFetch.mockResolvedValue( SETTINGS );
+	setup( {
+		...SETTINGS,
+		scan: { ...SETTINGS.scan, analysis_plugins: [ 'gone' ] },
+	} );
+	const save = screen.getByRole( 'button', { name: 'Save settings' } );
+
+	fireEvent.click(
+		screen.getByRole( 'checkbox', { name: /network sites menu/ } )
+	);
+	await waitFor( () => expect( save ).toBeEnabled() );
+	await act( async () => {
+		fireEvent.click( save );
+	} );
+
+	expect( apiFetch.mock.calls[ 0 ][ 0 ].data.scan.analysis_plugins ).toEqual(
+		[ 'gone' ]
 	);
 } );
 
