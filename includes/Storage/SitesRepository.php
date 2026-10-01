@@ -60,7 +60,7 @@ final class SitesRepository {
 			return [];
 		}
 		global $wpdb;
-		$rows    = $wpdb->get_results(
+		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT * FROM %i WHERE site_id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ') ORDER BY site_id ASC',
 				array_merge( [ Schema::sites_table() ], $ids )
