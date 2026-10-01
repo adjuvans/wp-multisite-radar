@@ -2,6 +2,8 @@
 namespace MultisiteRadar\Scan;
 
 use MultisiteRadar\Alerts\AlertEvaluator;
+use MultisiteRadar\Install\Installer;
+use MultisiteRadar\Install\Schema;
 use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Storage\SiteRecord;
 use MultisiteRadar\Storage\SitesRepository;
@@ -105,6 +107,9 @@ final class Queue {
 	public function process(): void {
 		if ( $this->processed ) {
 			$this->continue_soon();
+			return;
+		}
+		if ( ! self::schema_ready() ) {
 			return;
 		}
 		$this->processed = true;
@@ -220,6 +225,9 @@ final class Queue {
 			MainSite::schedule_once( self::HOOK_RECOMPUTE, MINUTE_IN_SECONDS );
 			return;
 		}
+		if ( ! self::schema_ready() ) {
+			return; // La mise à niveau relancera une analyse complète, qui réévalue les alertes de chaque site.
+		}
 		$this->processed = true;
 		$done            = $this->runner->locked(
 			function ( Lock $lock ): void {
@@ -229,6 +237,16 @@ final class Queue {
 		if ( ! $done ) {
 			MainSite::schedule_once( self::HOOK_RECOMPUTE, MINUTE_IN_SECONDS );
 		}
+	}
+
+	/**
+	 * Après une mise à jour du plugin sans visite de l'administration (mise à jour automatique, wp plugin update), le
+	 * cron peut passer avant admin_init : le schéma est d'abord mis à niveau ; s'il ne peut pas l'être, la passe attend
+	 * plutôt que d'écrire dans des tables périmées.
+	 */
+	private static function schema_ready(): bool {
+		Installer::maybe_upgrade();
+		return Schema::is_current();
 	}
 
 	/**

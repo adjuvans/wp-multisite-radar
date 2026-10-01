@@ -363,4 +363,47 @@ final class QueueTest extends TestCase {
 		$this->assertSame( $this->plugin()->sites()->count_all( $network ), $this->plugin()->sites()->count_dirty( $network ) );
 		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_CONTINUE ) );
 	}
+
+	public function test_a_cron_pass_upgrades_an_outdated_schema_before_scanning(): void {
+		self::factory()->blog->create();
+		update_site_option( Schema::OPTION, 1 );
+		$upgrades = did_action( 'msradar_upgraded' );
+
+		do_action( Queue::HOOK_PROCESS );
+
+		$this->assertTrue( Schema::is_current() );
+		$this->assertSame( $upgrades + 1, did_action( 'msradar_upgraded' ) );
+		$this->assertSame( 0, $this->plugin()->sites()->count_dirty(), 'The pass then scans with the current schema.' );
+	}
+
+	public function test_the_recompute_upgrades_an_outdated_schema_first(): void {
+		update_site_option( Schema::OPTION, 1 );
+		$upgrades = did_action( 'msradar_upgraded' );
+
+		do_action( Queue::HOOK_RECOMPUTE );
+
+		$this->assertTrue( Schema::is_current() );
+		$this->assertSame( $upgrades + 1, did_action( 'msradar_upgraded' ) );
+	}
+
+	public function test_cron_passes_wait_while_the_schema_cannot_be_upgraded(): void {
+		self::factory()->blog->create();
+		$this->plugin()->sites()->seed_from_blogs( get_current_network_id() );
+		$this->make_record( 3001, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		$dirty = $this->plugin()->sites()->count_dirty();
+		update_site_option( Schema::OPTION, 1 );
+		// Les tables semblent absentes après dbDelta : Schema::install() échoue et la version reste 1.
+		$hide = static fn ( string $query ): string => 0 === strpos( ltrim( $query ), 'SHOW TABLES LIKE' ) ? 'SELECT 1 FROM DUAL WHERE 1 = 0' : $query;
+		add_filter( 'query', $hide );
+		try {
+			$this->queue->process();
+			$this->queue->run_recompute();
+		} finally {
+			remove_filter( 'query', $hide );
+		}
+
+		$this->assertFalse( Schema::is_current() );
+		$this->assertSame( $dirty, $this->plugin()->sites()->count_dirty(), 'No site is scanned against an outdated schema.' );
+		$this->assertSame( 0, $this->plugin()->sites()->find( 3001 )->alert_level, 'No alert is recomputed against an outdated schema.' );
+	}
 }
