@@ -4,6 +4,15 @@
 
 Réécriture complète sous le nom **Multisite Radar** (slug `multisite-radar`). Voir la spec dans `docs/superpowers/specs/`.
 
+### Jalon M1 — Fondations
+- Collecte hybride : SQL agrégé sur les tables de chaque site + relevé des types enregistrés dans le contexte du site (libellés et origines exacts).
+- Tables réseau `msradar_sites` et `msradar_site_extensions`, file d'analyse WP-Cron par lots avec verrou.
+- Moteur d'alertes réglable (règles `no_users`, `inactive`, `high_media`).
+- API REST `multisite-radar/v1` (sites, analyse, réglages, synthèse des alertes).
+- Commandes `wp multisite-radar scan|probe|sites list`.
+- Migration automatique des réglages et des éléments de menu de la 1.x.
+- Outillage : PHPUnit multisite, WPCS, PHPStan niveau 6, CI GitHub Actions, Plugin Check.
+
 ---
 
 ## [1.6.0] - 2025-12-10

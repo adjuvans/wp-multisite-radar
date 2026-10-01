@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main, v2]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+      - run: composer install --no-progress --prefer-dist
+      - run: composer lint
+      - run: composer analyse
+
+  phpunit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.1', '8.4']
+        wp: ['6.9', '7.1', 'trunk']
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      WP_CORE_DIR: /tmp/wordpress
+      WP_TESTS_DB_NAME: wordpress_test
+      WP_TESTS_DB_USER: root
+      WP_TESTS_DB_PASSWORD: root
+      WP_TESTS_DB_HOST: 127.0.0.1:3306
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli
+          coverage: none
+          tools: composer:v2, wp-cli
+      - name: Download WordPress ${{ matrix.wp }}
+        run: |
+          if [ "${{ matrix.wp }}" = "trunk" ]; then VERSION=nightly; else VERSION="${{ matrix.wp }}"; fi
+          wp core download --path="$WP_CORE_DIR" --version="$VERSION" --force
+      - name: Install dependencies matching WordPress ${{ matrix.wp }}
+        run: |
+          if [ "${{ matrix.wp }}" = "trunk" ]; then TESTS="dev-master"; else TESTS="${{ matrix.wp }}.*"; fi
+          composer require --dev --no-update "wp-phpunit/wp-phpunit:$TESTS"
+          composer update --no-progress --prefer-dist -W
+      - run: vendor/bin/phpunit
+
+  plugin-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the distributable directory
+        run: |
+          mkdir -p /tmp/build/multisite-radar
+          rsync -a --exclude-from=.distignore ./ /tmp/build/multisite-radar/
+      - uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: /tmp/build/multisite-radar

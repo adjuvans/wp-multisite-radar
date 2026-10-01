@@ -3,6 +3,7 @@ parameters:
 	paths:
 		- multisite-radar.php
 		- includes
+		- uninstall.php
 	bootstrapFiles:
 		- tests/phpstan-bootstrap.php
 	scanFiles:
