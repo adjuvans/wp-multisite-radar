@@ -88,21 +88,25 @@ final class ScanController extends Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function request_scan( WP_REST_Request $request ) {
-		$network_id = get_current_network_id();
-		$scope      = (string) $request['scope'];
-		if ( 'all' === $scope ) {
-			$this->queue->request_full_scan( $network_id );
-		} elseif ( 'ids' === $scope ) {
-			$ids = $this->sites->ids_in_network( (array) $request['ids'], $network_id );
-			if ( [] === $ids ) {
-				return new WP_Error( 'msradar_no_sites', __( 'None of the requested sites belongs to this network.', 'multisite-radar' ), [ 'status' => 400 ] );
+		return $this->guard(
+			function () use ( $request ) {
+				$network_id = get_current_network_id();
+				$scope      = (string) $request['scope'];
+				if ( 'all' === $scope ) {
+					$this->queue->request_full_scan( $network_id );
+				} elseif ( 'ids' === $scope ) {
+					$ids = $this->sites->ids_in_network( (array) $request['ids'], $network_id );
+					if ( [] === $ids ) {
+						return new WP_Error( 'msradar_no_sites', __( 'None of the requested sites belongs to this network.', 'multisite-radar' ), [ 'status' => 400 ] );
+					}
+					$this->sites->mark_dirty( $ids );
+					$this->queue->continue_soon();
+				} else {
+					$this->queue->continue_soon();
+				}
+				return new WP_REST_Response( $this->status() );
 			}
-			$this->sites->mark_dirty( $ids );
-			$this->queue->continue_soon();
-		} else {
-			$this->queue->continue_soon();
-		}
-		return new WP_REST_Response( $this->status() );
+		);
 	}
 
 	public function run_batch(): WP_REST_Response {

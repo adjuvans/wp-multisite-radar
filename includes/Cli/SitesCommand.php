@@ -75,17 +75,23 @@ final class SitesCommand {
 		$items = [];
 		$page  = 1;
 		do {
-			$result = $query->list(
-				[
-					'page'        => $page,
-					'per_page'    => 100,
-					'orderby'     => 'id',
-					'search'      => (string) ( $assoc_args['search'] ?? '' ),
-					'alert_level' => isset( $assoc_args['alert'] ) ? [ (string) $assoc_args['alert'] ] : [],
-					'theme'       => (string) ( $assoc_args['theme'] ?? '' ),
-					'plugin'      => (string) ( $assoc_args['plugin'] ?? '' ),
-				]
-			);
+			try {
+				$result = $query->list(
+					[
+						'page'        => $page,
+						'per_page'    => 100,
+						'orderby'     => 'id',
+						'search'      => (string) ( $assoc_args['search'] ?? '' ),
+						'alert_level' => isset( $assoc_args['alert'] ) ? [ (string) $assoc_args['alert'] ] : [],
+						'theme'       => (string) ( $assoc_args['theme'] ?? '' ),
+						'plugin'      => (string) ( $assoc_args['plugin'] ?? '' ),
+					]
+				);
+			} catch ( \RuntimeException $error ) {
+				do_action( 'msradar_error', __METHOD__, $error );
+				\WP_CLI::error( 'Multisite Radar could not read its data. Try again in a moment.' );
+				return;
+			}
 			foreach ( $result['items'] as $item ) {
 				$items[] = self::flatten( $item );
 			}

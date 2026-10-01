@@ -100,4 +100,24 @@ final class ScanControllerTest extends RestTestCase {
 			$this->assertSame( 'msradar_no_sites', $response->get_data()['code'] );
 		}
 	}
+
+	public function test_a_failed_site_lookup_is_a_500(): void {
+		global $wpdb;
+		$this->login_as_super_admin();
+		$this->make_record( 701 );
+		$break    = static function ( string $query ): string {
+			return 0 === strpos( ltrim( $query ), 'SELECT site_id FROM' ) && false !== strpos( $query, 'IN (' ) ? 'SELECT * FROM msradar_missing_table' : $query;
+		};
+		$suppress = $wpdb->suppress_errors( true );
+		add_filter( 'query', $break );
+		try {
+			$response = $this->request( 'POST', '/scan', [ 'scope' => 'ids', 'ids' => [ 701 ] ] );
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $suppress );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'msradar_storage_error', $response->get_data()['code'] );
+	}
 }
