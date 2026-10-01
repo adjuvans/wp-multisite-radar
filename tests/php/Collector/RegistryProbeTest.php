@@ -87,7 +87,9 @@ final class RegistryProbeTest extends TestCase {
 		$sites->clear_dirty( $site_id );
 
 		switch_to_blog( $site_id );
-		$this->probe()->run();
+		$probe = $this->probe();
+		$probe->start_tracking();
+		$probe->run();
 		$registry = get_option( RegistryProbe::OPTION );
 		$autoload = $wpdb->get_var( $wpdb->prepare( 'SELECT autoload FROM %i WHERE option_name = %s', $wpdb->options, RegistryProbe::OPTION ) );
 		restore_current_blog();
@@ -126,6 +128,43 @@ final class RegistryProbeTest extends TestCase {
 		$probe->schedule();
 
 		$this->assertSame( 1, $this->count_cron_events( RegistryProbe::CRON_HOOK ) );
+	}
+
+	public function test_run_without_tracking_leaves_the_option_untouched(): void {
+		$stored = [
+			'fingerprint' => Fingerprint::current(),
+			'built_at'    => time(),
+			'post_types'  => [
+				'acme_thing' => [
+					'label'   => 'Acme',
+					'public'  => true,
+					'show_ui' => true,
+					'builtin' => false,
+					'origin'  => [
+						'kind' => 'plugin',
+						'slug' => 'acme',
+					],
+				],
+			],
+			'taxonomies'  => [],
+		];
+		update_option( RegistryProbe::OPTION, $stored );
+
+		$this->probe()->run();
+
+		$this->assertSame( $stored, get_option( RegistryProbe::OPTION ) );
+	}
+
+	public function test_tracked_run_clears_the_pending_event(): void {
+		wp_clear_scheduled_hook( RegistryProbe::CRON_HOOK );
+		$probe = $this->probe();
+		$probe->start_tracking();
+		$probe->schedule();
+		$this->assertSame( 1, $this->count_cron_events( RegistryProbe::CRON_HOOK ) );
+
+		$probe->run();
+
+		$this->assertSame( 0, $this->count_cron_events( RegistryProbe::CRON_HOOK ) );
 	}
 
 	public function test_plugin_boot_registers_the_probe(): void {

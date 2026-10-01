@@ -90,8 +90,13 @@ final class RegistryProbe {
 	}
 
 	public function run(): void {
+		// Sans suivi, les origines sont inconnues : ne jamais écraser un bon relevé par des « unknown ».
+		if ( ! $this->tracking ) {
+			return;
+		}
 		update_option( self::OPTION, $this->build(), true );
 		$this->sites->mark_dirty( [ get_current_blog_id() ] );
+		wp_clear_scheduled_hook( self::CRON_HOOK );
 	}
 
 	public function build(): array {
