@@ -31,7 +31,7 @@ final class PreloadTest extends RestTestCase {
 			[ '/multisite-radar/v1/preferences', '/multisite-radar/v1/alerts/summary', '/multisite-radar/v1/alerts?order=asc&orderby=rule&page=1&per_page=20' ],
 			Preload::paths( 'alerts', [], $prefs )
 		);
-		$this->assertSame( [ '/multisite-radar/v1/preferences', '/multisite-radar/v1/settings' ], Preload::paths( 'settings', [], $prefs ) );
+		$this->assertSame( [ '/multisite-radar/v1/preferences', '/multisite-radar/v1/settings', '/multisite-radar/v1/alert-rules' ], Preload::paths( 'settings', [], $prefs ) );
 	}
 
 	public function test_run_preloads_successful_responses_only(): void {

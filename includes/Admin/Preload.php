@@ -47,6 +47,7 @@ final class Preload {
 				break;
 			case 'settings':
 				$paths[] = ViewQuery::path( '/settings' );
+				$paths[] = ViewQuery::path( '/alert-rules' );
 				break;
 		}
 		return $paths;

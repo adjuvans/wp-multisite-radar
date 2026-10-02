@@ -25,14 +25,15 @@ use MultisiteRadar\Query\SiteUsersQuery;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Query\ThemesQuery;
 use MultisiteRadar\Query\UsersQuery;
+use MultisiteRadar\Rest\AlertRulesController;
 use MultisiteRadar\Rest\AlertsController;
 use MultisiteRadar\Rest\InventoryController;
 use MultisiteRadar\Rest\PluginsController;
 use MultisiteRadar\Rest\PreferencesController;
 use MultisiteRadar\Rest\ScanController;
-use MultisiteRadar\Rest\ThemesController;
 use MultisiteRadar\Rest\SettingsController;
 use MultisiteRadar\Rest\SitesController;
+use MultisiteRadar\Rest\ThemesController;
 use MultisiteRadar\Rest\UsersController;
 use MultisiteRadar\Scan\BatchRunner;
 use MultisiteRadar\Scan\Invalidation;
@@ -173,6 +174,7 @@ final class Plugin {
 			new ScanController( $this->sites(), $this->runner(), $this->queue(), $this->lock() ),
 			new SettingsController( $this->settings(), $this->rules() ),
 			new AlertsController( $this->alerts_query() ),
+			new AlertRulesController( $this->rules() ),
 			new PreferencesController( $this->preferences() ),
 		];
 		foreach ( $controllers as $controller ) {

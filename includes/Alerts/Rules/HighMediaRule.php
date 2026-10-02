@@ -35,6 +35,7 @@ final class HighMediaRule implements RuleInterface {
 					'type'        => 'integer',
 					'minimum'     => 1,
 					'maximum'     => 10000000,
+					'title'       => __( 'Number of media files', 'multisite-radar' ),
 					'description' => __( 'Number of media files that raises the alert.', 'multisite-radar' ),
 				],
 			],

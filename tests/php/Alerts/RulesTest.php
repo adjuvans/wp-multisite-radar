@@ -264,4 +264,13 @@ final class RulesTest extends TestCase {
 		update_site_option( 'upload_space_check_disabled', 1 );
 		$this->assertNull( $rule->evaluate( $site( 50 * MB_IN_BYTES ), [ 'percent' => 90 ], time() ), 'Quotas are disabled on the network.' );
 	}
+
+	public function test_every_parameter_has_a_title_and_a_description(): void {
+		foreach ( RuleRegistry::create_default()->all() as $id => $rule ) {
+			foreach ( $rule->params_schema()['properties'] as $key => $schema ) {
+				$this->assertNotSame( '', $schema['title'] ?? '', "$id.$key" );
+				$this->assertNotSame( '', $schema['description'] ?? '', "$id.$key" );
+			}
+		}
+	}
 }

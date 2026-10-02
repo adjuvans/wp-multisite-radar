@@ -35,6 +35,7 @@ final class InactiveRule implements RuleInterface {
 					'type'        => 'integer',
 					'minimum'     => 1,
 					'maximum'     => 120,
+					'title'       => __( 'Months without activity', 'multisite-radar' ),
 					'description' => __( 'Months without activity before the alert is raised.', 'multisite-radar' ),
 				],
 			],
