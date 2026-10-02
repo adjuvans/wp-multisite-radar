@@ -64,7 +64,11 @@ export default function UsersTab( { siteId } ) {
 								) }
 							</td>
 							<td>{ user.display_name }</td>
-							<td>{ user.roles.join( ', ' ) || '—' }</td>
+							<td>
+								{ ( user.role_names || user.roles ).join(
+									', '
+								) || '—' }
+							</td>
 						</tr>
 					) ) }
 				</tbody>

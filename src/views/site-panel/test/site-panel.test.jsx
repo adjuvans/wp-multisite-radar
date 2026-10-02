@@ -225,6 +225,7 @@ test( 'users are loaded on demand, page by page', async () => {
 				login: 'admin',
 				display_name: 'Admin',
 				roles: [ 'administrator' ],
+				role_names: [ 'Administrateur' ],
 				super_admin: true,
 				registered_gmt: null,
 			},
@@ -240,6 +241,8 @@ test( 'users are loaded on demand, page by page', async () => {
 	fireEvent.click( screen.getByRole( 'tab', { name: 'Users' } ) );
 
 	expect( await screen.findByText( 'admin' ) ).toBeInTheDocument();
+	expect( screen.getByText( 'Administrateur' ) ).toBeInTheDocument();
+	expect( screen.queryByText( 'administrator' ) ).not.toBeInTheDocument();
 	expect( apiFetch ).toHaveBeenCalledWith( {
 		path: '/multisite-radar/v1/sites/12/users?page=1&per_page=20',
 		parse: false,
