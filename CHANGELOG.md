@@ -1,5 +1,9 @@
 # Changelog — Multisite Radar
 
+## [Non publié]
+
+- Outillage : `Makefile` (`make dist`, `make check`, `make e2e`, `make version`), déploiement FTP vers les serveurs de test et de production (`make deploy-test`, `make deploy-prod`, paramètres dans `.env`).
+
 ## [2.0.0-beta.1] - 2026-10-01
 
 ### Jalon M2 — Interface

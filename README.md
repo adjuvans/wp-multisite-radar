@@ -7,6 +7,28 @@ Audit réseau pour WordPress Multisite (successeur de Network Plugin Utilities 1
 
 ## Développement
 
+Le `Makefile` regroupe les commandes ci-dessous (`make` seul affiche l'aide) :
+
+```bash
+make install          # dépendances npm et Composer
+make dist             # dist/multisite-radar-<version>.zip, filtré par .distignore
+make check            # lint + tests PHPUnit et Vitest
+make e2e WP_ENV_PORT=8890   # bout en bout ; make e2e-stop pour arrêter wp-env
+make version VERSION=2.0.0  # en-tête, constante, readme.txt, package.json et lock
+```
+
+Le zip de `make dist` contient le même arbre que celui validé par Plugin Check en CI. Ce n'est pas le cas de `npm run plugin-zip`, qui ajoute `package.json` et `README.md`.
+
+Déploiement FTP (requiert `lftp`) : copier `.env.example` en `.env`, puis renseigner les accès de test et de production.
+
+```bash
+make deploy-test DRY_RUN=1  # simulation : liste ce qui serait envoyé ou supprimé
+make deploy-test            # envoie le plugin sur le serveur de test
+make deploy-prod            # idem en production, après avoir tapé « prod »
+```
+
+Le plugin est envoyé dans un dossier caché (`.multisite-radar-new`), puis échangé par renommage avec la version en place : le site ne voit jamais un plugin à moitié copié. Si l'envoi échoue, la version en place reste intacte.
+
 ```bash
 composer install
 bin/test-db.sh        # une fois : crée la base wordpress_test

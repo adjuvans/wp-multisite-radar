@@ -26,3 +26,10 @@
 /playwright.config.js
 /.wp-env.json
 /artifacts
+/CHANGELOG.md
+/Makefile
+/dist
+/*.zip
+/.superpowers
+/.wp-env.override.json
+/.env*
