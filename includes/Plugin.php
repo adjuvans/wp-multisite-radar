@@ -19,6 +19,7 @@ use MultisiteRadar\Query\PluginsQuery;
 use MultisiteRadar\Query\SiteUsersQuery;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Query\ThemesQuery;
+use MultisiteRadar\Query\UsersQuery;
 use MultisiteRadar\Rest\AlertsController;
 use MultisiteRadar\Rest\PluginsController;
 use MultisiteRadar\Rest\PreferencesController;
@@ -26,6 +27,7 @@ use MultisiteRadar\Rest\ScanController;
 use MultisiteRadar\Rest\ThemesController;
 use MultisiteRadar\Rest\SettingsController;
 use MultisiteRadar\Rest\SitesController;
+use MultisiteRadar\Rest\UsersController;
 use MultisiteRadar\Scan\BatchRunner;
 use MultisiteRadar\Scan\Invalidation;
 use MultisiteRadar\Scan\Lock;
@@ -36,6 +38,7 @@ use MultisiteRadar\SitesMenu\Module as SitesMenuModule;
 use MultisiteRadar\SitesMenu\SitesListCache;
 use MultisiteRadar\Storage\ExtensionsRepository;
 use MultisiteRadar\Storage\SitesRepository;
+use MultisiteRadar\Storage\UsersRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -81,6 +84,10 @@ final class Plugin {
 	private ?PluginsQuery $plugins_query = null;
 
 	private ?ThemesQuery $themes_query = null;
+
+	private ?UsersRepository $users_repository = null;
+
+	private ?UsersQuery $users_query = null;
 
 	private ?LegacyMigration $legacy = null;
 
@@ -148,6 +155,7 @@ final class Plugin {
 			new SitesController( $this->sites_query(), $this->site_users_query() ),
 			new PluginsController( $this->plugins_query(), $this->sites_query() ),
 			new ThemesController( $this->themes_query(), $this->sites_query() ),
+			new UsersController( $this->users_query() ),
 			new ScanController( $this->sites(), $this->runner(), $this->queue(), $this->lock() ),
 			new SettingsController( $this->settings(), $this->rules() ),
 			new AlertsController( $this->alerts_query() ),
@@ -261,6 +269,14 @@ final class Plugin {
 
 	public function themes_query(): ThemesQuery {
 		return $this->themes_query ??= new ThemesQuery( $this->sites() );
+	}
+
+	public function users_repository(): UsersRepository {
+		return $this->users_repository ??= new UsersRepository();
+	}
+
+	public function users_query(): UsersQuery {
+		return $this->users_query ??= new UsersQuery( $this->users_repository() );
 	}
 
 	public function preferences(): Preferences {
