@@ -25,4 +25,11 @@ if ! wp site list --field=path | grep -qx '/atelier/'; then
 	wp site create --slug=atelier --title="L'atelier R&D"
 fi
 
+# Un compte rattaché à aucun site : il apparaît dans le filtre « No site » de la page Utilisateurs.
+if ! wp user get radar-orphan >/dev/null 2>&1; then
+	# `wp user create` refuse le tiret en multisite (validation des inscriptions) : on passe par wp_insert_user().
+	wp eval 'wp_insert_user( array( "user_login" => "radar-orphan", "user_email" => "radar-orphan@example.test", "user_pass" => wp_generate_password(), "role" => "subscriber" ) );'
+	wp eval 'remove_user_from_blog( get_user_by( "login", "radar-orphan" )->ID, get_main_site_id() );'
+fi
+
 wp multisite-radar scan --all --probe
