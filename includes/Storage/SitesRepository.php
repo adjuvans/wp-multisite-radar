@@ -524,4 +524,43 @@ final class SitesRepository {
 			'rules'       => $rules,
 		];
 	}
+
+	/**
+	 * Sites analysés du réseau par thème actif, et par thème parent d'un thème enfant actif. Les deux comptes ne se
+	 * recouvrent pas : leur somme est le nombre de lignes que retient le filtre « theme » de query().
+	 *
+	 * @return array{active: array<string, int>, parent: array<string, int>} Dossier du thème => nombre de sites.
+	 * @throws \RuntimeException Si une lecture échoue.
+	 */
+	public function theme_counts( int $network_id ): array {
+		global $wpdb;
+		$table  = Schema::sites_table();
+		$active = $wpdb->get_results(
+			$wpdb->prepare( "SELECT theme_stylesheet AS theme, COUNT(*) AS sites FROM %i WHERE network_id = %d AND theme_stylesheet <> '' GROUP BY theme_stylesheet ORDER BY theme_stylesheet ASC", $table, $network_id ),
+			ARRAY_A
+		);
+		self::check_read();
+		$parent = $wpdb->get_results(
+			$wpdb->prepare( "SELECT theme_template AS theme, COUNT(*) AS sites FROM %i WHERE network_id = %d AND theme_template <> '' AND theme_template <> theme_stylesheet GROUP BY theme_template ORDER BY theme_template ASC", $table, $network_id ),
+			ARRAY_A
+		);
+		self::check_read();
+
+		return [
+			'active' => self::count_map( (array) $active ),
+			'parent' => self::count_map( (array) $parent ),
+		];
+	}
+
+	/**
+	 * @param array[] $rows Lignes { theme, sites }.
+	 * @return array<string, int>
+	 */
+	private static function count_map( array $rows ): array {
+		$counts = [];
+		foreach ( $rows as $row ) {
+			$counts[ (string) $row['theme'] ] = (int) $row['sites'];
+		}
+		return $counts;
+	}
 }

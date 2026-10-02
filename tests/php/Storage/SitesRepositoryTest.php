@@ -223,4 +223,41 @@ final class SitesRepositoryTest extends TestCase {
 		$this->expectException( \LogicException::class );
 		$this->plugin()->sites()->save( $record );
 	}
+
+	public function test_theme_counts_separate_active_themes_and_parents_per_network(): void {
+		$this->make_record(
+			981,
+			[
+				'theme_stylesheet' => 'child',
+				'theme_template'   => 'parent',
+			]
+		);
+		$this->make_record(
+			982,
+			[
+				'theme_stylesheet' => 'parent',
+				'theme_template'   => 'parent',
+			]
+		);
+		$this->make_record(
+			983,
+			[
+				'network_id'       => 2,
+				'theme_stylesheet' => 'parent',
+				'theme_template'   => 'parent',
+			]
+		);
+		$this->make_record( 984 );
+
+		$counts = $this->plugin()->sites()->theme_counts( get_current_network_id() );
+
+		$this->assertSame(
+			[
+				'child'  => 1,
+				'parent' => 1,
+			],
+			$counts['active']
+		);
+		$this->assertSame( [ 'parent' => 1 ], $counts['parent'] );
+	}
 }

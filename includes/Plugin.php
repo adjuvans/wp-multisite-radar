@@ -18,10 +18,12 @@ use MultisiteRadar\Query\AlertsQuery;
 use MultisiteRadar\Query\PluginsQuery;
 use MultisiteRadar\Query\SiteUsersQuery;
 use MultisiteRadar\Query\SitesQuery;
+use MultisiteRadar\Query\ThemesQuery;
 use MultisiteRadar\Rest\AlertsController;
 use MultisiteRadar\Rest\PluginsController;
 use MultisiteRadar\Rest\PreferencesController;
 use MultisiteRadar\Rest\ScanController;
+use MultisiteRadar\Rest\ThemesController;
 use MultisiteRadar\Rest\SettingsController;
 use MultisiteRadar\Rest\SitesController;
 use MultisiteRadar\Scan\BatchRunner;
@@ -77,6 +79,8 @@ final class Plugin {
 	private ?AlertsQuery $alerts_query = null;
 
 	private ?PluginsQuery $plugins_query = null;
+
+	private ?ThemesQuery $themes_query = null;
 
 	private ?LegacyMigration $legacy = null;
 
@@ -143,6 +147,7 @@ final class Plugin {
 		$controllers = [
 			new SitesController( $this->sites_query(), $this->site_users_query() ),
 			new PluginsController( $this->plugins_query(), $this->sites_query() ),
+			new ThemesController( $this->themes_query(), $this->sites_query() ),
 			new ScanController( $this->sites(), $this->runner(), $this->queue(), $this->lock() ),
 			new SettingsController( $this->settings(), $this->rules() ),
 			new AlertsController( $this->alerts_query() ),
@@ -252,6 +257,10 @@ final class Plugin {
 
 	public function plugins_query(): PluginsQuery {
 		return $this->plugins_query ??= new PluginsQuery( $this->extensions(), $this->sites() );
+	}
+
+	public function themes_query(): ThemesQuery {
+		return $this->themes_query ??= new ThemesQuery( $this->sites() );
 	}
 
 	public function preferences(): Preferences {
