@@ -158,18 +158,90 @@ final class ExportHandlerTest extends TestCase {
 		$this->assertSame( [ ExportHandler::class . '::handle' ], $reported );
 	}
 
+	public function test_plugins_and_themes_are_exported_with_their_own_filters_and_columns(): void {
+		wp_cache_set(
+			'plugins',
+			[
+				'' => [
+					'alpha/alpha.php' => [
+						'Name'    => '=Alpha',
+						'Version' => '1.0',
+					],
+					'beta/beta.php'   => [
+						'Name'    => 'Beta',
+						'Version' => '2.0',
+					],
+				],
+			],
+			'plugins'
+		);
+		$this->plugin()->extensions()->replace_for_site( 801, [ 'alpha/alpha.php' ], '', '' );
+
+		$csv = $this->export(
+			[
+				'resource' => 'plugins',
+				'format'   => 'csv',
+				'fields'   => 'name,file,sites_count,network_active',
+				'status'   => 'local',
+			]
+		);
+		$this->assertSame( "\xEF\xBB\xBFName,\"Plugin file\",\"Network activated\",Sites\n'=Alpha,alpha/alpha.php,0,1\n", $csv );
+
+		$data = json_decode(
+			$this->export(
+				[
+					'resource' => 'themes',
+					'format'   => 'json',
+					'fields'   => 'stylesheet,sites_count',
+					'search'   => 'astra',
+				]
+			),
+			true
+		);
+		$this->assertSame( 'themes', $data['meta']['resource'] );
+		$this->assertSame( [ 'search' => 'astra' ], $data['meta']['filters'] );
+		$this->assertSame(
+			[
+				[
+					'stylesheet'  => 'astra',
+					'sites_count' => 1,
+				],
+			],
+			$data['items']
+		);
+	}
+
+	public function test_each_resource_accepts_only_its_own_filters_and_columns(): void {
+		$params = $this->handler->params(
+			[
+				'resource'    => 'plugins',
+				'has_update'  => '1',
+				'alert_level' => 'error',
+				'fields'      => 'bogus',
+			]
+		);
+
+		$this->assertSame( [ 'has_update' => '1' ], $params['filters'] );
+		$this->assertSame( [ 'name', 'file', 'version', 'status', 'network_active', 'sites_count', 'update_version' ], $params['fields'] );
+	}
+
 	/**
 	 * @dataProvider formats
 	 */
-	public function test_a_failure_from_the_second_chunk_stops_without_any_markup( string $format ): void {
+	public function test_a_failure_from_the_second_chunk_ends_the_file_with_a_visible_marker( string $format ): void {
 		global $wpdb;
-		$params = $this->handler->params( [ 'format' => $format, 'fields' => 'id' ] );
+		$params = $this->handler->params(
+			[
+				'format' => $format,
+				'fields' => 'id',
+			]
+		);
 		$stream = fopen( 'php://memory', 'w+b' );
 		$fired  = [];
 		$report = static function ( string $context ) use ( &$fired ): void {
 			$fired[] = $context;
 		};
-		$guard  = $this->break_sites_reads( 1 );
+		$guard  = $this->break_sites_reads( 2 ); // Each page reads twice: the count, then the rows.
 		add_action( 'msradar_error', $report );
 		add_filter( 'query', $guard );
 		$previous = $wpdb->suppress_errors( true );
@@ -185,10 +257,20 @@ final class ExportHandlerTest extends TestCase {
 		$output = (string) stream_get_contents( $stream );
 
 		$this->assertFalse( $completed );
-		$this->assertNotSame( '', $output, 'The first chunk was streamed before the failure.' );
 		$this->assertSame( [ ExportHandler::class . '::stream' ], $fired );
 		$this->assertStringNotContainsString( '<', $output );
 		$this->assertStringNotContainsString( 'wp-die', $output );
+		if ( 'csv' === $format ) {
+			$lines = explode( "\n", trim( $output ) );
+			$this->assertGreaterThanOrEqual( 3, count( $lines ), 'Header, first chunk, then the marker.' );
+			$this->assertSame( [ ExportHandler::incomplete_notice() ], str_getcsv( (string) end( $lines ), ',', '"', '' ) );
+		} else {
+			$data = json_decode( $output, true );
+			$this->assertIsArray( $data, 'The document stays valid JSON.' );
+			$this->assertNotEmpty( $data['items'], 'The first chunk was streamed before the failure.' );
+			$this->assertTrue( $data['incomplete'] );
+			$this->assertSame( ExportHandler::incomplete_notice(), $data['error'] );
+		}
 	}
 
 	public static function formats(): array {

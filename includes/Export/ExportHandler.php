@@ -2,28 +2,30 @@
 namespace MultisiteRadar\Export;
 
 use MultisiteRadar\Capabilities;
-use MultisiteRadar\Query\SitesQuery;
 use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Export des sites en CSV ou JSON par admin-post.php, avec nonce et capacité msradar_view.
- * Les mêmes filtres que GET /sites ; les lignes sont lues et écrites par tranches de 500.
+ * Exports CSV et JSON par admin-post.php, avec nonce et capacité msradar_view (spec §5.2) : sites, plugins, thèmes.
+ * Les filtres sont ceux de la route REST de la ressource ; les sites sont lus et écrits par tranches de 500.
  */
 final class ExportHandler {
 
 	public const ACTION    = 'msradar_export';
-	public const RESOURCES = [ 'sites' ];
+	public const RESOURCES = [ 'sites', 'plugins', 'themes' ];
 	public const FORMATS   = [ 'csv', 'json' ];
 
-	private const FILTERS      = [ 'search', 'orderby', 'order', 'alert_level', 'status', 'registry_status', 'rule', 'theme', 'plugin', 'include' ];
-	private const LIST_FILTERS = [ 'alert_level', 'status', 'registry_status', 'include' ];
+	/**
+	 * @var array<string, ExportSource>
+	 */
+	private array $sources;
 
-	private SitesQuery $sites;
-
-	public function __construct( SitesQuery $sites ) {
-		$this->sites = $sites;
+	/**
+	 * @param array<string, ExportSource> $sources Ressource (RESOURCES) => source.
+	 */
+	public function __construct( array $sources ) {
+		$this->sources = $sources;
 	}
 
 	public function register(): void {
@@ -42,7 +44,7 @@ final class ExportHandler {
 
 		// Premier accès aux données avant tout en-tête et tout octet : un échec donne encore un vrai 500.
 		try {
-			$this->sites->list( array_merge( $params['filters'], [ 'per_page' => 1 ] ) );
+			$this->sources[ $params['resource'] ]->check( $params['filters'] );
 		} catch ( \RuntimeException $error ) {
 			do_action( 'msradar_error', __METHOD__, $error );
 			wp_die( esc_html__( 'The export could not be read from the database.', 'multisite-radar' ), '', [ 'response' => 500 ] );
@@ -87,7 +89,7 @@ final class ExportHandler {
 	 */
 	public function params( array $input ) {
 		$resource = (string) ( $input['resource'] ?? 'sites' );
-		if ( ! in_array( $resource, self::RESOURCES, true ) ) {
+		if ( ! in_array( $resource, self::RESOURCES, true ) || ! isset( $this->sources[ $resource ] ) ) {
 			return new WP_Error( 'msradar_unknown_resource', __( 'This data cannot be exported.', 'multisite-radar' ), [ 'status' => 400 ] );
 		}
 		$format = (string) ( $input['format'] ?? 'csv' );
@@ -95,49 +97,59 @@ final class ExportHandler {
 			return new WP_Error( 'msradar_unknown_format', __( 'Unknown export format.', 'multisite-radar' ), [ 'status' => 400 ] );
 		}
 
+		$source  = $this->sources[ $resource ];
+		$lists   = $source->list_filters();
 		$filters = [];
-		foreach ( self::FILTERS as $key ) {
+		foreach ( $source->filters() as $key ) {
 			if ( ! isset( $input[ $key ] ) ) {
 				continue;
 			}
-			if ( ! in_array( $key, self::LIST_FILTERS, true ) && ! is_scalar( $input[ $key ] ) ) {
+			$is_list = in_array( $key, $lists, true );
+			if ( ! $is_list && ! is_scalar( $input[ $key ] ) ) {
 				continue;
 			}
-			$value = in_array( $key, self::LIST_FILTERS, true ) ? self::to_list( $input[ $key ] ) : (string) $input[ $key ];
+			$value = $is_list ? self::to_list( $input[ $key ] ) : (string) $input[ $key ];
 			if ( '' === $value || [] === $value ) {
 				continue;
 			}
 			$filters[ $key ] = 'include' === $key ? array_map( 'intval', (array) $value ) : $value;
 		}
 
+		$known  = array_keys( $source->columns() );
+		$fields = array_values( array_intersect( $known, self::to_list( $input['fields'] ?? [] ) ) );
 		return [
 			'resource' => $resource,
 			'format'   => $format,
-			'fields'   => SitesColumns::select( self::to_list( $input['fields'] ?? [] ) ),
+			'fields'   => [] === $fields ? $known : $fields,
 			'filters'  => $filters,
 		];
 	}
 
 	/**
+	 * Écrit l'export. Si une lecture échoue en cours de route, la sortie est déjà partie : le fichier se termine par
+	 * un marqueur visible, puis l'exception remonte à stream(), qui la signale.
+	 *
 	 * @param array    $params Résultat de params().
 	 * @param resource $stream Flux de sortie.
 	 * @param int      $chunk  Taille des tranches de lecture.
-	 * @return int Nombre de sites exportés.
+	 * @return int Nombre d'éléments exportés.
+	 * @throws \RuntimeException Si une lecture échoue.
 	 */
 	public function write( array $params, $stream, int $chunk = 500 ): int {
+		$source  = $this->sources[ $params['resource'] ];
 		$keys    = (array) $params['fields'];
-		$columns = SitesColumns::all();
+		$columns = $source->columns();
+		$filters = (array) $params['filters'];
 
 		if ( 'csv' === $params['format'] ) {
 			$csv = new CsvWriter( $stream );
 			$csv->header( array_map( static fn ( string $key ): string => $columns[ $key ], $keys ) );
-			return $this->sites->each(
-				(array) $params['filters'],
-				static function ( array $item ) use ( $csv, $keys ): void {
-					$csv->row( SitesColumns::row( $item, $keys ) );
-				},
-				$chunk
-			);
+			try {
+				return $source->each( $filters, $keys, [ $csv, 'row' ], $chunk );
+			} catch ( \RuntimeException $error ) {
+				$csv->row( [ 'incomplete' => self::incomplete_notice() ] );
+				throw $error;
+			}
 		}
 
 		$json = new JsonWriter( $stream );
@@ -147,19 +159,30 @@ final class ExportHandler {
 				'network'       => network_home_url( '/' ),
 				'version'       => MSRADAR_VERSION,
 				'resource'      => $params['resource'],
-				'filters'       => (object) $params['filters'],
+				'filters'       => (object) $filters,
 				'fields'        => $keys,
 			]
 		);
-		$count = $this->sites->each(
-			(array) $params['filters'],
-			static function ( array $item ) use ( $json, $keys ): void {
-				$json->item( SitesColumns::row( $item, $keys ) );
-			},
-			$chunk
-		);
+		try {
+			$count = $source->each( $filters, $keys, [ $json, 'item' ], $chunk );
+		} catch ( \RuntimeException $error ) {
+			$json->end(
+				[
+					'incomplete' => true,
+					'error'      => self::incomplete_notice(),
+				]
+			);
+			throw $error;
+		}
 		$json->end();
 		return $count;
+	}
+
+	/**
+	 * Dernière ligne (CSV) ou clé « error » (JSON) d'un export interrompu.
+	 */
+	public static function incomplete_notice(): string {
+		return __( 'Export incomplete: the data could not be read to the end. Run the export again.', 'multisite-radar' );
 	}
 
 	public function filename( string $name, string $format ): string {

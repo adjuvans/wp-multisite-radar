@@ -55,4 +55,15 @@ final class JsonWriterTest extends TestCase {
 			$this->assertSame( $written, ftell( $stream ), 'Nothing, not even a comma, is written for the bad item.' );
 		}
 	}
+
+	public function test_extra_keys_close_an_interrupted_document(): void {
+		$stream = fopen( 'php://memory', 'w+b' );
+		$json   = new JsonWriter( $stream );
+		$json->begin( [ 'resource' => 'sites' ] );
+		$json->item( [ 'id' => 1 ] );
+		$json->end( [ 'incomplete' => true ] );
+		rewind( $stream );
+
+		$this->assertSame( '{"meta":{"resource":"sites"},"items":[{"id":1}],"incomplete":true}', stream_get_contents( $stream ) );
+	}
 }

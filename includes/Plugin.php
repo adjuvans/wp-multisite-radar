@@ -12,6 +12,9 @@ use MultisiteRadar\Cli\RadarCommand;
 use MultisiteRadar\Collector\RegistryProbe;
 use MultisiteRadar\Collector\SiteCollector;
 use MultisiteRadar\Export\ExportHandler;
+use MultisiteRadar\Export\PluginsExport;
+use MultisiteRadar\Export\SitesExport;
+use MultisiteRadar\Export\ThemesExport;
 use MultisiteRadar\Install\Installer;
 use MultisiteRadar\Install\LegacyMigration;
 use MultisiteRadar\Query\AlertsQuery;
@@ -293,7 +296,13 @@ final class Plugin {
 	}
 
 	public function export(): ExportHandler {
-		return $this->export ??= new ExportHandler( $this->sites_query() );
+		return $this->export ??= new ExportHandler(
+			[
+				'sites'   => new SitesExport( $this->sites_query() ),
+				'plugins' => new PluginsExport( $this->plugins_query() ),
+				'themes'  => new ThemesExport( $this->themes_query() ),
+			]
+		);
 	}
 
 	public function admin_menu(): Menu {

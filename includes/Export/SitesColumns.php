@@ -36,16 +36,6 @@ final class SitesColumns {
 	}
 
 	/**
-	 * @param string[] $requested Clés demandées.
-	 * @return string[] Clés connues, dans l'ordre d'export ; toutes si aucune n'est reconnue.
-	 */
-	public static function select( array $requested ): array {
-		$known = array_keys( self::all() );
-		$keys  = array_values( array_intersect( $known, array_map( 'strval', $requested ) ) );
-		return [] === $keys ? $known : $keys;
-	}
-
-	/**
 	 * @param array    $item Site mis en forme par SitesQuery::summary().
 	 * @param string[] $keys Colonnes à produire.
 	 * @return array<string, mixed> Valeurs scalaires ou null, dans l'ordre de $keys.

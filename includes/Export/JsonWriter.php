@@ -31,8 +31,12 @@ final class JsonWriter {
 		$this->first = false;
 	}
 
-	public function end(): void {
-		$this->put( ']}' );
+	/**
+	 * Ferme le document. $extra ajoute des clés après « items », comme le marqueur d'un export interrompu.
+	 */
+	public function end( array $extra = [] ): void {
+		$tail = [] === $extra ? '' : ',' . substr( self::encode( $extra ), 1, -1 );
+		$this->put( ']' . $tail . '}' );
 	}
 
 	/**
