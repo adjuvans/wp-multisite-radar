@@ -37,6 +37,7 @@ use MultisiteRadar\Rest\UsersController;
 use MultisiteRadar\Scan\BatchRunner;
 use MultisiteRadar\Scan\Invalidation;
 use MultisiteRadar\Scan\Lock;
+use MultisiteRadar\Scan\NetworkStateWatcher;
 use MultisiteRadar\Scan\Queue;
 use MultisiteRadar\Settings\Preferences;
 use MultisiteRadar\Settings\Settings;
@@ -81,7 +82,8 @@ final class Plugin {
 
 	private ?Queue $queue = null;
 
-	private ?Invalidation $invalidation = null;
+	private ?Invalidation $invalidation         = null;
+	private ?NetworkStateWatcher $state_watcher = null;
 
 	private ?SitesQuery $sites_query = null;
 
@@ -134,6 +136,7 @@ final class Plugin {
 		$this->probe()->register();
 		$this->queue()->register();
 		$this->invalidation()->register();
+		$this->state_watcher()->register();
 		$this->sites_menu()->register();
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 		$this->legacy()->register();
@@ -267,6 +270,10 @@ final class Plugin {
 
 	public function invalidation(): Invalidation {
 		return $this->invalidation ??= new Invalidation( $this->sites(), $this->extensions(), $this->settings() );
+	}
+
+	public function state_watcher(): NetworkStateWatcher {
+		return $this->state_watcher ??= new NetworkStateWatcher( $this->network_state() );
 	}
 
 	public function site_users_query(): SiteUsersQuery {
