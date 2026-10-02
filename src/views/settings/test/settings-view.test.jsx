@@ -5,6 +5,7 @@ import {
 	render,
 	screen,
 	waitFor,
+	within,
 } from '@testing-library/react';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
@@ -33,10 +34,76 @@ const SETTINGS = {
 	retention: { events_days: 90, snapshots_days: 365 },
 };
 
-function setup( settings = SETTINGS, extraPreload = {} ) {
+const RULES = [
+	{
+		id: 'no_users',
+		label: 'Site without users',
+		description: 'No user account is attached to the site.',
+		default_severity: 'error',
+		default_params: {},
+		params_schema: { type: 'object', properties: {} },
+	},
+	{
+		id: 'inactive',
+		label: 'Inactive site',
+		description:
+			'No content of the tracked types has been published or updated for a while.',
+		default_severity: 'warning',
+		default_params: { months: 6 },
+		params_schema: {
+			type: 'object',
+			properties: {
+				months: {
+					type: 'integer',
+					minimum: 1,
+					maximum: 120,
+					title: 'Months without activity',
+					description:
+						'Months without activity before the alert is raised.',
+				},
+			},
+		},
+	},
+	{
+		id: 'acme_rule',
+		label: 'Acme rule',
+		description: 'A rule added by another plugin.',
+		default_severity: 'info',
+		default_params: { tags: [ 'a' ] },
+		params_schema: {
+			type: 'object',
+			properties: { tags: { type: 'array' } },
+		},
+	},
+];
+
+/**
+ * Panneau d'une règle, ouvert.
+ *
+ * @param {string} label Libellé de la règle.
+ */
+function openRule( label ) {
+	const toggle = screen.getByRole( 'button', { name: label } );
+	fireEvent.click( toggle );
+	return toggle.closest( '.components-panel__body' );
+}
+
+function setup(
+	settings = SETTINGS,
+	extraPreload = {},
+	{ rules = true } = {}
+) {
 	const preload = {
 		'/multisite-radar/v1/preferences': { body: {}, headers: {} },
 		'/multisite-radar/v1/settings': { body: settings, headers: {} },
+		...( rules
+			? {
+					'/multisite-radar/v1/alert-rules': {
+						body: RULES,
+						headers: {},
+					},
+				}
+			: {} ),
 		...extraPreload,
 	};
 	window.msradarAdmin = {
@@ -236,4 +303,125 @@ test( 'the disk measure can be switched off', async () => {
 	expect( apiFetch.mock.calls[ 0 ][ 0 ].data ).toEqual( {
 		scan: { measure_disk: false },
 	} );
+} );
+
+test( 'each rule has a panel, and a changed parameter is saved with its rule', async () => {
+	apiFetch.mockResolvedValue( SETTINGS );
+	setup();
+	expect(
+		screen.getByRole( 'button', { name: 'Site without users' } )
+	).toBeInTheDocument();
+	const panel = openRule( 'Inactive site' );
+	const months = within( panel ).getByRole( 'spinbutton', {
+		name: /Months without activity/,
+	} );
+	expect( months ).toHaveValue( 6 );
+
+	fireEvent.change( months, { target: { value: '8' } } );
+	await act( async () => {
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Save settings' } )
+		);
+	} );
+
+	expect( apiFetch.mock.calls[ 0 ][ 0 ].data ).toEqual( {
+		alerts: {
+			rules: {
+				inactive: {
+					enabled: true,
+					severity: null,
+					params: { months: 8 },
+				},
+			},
+		},
+	} );
+} );
+
+test( 'a disabled rule says so, and choosing the default severity again leaves nothing to save', async () => {
+	setup();
+	const save = screen.getByRole( 'button', { name: 'Save settings' } );
+	const panel = openRule( 'Site without users' );
+
+	fireEvent.click(
+		within( panel ).getByRole( 'checkbox', { name: 'Enabled' } )
+	);
+	expect(
+		screen.getByRole( 'button', { name: 'Site without users (disabled)' } )
+	).toBeInTheDocument();
+	await waitFor( () => expect( save ).toBeEnabled() );
+	fireEvent.click(
+		within( panel ).getByRole( 'checkbox', { name: 'Enabled' } )
+	);
+	await waitFor( () => expect( save ).toBeDisabled() );
+
+	const severity = within( panel ).getByRole( 'combobox', {
+		name: 'Severity',
+	} );
+	expect( severity ).toHaveValue( '' );
+	expect(
+		within( severity ).getByRole( 'option', { name: 'Default (Error)' } )
+	).toBeInTheDocument();
+	fireEvent.change( severity, { target: { value: 'warning' } } );
+	await waitFor( () => expect( save ).toBeEnabled() );
+	fireEvent.change( severity, { target: { value: '' } } );
+	await waitFor( () => expect( save ).toBeDisabled() );
+} );
+
+test( 'a third-party rule keeps the parameters the form cannot edit', async () => {
+	apiFetch.mockResolvedValue( SETTINGS );
+	setup();
+	const panel = openRule( 'Acme rule' );
+	expect( within( panel ).queryByRole( 'spinbutton' ) ).toBeNull();
+
+	fireEvent.change(
+		within( panel ).getByRole( 'combobox', { name: 'Severity' } ),
+		{ target: { value: 'error' } }
+	);
+	await act( async () => {
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Save settings' } )
+		);
+	} );
+
+	expect( apiFetch.mock.calls[ 0 ][ 0 ].data ).toEqual( {
+		alerts: {
+			rules: {
+				acme_rule: {
+					enabled: true,
+					severity: 'error',
+					params: { tags: [ 'a' ] },
+				},
+			},
+		},
+	} );
+} );
+
+test( 'an out-of-range parameter disables saving', async () => {
+	setup();
+	const save = screen.getByRole( 'button', { name: 'Save settings' } );
+	const panel = openRule( 'Inactive site' );
+
+	fireEvent.change(
+		within( panel ).getByRole( 'spinbutton', {
+			name: /Months without activity/,
+		} ),
+		{ target: { value: '0' } }
+	);
+
+	await waitFor( () => expect( save ).toBeDisabled() );
+} );
+
+test( 'rules that are not loaded yet show a skeleton; the rest of the form works', async () => {
+	apiFetch.mockImplementation( () => new Promise( () => {} ) );
+	setup( SETTINGS, {}, { rules: false } );
+
+	expect( screen.getByText( 'Loading alert rules…' ) ).toBeInTheDocument();
+	fireEvent.click(
+		screen.getByRole( 'checkbox', { name: /network sites menu/ } )
+	);
+	await waitFor( () =>
+		expect(
+			screen.getByRole( 'button', { name: 'Save settings' } )
+		).toBeEnabled()
+	);
 } );

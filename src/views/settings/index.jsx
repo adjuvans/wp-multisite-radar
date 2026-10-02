@@ -11,32 +11,45 @@ import { useResource } from '../../hooks/use-resource';
 import { STORE_NAME, toResponse } from '../../store';
 import { buildPath } from '../../store/paths';
 import {
-	ALL_FORM,
+	allForm,
 	changes,
 	getSettingsFields,
 	MENU_FORM,
 	mergeDeep,
 	SCAN_FORM,
 } from './fields';
+import { getRuleFields } from './rule-fields';
+import RulesCard from './rules-card';
 
 const SETTINGS_PATH = buildPath( '/settings' );
+const RULES_PATH = buildPath( '/alert-rules' );
+const NO_RULES = [];
 
 export default function SettingsView() {
 	const settings = useResource( SETTINGS_PATH );
+	const rules = useResource( RULES_PATH );
+	const ruleList = rules.data || NO_RULES;
 	const [ edits, setEdits ] = useState( {} );
 	const [ saving, setSaving ] = useState( false );
 	const { receiveResponse, invalidate } = useDispatch( STORE_NAME );
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
-	const fields = useMemo( () => getSettingsFields( getConfig() ), [] );
+	const fields = useMemo(
+		() => [
+			...getSettingsFields( getConfig() ),
+			...ruleList.flatMap( ( rule ) => getRuleFields( rule ) ),
+		],
+		[ ruleList ]
+	);
+	const form = useMemo( () => allForm( ruleList ), [ ruleList ] );
 	const data = useMemo(
 		() => mergeDeep( settings.data || {}, edits ),
 		[ settings.data, edits ]
 	);
-	const { validity, isValid } = useFormValidity( data, fields, ALL_FORM );
+	const { validity, isValid } = useFormValidity( data, fields, form );
 	const changed = useMemo(
-		() => changes( settings.data || {}, data ),
-		[ settings.data, data ]
+		() => changes( settings.data || {}, data, ruleList ),
+		[ settings.data, data, ruleList ]
 	);
 	const dirty = Object.keys( changed ).length > 0;
 
@@ -54,6 +67,7 @@ export default function SettingsView() {
 			receiveResponse( SETTINGS_PATH, toResponse( saved ) );
 			setEdits( {} );
 			invalidate( buildPath( '/sites' ) );
+			invalidate( buildPath( '/alerts' ) );
 			createSuccessNotice( __( 'Settings saved.', 'multisite-radar' ), {
 				type: 'snackbar',
 			} );
@@ -95,6 +109,12 @@ export default function SettingsView() {
 							/>
 						</CardBody>
 					</Card>
+					<RulesCard
+						resource={ rules }
+						data={ data }
+						validity={ validity }
+						onChange={ onChange }
+					/>
 					<Card>
 						<CardHeader>
 							<h2>

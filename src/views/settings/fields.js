@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import { ruleConfig, ruleForm } from './rule-fields';
 
 const POST_TYPE_KEY = /^[a-z0-9_-]{1,20}$/;
 
@@ -109,10 +110,21 @@ export const MENU_FORM = {
 	fields: [ 'sites_menu.enabled' ],
 };
 
-export const ALL_FORM = {
-	layout: { type: 'regular' },
-	fields: [ ...SCAN_FORM.fields, ...MENU_FORM.fields ],
-};
+/**
+ * Formulaire complet, pour la validation : analyse, menu des sites, puis les champs de chaque règle.
+ *
+ * @param {Array} rules Définitions des règles (GET /alert-rules).
+ */
+export function allForm( rules = [] ) {
+	return {
+		layout: { type: 'regular' },
+		fields: [
+			...SCAN_FORM.fields,
+			...MENU_FORM.fields,
+			...rules.flatMap( ( rule ) => ruleForm( rule ).fields ),
+		],
+	};
+}
 
 function isObject( value ) {
 	return (
@@ -144,13 +156,14 @@ function same( a, b ) {
 /**
  * Corps de POST /settings : seules les valeurs différentes des réglages enregistrés (écart E14 du plan M4).
  * Revenir à la valeur de départ n'est donc plus une modification, et deux administrateurs qui changent des réglages
- * différents ne s'écrasent pas.
+ * différents ne s'écrasent pas. Une règle modifiée est envoyée entière (activée, gravité, paramètres).
  *
  * @param {Object} saved   Réglages enregistrés.
  * @param {Object} current Réglages affichés, modifications comprises.
+ * @param {Array}  rules   Définitions des règles (GET /alert-rules).
  * @return {Object} Modifications ; un objet vide s'il n'y a rien à enregistrer.
  */
-export function changes( saved, current ) {
+export function changes( saved, current, rules = [] ) {
 	const patch = {};
 	SCAN_KEYS.forEach( ( key ) => {
 		if ( ! same( saved.scan?.[ key ], current.scan?.[ key ] ) ) {
@@ -160,5 +173,13 @@ export function changes( saved, current ) {
 	if ( !! saved.sites_menu?.enabled !== !! current.sites_menu?.enabled ) {
 		patch.sites_menu = { enabled: !! current.sites_menu?.enabled };
 	}
+	rules.forEach( ( rule ) => {
+		const after = ruleConfig( current, rule );
+		if ( ! same( ruleConfig( saved, rule ), after ) ) {
+			patch.alerts = {
+				rules: { ...patch.alerts?.rules, [ rule.id ]: after },
+			};
+		}
+	} );
 	return patch;
 }
