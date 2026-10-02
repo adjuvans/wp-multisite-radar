@@ -54,6 +54,46 @@ final class ExtensionsRepository {
 	}
 
 	/**
+	 * Nombre de sites analysés du réseau sur lesquels chaque plugin est activé localement.
+	 * Les plugins activés sur le réseau n'ont pas de ligne ici (voir la docblock de la table, spec §3.1).
+	 *
+	 * @return array<string, int> Fichier du plugin => nombre de sites, triés par fichier.
+	 * @throws \RuntimeException Si la lecture échoue.
+	 */
+	public function plugin_counts( int $network_id ): array {
+		global $wpdb;
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT e.slug, COUNT(*) AS sites FROM %i AS e INNER JOIN %i AS s ON s.site_id = e.site_id WHERE e.type = %s AND s.network_id = %d GROUP BY e.slug ORDER BY e.slug ASC',
+				Schema::extensions_table(),
+				Schema::sites_table(),
+				self::TYPE_PLUGIN,
+				$network_id
+			),
+			ARRAY_A
+		);
+		self::check_read();
+
+		$counts = [];
+		foreach ( (array) $rows as $row ) {
+			$counts[ (string) $row['slug'] ] = (int) $row['sites'];
+		}
+		return $counts;
+	}
+
+	/**
+	 * Une lecture en échec ne doit pas passer pour un inventaire vide.
+	 *
+	 * @throws \RuntimeException Si la dernière requête a échoué.
+	 */
+	private static function check_read(): void {
+		global $wpdb;
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not output.
+		}
+	}
+
+	/**
 	 * @param int|false $result Résultat d'une écriture $wpdb.
 	 */
 	private static function check( $result ): void {

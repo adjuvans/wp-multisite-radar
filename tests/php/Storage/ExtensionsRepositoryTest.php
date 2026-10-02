@@ -54,4 +54,39 @@ final class ExtensionsRepositoryTest extends TestCase {
 			'insert' => [ 'INSERT INTO' ],
 		];
 	}
+
+	public function test_plugin_counts_cover_the_analysed_sites_of_one_network(): void {
+		$this->make_record( 931 );
+		$this->make_record( 932 );
+		$this->make_record( 933, [ 'network_id' => 2 ] );
+		$repository = $this->plugin()->extensions();
+		$repository->replace_for_site( 931, [ 'alpha/alpha.php', 'beta.php' ], '', '' );
+		$repository->replace_for_site( 932, [ 'alpha/alpha.php' ], '', '' );
+		$repository->replace_for_site( 933, [ 'alpha/alpha.php' ], '', '' );
+
+		$this->assertSame(
+			[
+				'alpha/alpha.php' => 2,
+				'beta.php'        => 1,
+			],
+			$repository->plugin_counts( get_current_network_id() )
+		);
+		$this->assertSame( [ 'alpha/alpha.php' => 1 ], $repository->plugin_counts( 2 ) );
+	}
+
+	public function test_a_failed_count_read_throws(): void {
+		global $wpdb;
+		$break    = static function ( string $query ): string {
+			return false !== strpos( $query, 'GROUP BY e.slug' ) ? 'SELECT * FROM msradar_missing_table' : $query;
+		};
+		$suppress = $wpdb->suppress_errors( true );
+		add_filter( 'query', $break );
+		try {
+			$this->expectException( \RuntimeException::class );
+			$this->plugin()->extensions()->plugin_counts( 1 );
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $suppress );
+		}
+	}
 }
