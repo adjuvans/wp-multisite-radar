@@ -23,6 +23,11 @@ final class SiteCollector {
 	private const PRIVILEGED_LIMIT = 50;
 	private const ZERO_DATE        = '0000-00-00 00:00:00';
 
+	/**
+	 * Secondes accordées à la mesure du dossier d'envoi d'un site (filtre msradar_disk_budget).
+	 */
+	public const DISK_BUDGET = 2.0;
+
 	private Settings $settings;
 
 	public function __construct( Settings $settings ) {
@@ -50,6 +55,8 @@ final class SiteCollector {
 		} finally {
 			$wpdb->suppress_errors( $suppress );
 		}
+
+		$disk = $this->measure_disk( $site_id, (int) $site->site_id );
 
 		$raw_sitewide    = get_network_option( (int) $site->site_id, 'active_sitewide_plugins', [] );
 		$network_plugins = Fingerprint::network_plugin_files( $raw_sitewide );
@@ -85,6 +92,8 @@ final class SiteCollector {
 		$record->admins_count      = (int) ( $users['by_role']['administrator'] ?? 0 );
 		$record->content_count     = (int) array_sum( array_map( static fn ( array $type ): int => 'attachment' === $type['name'] ? 0 : $type['publish'], $post_types ) );
 		$record->media_count       = (int) ( $attachments['inherit'] ?? 0 ) + (int) ( $attachments['publish'] ?? 0 );
+		$record->disk_bytes        = $disk['bytes'];
+		$record->disk_is_estimate  = $disk['estimate'];
 		$record->last_activity_gmt = null !== $last ? $last['date_gmt'] : null;
 		$record->registry_status   = $status;
 		$record->data              = [
@@ -196,6 +205,45 @@ final class SiteCollector {
 			'type'     => (string) $row['post_type'],
 			'title'    => (string) $row['post_title'],
 			'date_gmt' => $date,
+		];
+	}
+
+	/**
+	 * Dossier d'envoi du site, mesuré dans un budget de temps. C'est le seul endroit où le collecteur change de site
+	 * (spec §3.3) : wp_upload_dir() dépend des options du site. Le site principal ne compte pas sites/, où vivent les
+	 * autres sites, comme get_dirsize() du cœur.
+	 *
+	 * @return array{bytes: int|null, estimate: bool}
+	 */
+	private function measure_disk( int $site_id, int $network_id ): array {
+		if ( ! $this->settings->get( 'scan.measure_disk', true ) ) {
+			return [
+				'bytes'    => null,
+				'estimate' => false,
+			];
+		}
+
+		switch_to_blog( $site_id );
+		try {
+			$uploads = wp_upload_dir( null, false );
+		} finally {
+			restore_current_blog();
+		}
+		$base = untrailingslashit( $uploads['basedir'] );
+		if ( '' === $base ) {
+			return [
+				'bytes'    => null,
+				'estimate' => false,
+			];
+		}
+
+		$exclude = is_main_site( $site_id, $network_id ) ? [ $base . '/sites' ] : [];
+		$budget  = (float) apply_filters( 'msradar_disk_budget', self::DISK_BUDGET, $site_id );
+		$result  = DiskMeter::measure( $base, $exclude, $budget );
+
+		return [
+			'bytes'    => null === $result ? null : $result['bytes'],
+			'estimate' => null !== $result && ! $result['complete'],
 		];
 	}
 

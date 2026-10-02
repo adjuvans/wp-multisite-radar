@@ -10,11 +10,108 @@ use RuntimeException;
 
 final class SiteCollectorTest extends TestCase {
 
+	private string $uploads = '';
+
 	public function tear_down(): void {
+		if ( '' !== $this->uploads ) {
+			self::remove_tree( $this->uploads );
+			$this->uploads = '';
+		}
 		if ( post_type_exists( 'fixture_event' ) ) {
 			unregister_post_type( 'fixture_event' );
 		}
 		parent::tear_down();
+	}
+
+	/**
+	 * Dossiers d'envoi factices, rangés comme ceux du cœur : la racine pour le site principal, sites/<id> pour les autres.
+	 */
+	private function fake_uploads(): string {
+		$root = untrailingslashit( get_temp_dir() ) . '/msradar-uploads-' . wp_generate_password( 8, false );
+		wp_mkdir_p( $root );
+		add_filter(
+			'upload_dir',
+			static function ( array $uploads ) use ( $root ): array {
+				$uploads['basedir'] = is_main_site() ? $root : $root . '/sites/' . get_current_blog_id();
+				return $uploads;
+			}
+		);
+		$this->uploads = $root;
+		return $root;
+	}
+
+	private static function put_file( string $path, int $bytes ): void {
+		wp_mkdir_p( dirname( $path ) );
+		file_put_contents( $path, str_repeat( 'x', $bytes ) );
+	}
+
+	private static function remove_tree( string $path ): void {
+		if ( is_link( $path ) || is_file( $path ) ) {
+			@unlink( $path );
+			return;
+		}
+		if ( ! is_dir( $path ) ) {
+			return;
+		}
+		foreach ( (array) scandir( $path ) as $entry ) {
+			if ( '.' !== $entry && '..' !== $entry ) {
+				self::remove_tree( $path . '/' . $entry );
+			}
+		}
+		@rmdir( $path );
+	}
+
+	public function test_measures_the_upload_folder_of_the_site(): void {
+		$root    = $this->fake_uploads();
+		$site_id = self::factory()->blog->create();
+		self::put_file( $root . '/sites/' . $site_id . '/2026/09/photo.jpg', 1500 );
+
+		$record = $this->collect( $site_id );
+
+		$this->assertSame( 1500, $record->disk_bytes );
+		$this->assertFalse( $record->disk_is_estimate );
+	}
+
+	public function test_a_site_without_upload_folder_uses_no_disk_space(): void {
+		$this->fake_uploads();
+
+		$record = $this->collect( self::factory()->blog->create() );
+
+		$this->assertSame( 0, $record->disk_bytes );
+		$this->assertFalse( $record->disk_is_estimate );
+	}
+
+	public function test_the_main_site_does_not_count_the_folders_of_the_other_sites(): void {
+		$root    = $this->fake_uploads();
+		$site_id = self::factory()->blog->create();
+		self::put_file( $root . '/logo.png', 100 );
+		self::put_file( $root . '/sites/' . $site_id . '/photo.jpg', 1500 );
+
+		$this->assertSame( 100, $this->collect( get_main_site_id() )->disk_bytes );
+	}
+
+	public function test_a_measure_cut_short_by_its_budget_is_an_estimate(): void {
+		$root    = $this->fake_uploads();
+		$site_id = self::factory()->blog->create();
+		self::put_file( $root . '/sites/' . $site_id . '/photo.jpg', 1500 );
+		add_filter( 'msradar_disk_budget', static fn (): float => 0.0 );
+
+		$record = $this->collect( $site_id );
+
+		$this->assertTrue( $record->disk_is_estimate );
+		$this->assertLessThan( 1500, (int) $record->disk_bytes );
+	}
+
+	public function test_the_disk_measure_can_be_switched_off(): void {
+		$root    = $this->fake_uploads();
+		$site_id = self::factory()->blog->create();
+		self::put_file( $root . '/sites/' . $site_id . '/photo.jpg', 1500 );
+		$this->plugin()->settings()->update( [ 'scan' => [ 'measure_disk' => false ] ] );
+
+		$record = $this->collect( $site_id );
+
+		$this->assertNull( $record->disk_bytes );
+		$this->assertFalse( $record->disk_is_estimate );
 	}
 
 	private function collect( int $site_id ): SiteRecord {
