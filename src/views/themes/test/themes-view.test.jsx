@@ -31,6 +31,7 @@ function renderView() {
 		'/multisite-radar/v1/inventory/summary': {
 			body: {
 				pending_sites: 0,
+				networks: 1,
 				plugins: {
 					installed: 0,
 					network: 0,

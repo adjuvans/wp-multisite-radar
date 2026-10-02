@@ -31,12 +31,13 @@ async function settle() {
 	} );
 }
 
-function renderView( pending = 0 ) {
+function renderView( pending = 0, { networks = 1, withSummary = true } = {} ) {
 	const preload = {
 		'/multisite-radar/v1/preferences': { body: {}, headers: {} },
 		'/multisite-radar/v1/inventory/summary': {
 			body: {
 				pending_sites: pending,
+				networks,
 				plugins: {
 					installed: 2,
 					network: 1,
@@ -63,6 +64,9 @@ function renderView( pending = 0 ) {
 				headers: { 'X-WP-Total': '2', 'X-WP-TotalPages': '1' },
 			},
 	};
+	if ( ! withSummary ) {
+		delete preload[ '/multisite-radar/v1/inventory/summary' ];
+	}
 	window.msradarAdmin = {
 		view: 'plugins',
 		canManage: true,
@@ -114,6 +118,38 @@ test( 'warns while some sites have not been analysed', () => {
 			'3 sites have not been analysed yet: what they use is not counted below.'
 		)
 	).toBeInTheDocument();
+} );
+
+test( 'warns that unused may be wrong when the installation has several networks', () => {
+	const notice =
+		'This installation has several networks. Plugin and theme files are shared by all of them: what is unused on this network may be used on another one.';
+	const several = renderView( 0, { networks: 2 } );
+
+	expect(
+		within( several.container ).getByText( notice )
+	).toBeInTheDocument();
+	several.unmount();
+
+	const single = renderView( 0, { networks: 1 } );
+	expect(
+		within( single.container ).queryByText( notice )
+	).not.toBeInTheDocument();
+} );
+
+test( 'a failed inventory summary shows a Retry notice and keeps the list', async () => {
+	apiFetch.mockRejectedValueOnce( {
+		code: 'x',
+		message: 'Inventory failed',
+	} );
+	const { container } = renderView( 0, { withSummary: false } );
+
+	expect(
+		await within( container ).findByText( 'Inventory failed' )
+	).toBeInTheDocument();
+	expect(
+		within( container ).getByRole( 'button', { name: 'Retry' } )
+	).toBeInTheDocument();
+	expect( screen.getByText( 'My plugin' ) ).toBeInTheDocument();
 } );
 
 test( 'a plugin opens the panel of its sites with an encoded path', async () => {

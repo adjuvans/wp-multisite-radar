@@ -110,6 +110,19 @@ export default function InventoryView( {
 					) }
 				</Notice>
 			) }
+			{ summary.data?.networks > 1 && (
+				<Notice
+					status="warning"
+					isDismissible={ false }
+					className="msradar-inventory__networks"
+				>
+					{ __(
+						'This installation has several networks. Plugin and theme files are shared by all of them: what is unused on this network may be used on another one.',
+						'multisite-radar'
+					) }
+				</Notice>
+			) }
+			<ErrorNotice error={ summary.error } onRetry={ summary.retry } />
 			<ErrorNotice error={ list.error } onRetry={ list.retry } />
 			<DataViews
 				data={ list.data || [] }

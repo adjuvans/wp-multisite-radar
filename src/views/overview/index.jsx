@@ -55,6 +55,10 @@ export default function OverviewView() {
 		<div className="msradar-overview">
 			<ErrorNotice error={ summary.error } onRetry={ summary.retry } />
 			<ErrorNotice error={ status.error } onRetry={ status.retry } />
+			<ErrorNotice
+				error={ inventory.error }
+				onRetry={ inventory.retry }
+			/>
 			{ firstRun && (
 				<FirstRun
 					total={ data.total_sites }

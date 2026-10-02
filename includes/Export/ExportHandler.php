@@ -66,7 +66,7 @@ final class ExportHandler {
 	}
 
 	/**
-	 * Écrit l'export ; si une lecture échoue en cours de route (la sortie est déjà partie), signale l'erreur et s'arrête sans rien ajouter.
+	 * Écrit l'export ; si une lecture échoue en cours de route (la sortie est déjà partie), le fichier se termine par le marqueur d'interruption écrit par write(), puis l'erreur est signalée par msradar_error.
 	 *
 	 * @param array    $params Résultat de params().
 	 * @param resource $stream Flux de sortie.

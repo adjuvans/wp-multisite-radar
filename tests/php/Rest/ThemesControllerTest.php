@@ -51,6 +51,8 @@ final class ThemesControllerTest extends RestTestCase {
 	}
 
 	public function test_lists_the_sites_of_a_theme_active_or_as_parent(): void {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertSame( 403, $this->request( 'GET', '/themes/msradar-parent/sites' )->get_status() );
 		$this->login_as_super_admin();
 
 		$response = $this->request( 'GET', '/themes/msradar-parent/sites' );

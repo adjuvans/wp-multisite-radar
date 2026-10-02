@@ -22,12 +22,13 @@ final class InventoryQuery {
 	}
 
 	/**
-	 * @return array{pending_sites: int, plugins: array, themes: array}
+	 * @return array{pending_sites: int, networks: int, plugins: array, themes: array}
 	 * @throws \RuntimeException Si une lecture échoue.
 	 */
 	public function summary(): array {
 		return [
 			'pending_sites' => $this->sites->count_pending( get_current_network_id() ),
+			'networks'      => (int) get_networks( [ 'count' => true ] ),
 			'plugins'       => $this->plugins->summary(),
 			'themes'        => $this->themes->summary(),
 		];

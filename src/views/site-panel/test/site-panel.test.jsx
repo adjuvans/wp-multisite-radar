@@ -291,13 +291,18 @@ test( 'the pager follows X-WP-TotalPages and never requests out of range', async
 	fireEvent.click( screen.getByRole( 'tab', { name: 'Users' } ) );
 
 	expect( await screen.findByText( 'Page 1 of 3' ) ).toBeInTheDocument();
-	expect( screen.getByRole( 'button', { name: 'Previous' } ) ).toBeDisabled();
+	expect(
+		screen.getByRole( 'button', { name: 'Previous' } )
+	).toHaveAttribute( 'aria-disabled', 'true' );
 
 	fireEvent.click( screen.getByRole( 'button', { name: 'Next' } ) );
 	expect( await screen.findByText( 'Page 2 of 3' ) ).toBeInTheDocument();
 	fireEvent.click( screen.getByRole( 'button', { name: 'Next' } ) );
 	expect( await screen.findByText( 'Page 3 of 3' ) ).toBeInTheDocument();
-	expect( screen.getByRole( 'button', { name: 'Next' } ) ).toBeDisabled();
+	expect( screen.getByRole( 'button', { name: 'Next' } ) ).toHaveAttribute(
+		'aria-disabled',
+		'true'
+	);
 
 	expect( userPaths() ).toEqual( [
 		'/multisite-radar/v1/sites/12/users?page=1&per_page=20',

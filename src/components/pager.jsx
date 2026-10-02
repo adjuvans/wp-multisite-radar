@@ -14,6 +14,7 @@ export default function Pager( { page, pages, onChange } ) {
 		<div className="msradar-pager">
 			<Button
 				variant="secondary"
+				accessibleWhenDisabled
 				disabled={ page <= 1 }
 				onClick={ () => onChange( page - 1 ) }
 			>
@@ -29,6 +30,7 @@ export default function Pager( { page, pages, onChange } ) {
 			</span>
 			<Button
 				variant="secondary"
+				accessibleWhenDisabled
 				disabled={ page >= pages }
 				onClick={ () => onChange( page + 1 ) }
 			>

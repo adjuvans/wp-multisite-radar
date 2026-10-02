@@ -88,6 +88,9 @@ final class PluginsControllerTest extends RestTestCase {
 	}
 
 	public function test_lists_the_sites_of_a_plugin_by_its_public_id(): void {
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertSame( 403, $this->request( 'GET', '/plugins/alpha/alpha/sites' )->get_status() );
+
 		$this->login_as_super_admin();
 
 		$response = $this->request( 'GET', '/plugins/alpha/alpha/sites' );

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-02T14:15:43+00:00\n"
+"POT-Creation-Date: 2026-10-02T14:38:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: multisite-radar\n"
@@ -1316,6 +1316,11 @@ msgid "%d site has not been analysed yet: what it uses is not counted below."
 msgid_plural "%d sites have not been analysed yet: what they use is not counted below."
 msgstr[0] ""
 msgstr[1] ""
+
+#: build/admin/plugins.js:4
+#: build/admin/themes.js:4
+msgid "This installation has several networks. Plugin and theme files are shared by all of them: what is unused on this network may be used on another one."
+msgstr ""
 
 #: build/admin/plugins.js:4
 msgid "Network activated: every site of the network loads this plugin."

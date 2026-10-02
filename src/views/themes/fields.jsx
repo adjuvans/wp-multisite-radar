@@ -11,6 +11,7 @@ import {
 export const DEFAULT_THEME_FIELDS = [
 	'version',
 	'parent',
+	'allowed_on_network',
 	'status',
 	'sites_count',
 	'update_version',

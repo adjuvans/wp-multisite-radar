@@ -2176,3 +2176,8 @@ msgstr "Cette extension n’est ni installée ni active sur aucun site."
 #: includes/Rest/ThemesController.php:84
 msgid "This theme is neither installed nor used by any site."
 msgstr "Ce thème n’est ni installé ni utilisé par aucun site."
+
+#: build/admin/plugins.js:4
+#: build/admin/themes.js:4
+msgid "This installation has several networks. Plugin and theme files are shared by all of them: what is unused on this network may be used on another one."
+msgstr "\"Cette installation compte plusieurs réseaux. Les fichiers des extensions et des thèmes leur sont communs : ce qui est inutilisé sur ce réseau peut servir sur un autre."

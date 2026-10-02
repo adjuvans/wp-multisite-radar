@@ -7,6 +7,8 @@ final class InventoryControllerTest extends RestTestCase {
 
 	public function test_summarises_plugins_themes_and_sites_still_to_analyse(): void {
 		$this->assertSame( 401, $this->request( 'GET', '/inventory/summary' )->get_status() );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertSame( 403, $this->request( 'GET', '/inventory/summary' )->get_status() );
 
 		$this->login_as_super_admin();
 		wp_cache_set(
@@ -29,7 +31,8 @@ final class InventoryControllerTest extends RestTestCase {
 
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertSame( [ 'pending_sites', 'plugins', 'themes' ], array_keys( $data ) );
+		$this->assertSame( [ 'pending_sites', 'networks', 'plugins', 'themes' ], array_keys( $data ) );
+		$this->assertSame( (int) get_networks( [ 'count' => true ] ), $data['networks'] );
 		$this->assertSame( $pending, $data['pending_sites'] );
 		$this->assertGreaterThanOrEqual( 1, $data['pending_sites'] );
 		$this->assertSame(

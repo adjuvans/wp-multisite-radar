@@ -7,6 +7,7 @@ import ExtensionSitesPanel from '../extension-sites-panel';
 import ExportMenu from '../export-menu';
 import Skeleton from '../skeleton';
 import SidePanel from '../side-panel';
+import Pager from '../pager';
 import ErrorNotice from '../error-notice';
 import { RegistryBadge, SeverityBadge } from '../badges';
 
@@ -190,4 +191,14 @@ test( 'ExportMenu offers CSV and JSON', () => {
 
 	expect( href ).toHaveBeenCalledWith( 'json' );
 	expect( window.location.hash ).toBe( '#export-json' );
+} );
+
+test( 'Pager keeps a disabled Next focusable and inert', () => {
+	const onChange = vi.fn();
+	render( <Pager page={ 2 } pages={ 2 } onChange={ onChange } /> );
+
+	const next = screen.getByRole( 'button', { name: 'Next' } );
+	expect( next ).toHaveAttribute( 'aria-disabled', 'true' );
+	fireEvent.click( next );
+	expect( onChange ).not.toHaveBeenCalled();
 } );

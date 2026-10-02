@@ -62,6 +62,7 @@ function summary( overrides = {} ) {
 function inventory( overrides = {} ) {
 	return {
 		pending_sites: 2,
+		networks: 1,
 		plugins: {
 			installed: 9,
 			network: 2,
@@ -78,6 +79,7 @@ function renderView( {
 	canManage = true,
 	data = summary(),
 	stock = inventory(),
+	preloadInventory = true,
 } = {} ) {
 	const preload = {
 		'/multisite-radar/v1/preferences': { body: {}, headers: {} },
@@ -95,6 +97,9 @@ function renderView( {
 			headers: {},
 		},
 	};
+	if ( ! preloadInventory ) {
+		delete preload[ '/multisite-radar/v1/inventory/summary' ];
+	}
 	window.msradarAdmin = {
 		view: 'overview',
 		canManage,
@@ -129,6 +134,22 @@ test( 'tiles link to the sites filtered by severity', async () => {
 	expect( screen.getByText( '2 awaiting analysis' ) ).toBeInTheDocument();
 	await act( () => new Promise( ( resolve ) => setTimeout( resolve, 0 ) ) );
 	expect( apiFetch ).not.toHaveBeenCalled();
+} );
+
+test( 'a failed inventory read shows a Retry notice and keeps the rest of the overview', async () => {
+	apiFetch.mockRejectedValueOnce( {
+		code: 'x',
+		message: 'Inventory failed',
+	} );
+	const { container } = renderView( { preloadInventory: false } );
+
+	expect(
+		await within( container ).findByText( 'Inventory failed' )
+	).toBeInTheDocument();
+	expect(
+		within( container ).getByRole( 'button', { name: 'Retry' } )
+	).toBeInTheDocument();
+	expect( screen.getByText( '2 awaiting analysis' ) ).toBeInTheDocument();
 } );
 
 test( 'to review lists enabled rules with sites, the most severe first', () => {
