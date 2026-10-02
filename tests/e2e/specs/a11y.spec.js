@@ -14,9 +14,10 @@ const PAGES = [
 async function seriousViolations( page ) {
 	const results = await new AxeBuilder( { page } )
 		.include( '.msradar-wrap' )
-		// Page Réglages : @wordpress/dataviews 19.1 ajoute à un FormTokenField validé un champ texte invisible
+		// @wordpress/dataviews 19.1 ajoute à un FormTokenField validé (page Réglages) un champ texte invisible
 		// (opacity 0, tabindex -1) sans libellé, que la règle « label » signale. Ce nœud n'est pas dans notre code :
-		// on n'exclut que lui, jamais la règle. À revoir à chaque montée de version de DataViews (spec §14).
+		// on n'exclut que lui, sur toutes les pages auditées, jamais la règle. À revoir à chaque montée de version de
+		// DataViews (spec §14).
 		.exclude( '.dataviews-validated-control__error-delegate' )
 		.withTags( [ 'wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa' ] )
 		.analyze();
@@ -73,6 +74,25 @@ test.describe( 'Accessibility, WCAG 2.2 AA (spec 1.4, criterion 5)', () => {
 			.getByText( 'Multisite Radar demo CPT', { exact: true } )
 			.click();
 		await expect( page.getByRole( 'dialog' ) ).toBeVisible();
+
+		expect( await seriousViolations( page ) ).toEqual( [] );
+	} );
+
+	test( 'no serious or critical violation with an alert rule open in the settings', async ( {
+		admin,
+		page,
+	} ) => {
+		await admin.visitAdminPage(
+			'network/admin.php',
+			'page=multisite-radar-settings'
+		);
+		await page
+			.locator( '#msradar-app' )
+			.getByRole( 'button', { name: 'Inactive site' } )
+			.click();
+		await expect(
+			page.getByRole( 'spinbutton', { name: /Months without activity/ } )
+		).toBeVisible();
 
 		expect( await seriousViolations( page ) ).toEqual( [] );
 	} );

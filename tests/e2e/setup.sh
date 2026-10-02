@@ -32,4 +32,10 @@ if ! wp user get radar-orphan >/dev/null 2>&1; then
 	wp eval 'remove_user_from_blog( get_user_by( "login", "radar-orphan" )->ID, get_main_site_id() );'
 fi
 
+# Un site masqué aux moteurs de recherche : il déclenche l'alerte « Hidden from search engines ».
+# Un site à part, pour ne changer aucun site dont dépendent les autres tests (bloc des sites publics, recherche…).
+if ! wp site list --field=path | grep -qx '/discret/'; then
+	wp site create --slug=discret --title='Site discret'
+fi
+wp option update blog_public 0 --url="$URL/discret/"
 wp multisite-radar scan --all --probe
