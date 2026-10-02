@@ -107,7 +107,7 @@ final class AlertEvaluatorTest extends TestCase {
 
 		$registry = RuleRegistry::create_default();
 
-		$this->assertSame( [ 'no_users', 'inactive', 'high_media', 'no_admin', 'heavy_autoload', 'search_hidden', 'cron_overdue', 'always' ], array_keys( $registry->all() ) );
+		$this->assertSame( [ 'no_users', 'inactive', 'high_media', 'no_admin', 'missing_theme', 'updates_pending', 'insecure_url', 'disk_quota', 'heavy_autoload', 'search_hidden', 'cron_overdue', 'always' ], array_keys( $registry->all() ) );
 	}
 
 	public function test_formatter_builds_labels_and_messages(): void {
@@ -127,5 +127,25 @@ final class AlertEvaluatorTest extends TestCase {
 			],
 			$formatted
 		);
+	}
+
+	public function test_rules_read_the_network_state_again_after_a_reset(): void {
+		set_site_transient( 'update_plugins', (object) [ 'response' => [ 'akismet/akismet.php' => (object) [ 'new_version' => '9.0' ] ] ] );
+		$this->plugin()->reset_caches();
+		$record = $this->build_record(
+			[
+				'users_count'  => 1,
+				'admins_count' => 1,
+				'data'         => [ 'plugins_local' => [ 'akismet/akismet.php' ] ],
+			]
+		);
+
+		$this->plugin()->evaluator()->apply( $record, time() );
+		$this->assertSame( ',updates_pending,', $record->alert_rules );
+
+		delete_site_transient( 'update_plugins' );
+		$this->plugin()->reset_caches();
+		$this->plugin()->evaluator()->apply( $record, time() );
+		$this->assertSame( '', $record->alert_rules );
 	}
 }

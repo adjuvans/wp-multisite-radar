@@ -7,6 +7,7 @@ use MultisiteRadar\Admin\Menu;
 use MultisiteRadar\Admin\Privacy;
 use MultisiteRadar\Alerts\AlertEvaluator;
 use MultisiteRadar\Alerts\AlertFormatter;
+use MultisiteRadar\Alerts\NetworkState;
 use MultisiteRadar\Alerts\RuleRegistry;
 use MultisiteRadar\Cli\RadarCommand;
 use MultisiteRadar\Collector\RegistryProbe;
@@ -65,6 +66,8 @@ final class Plugin {
 	private ?RegistryProbe $probe = null;
 
 	private ?SiteCollector $collector = null;
+
+	private ?NetworkState $network_state = null;
 
 	private ?RuleRegistry $rules = null;
 
@@ -204,8 +207,12 @@ final class Plugin {
 		return $this->collector ??= new SiteCollector( $this->settings() );
 	}
 
+	public function network_state(): NetworkState {
+		return $this->network_state ??= new NetworkState();
+	}
+
 	public function rules(): RuleRegistry {
-		return $this->rules ??= RuleRegistry::create_default();
+		return $this->rules ??= RuleRegistry::create_default( $this->network_state() );
 	}
 
 	public function evaluator(): AlertEvaluator {
@@ -234,6 +241,9 @@ final class Plugin {
 	public function reset_caches(): void {
 		if ( null !== $this->settings ) {
 			$this->settings->reset_cache();
+		}
+		if ( null !== $this->network_state ) {
+			$this->network_state->reset();
 		}
 		if ( null !== $this->evaluator ) {
 			$this->evaluator->reset();

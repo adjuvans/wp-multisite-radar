@@ -2,12 +2,16 @@
 namespace MultisiteRadar\Alerts;
 
 use MultisiteRadar\Alerts\Rules\CronOverdueRule;
+use MultisiteRadar\Alerts\Rules\DiskQuotaRule;
 use MultisiteRadar\Alerts\Rules\HeavyAutoloadRule;
 use MultisiteRadar\Alerts\Rules\HighMediaRule;
 use MultisiteRadar\Alerts\Rules\InactiveRule;
+use MultisiteRadar\Alerts\Rules\InsecureUrlRule;
+use MultisiteRadar\Alerts\Rules\MissingThemeRule;
 use MultisiteRadar\Alerts\Rules\NoAdminRule;
 use MultisiteRadar\Alerts\Rules\NoUsersRule;
 use MultisiteRadar\Alerts\Rules\SearchHiddenRule;
+use MultisiteRadar\Alerts\Rules\UpdatesPendingRule;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -31,13 +35,22 @@ final class RuleRegistry {
 		$this->defaults = $defaults;
 	}
 
-	public static function create_default(): self {
+	/**
+	 * @param NetworkState|null $state État du réseau partagé par les règles qui en dépendent (celui du plugin en
+	 *                                 production, un état neuf sinon).
+	 */
+	public static function create_default( ?NetworkState $state = null ): self {
+		$state = $state ?? new NetworkState();
 		return new self(
 			[
 				new NoUsersRule(),
 				new InactiveRule(),
 				new HighMediaRule(),
 				new NoAdminRule(),
+				new MissingThemeRule( $state ),
+				new UpdatesPendingRule( $state ),
+				new InsecureUrlRule( $state ),
+				new DiskQuotaRule( $state ),
 				new HeavyAutoloadRule(),
 				new SearchHiddenRule(),
 				new CronOverdueRule(),
