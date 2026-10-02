@@ -225,6 +225,28 @@
 	margin-bottom: 8px;
 }
 
+.msradar-site-list {
+	margin: 0 0 16px;
+
+	li {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px 8px;
+		padding: 8px 0;
+		border-bottom: 1px solid #f0f0f1;
+	}
+
+	&__url,
+	&__detail {
+		color: #50575e;
+		font-size: 12px;
+	}
+
+	&__detail {
+		flex-basis: 100%;
+	}
+}
+
 .msradar-tiles {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

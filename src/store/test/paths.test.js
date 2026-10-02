@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { buildPath, normalizePath, NAMESPACE } from '../paths';
+import { buildPath, encodeSegments, normalizePath, NAMESPACE } from '../paths';
 
 describe( 'buildPath', () => {
 	test( 'sorts keys, drops empty values and encodes the rest', () => {
@@ -45,4 +45,11 @@ describe( 'normalizePath', () => {
 			'/x?a=%25E0%25A4%25A&b=a%20b'
 		);
 	} );
+} );
+
+test( 'encodeSegments keeps the slashes and encodes each segment', () => {
+	expect( encodeSegments( 'my plugin/my.plugin+été' ) ).toBe(
+		'my%20plugin/my.plugin%2B%C3%A9t%C3%A9'
+	);
+	expect( encodeSegments( 'hello' ) ).toBe( 'hello' );
 } );

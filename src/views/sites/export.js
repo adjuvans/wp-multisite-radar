@@ -1,5 +1,4 @@
-import { addQueryArgs } from '@wordpress/url';
-import { getConfig } from '../../admin/config';
+import { columnsFor, exportLink } from '../../utils/export';
 
 /**
  * Colonnes de l'export (clés de Export\SitesColumns) pour chaque champ visible de la liste.
@@ -20,15 +19,7 @@ const FIELD_COLUMNS = {
 };
 
 export function exportColumns( fields ) {
-	const columns = [ 'id', 'name', 'url' ];
-	( fields || [] ).forEach( ( field ) => {
-		( FIELD_COLUMNS[ field ] || [] ).forEach( ( column ) => {
-			if ( ! columns.includes( column ) ) {
-				columns.push( column );
-			}
-		} );
-	} );
-	return columns;
+	return columnsFor( [ 'id', 'name', 'url' ], FIELD_COLUMNS, fields );
 }
 
 /**
@@ -40,12 +31,7 @@ export function exportColumns( fields ) {
  * @param {number[]} include Sélection (vide : toute la liste filtrée).
  */
 export function exportUrl( format, state, fields, include = [] ) {
-	const { exportUrl: base, exportNonce } = getConfig();
 	const args = {
-		action: 'msradar_export',
-		_wpnonce: exportNonce,
-		resource: 'sites',
-		format,
 		fields: exportColumns( fields ).join( ',' ),
 		orderby: state.orderby,
 		order: state.order,
@@ -64,5 +50,5 @@ export function exportUrl( format, state, fields, include = [] ) {
 	if ( include.length > 0 ) {
 		args.include = include.join( ',' );
 	}
-	return addQueryArgs( base, args );
+	return exportLink( 'sites', format, args );
 }

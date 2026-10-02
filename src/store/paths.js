@@ -70,3 +70,13 @@ export function normalizePath( path ) {
 		)
 		.join( '&' ) }`;
 }
+
+/**
+ * Identifiant à plusieurs segments dans un chemin REST (fichier d'un plugin sans « .php », dossier d'un thème) :
+ * chaque segment est encodé, les « / » restent.
+ *
+ * @param {string} id Identifiant.
+ */
+export function encodeSegments( id ) {
+	return String( id ).split( '/' ).map( encodeURIComponent ).join( '/' );
+}

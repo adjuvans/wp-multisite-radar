@@ -3,6 +3,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { getConfig } from '../../admin/config';
 import { DataViews } from '../../components/data-views';
 import ErrorNotice from '../../components/error-notice';
+import ExportMenu from '../../components/export-menu';
 import Skeleton from '../../components/skeleton';
 import { useDebouncedSave, usePreferences } from '../../hooks/use-preferences';
 import { useResource } from '../../hooks/use-resource';
@@ -13,7 +14,6 @@ import { samePrefs } from '../../utils/view-query';
 import SitePanel from '../site-panel';
 import { getSitesActions } from './actions';
 import { exportUrl } from './export';
-import ExportMenu from './export-menu';
 import { getSitesFields } from './fields';
 import {
 	fromSitesView,
@@ -104,7 +104,13 @@ export default function SitesView() {
 				isItemClickable={ () => true }
 				onClickItem={ openSite }
 				searchLabel={ __( 'Search sites', 'multisite-radar' ) }
-				header={ <ExportMenu state={ state } fields={ view.fields } /> }
+				header={
+					<ExportMenu
+						href={ ( format ) =>
+							exportUrl( format, state, view.fields )
+						}
+					/>
+				}
 				empty={
 					list.isLoading ? (
 						<Skeleton

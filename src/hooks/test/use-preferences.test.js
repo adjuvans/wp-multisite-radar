@@ -11,8 +11,17 @@ test( 'corrupted stored preferences fall back to the defaults', () => {
 } );
 
 test( 'partial preferences keep their values and default the rest, per view', () => {
-	expect( mergePreferences( { sites: { per_page: 50 } } ) ).toEqual( {
+	expect(
+		mergePreferences( { sites: { per_page: 50 }, users: 'broken' } )
+	).toEqual( {
+		...DEFAULT_PREFERENCES,
 		sites: { ...DEFAULT_PREFERENCES.sites, per_page: 50 },
-		alerts: DEFAULT_PREFERENCES.alerts,
 	} );
+	expect( Object.keys( DEFAULT_PREFERENCES ) ).toEqual( [
+		'sites',
+		'plugins',
+		'themes',
+		'users',
+		'alerts',
+	] );
 } );

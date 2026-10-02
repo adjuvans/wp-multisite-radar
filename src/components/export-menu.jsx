@@ -1,9 +1,14 @@
 import { DropdownMenu } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { download } from '@wordpress/icons';
-import { exportUrl } from './export';
 
-export default function ExportMenu( { state, fields } ) {
+/**
+ * Menu « Export » d'une liste : CSV ou JSON.
+ *
+ * @param {Object}                     props
+ * @param {(format: string) => string} props.href URL de téléchargement pour csv ou json.
+ */
+export default function ExportMenu( { href } ) {
 	return (
 		<DropdownMenu
 			icon={ download }
@@ -11,17 +16,11 @@ export default function ExportMenu( { state, fields } ) {
 			controls={ [
 				{
 					title: __( 'Export as CSV', 'multisite-radar' ),
-					onClick: () =>
-						window.location.assign(
-							exportUrl( 'csv', state, fields )
-						),
+					onClick: () => window.location.assign( href( 'csv' ) ),
 				},
 				{
 					title: __( 'Export as JSON', 'multisite-radar' ),
-					onClick: () =>
-						window.location.assign(
-							exportUrl( 'json', state, fields )
-						),
+					onClick: () => window.location.assign( href( 'json' ) ),
 				},
 			] }
 		/>

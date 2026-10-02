@@ -1,7 +1,7 @@
-import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import ErrorNotice from '../../components/error-notice';
+import Pager from '../../components/pager';
 import Skeleton from '../../components/skeleton';
 import { useResource } from '../../hooks/use-resource';
 import { buildPath } from '../../store/paths';
@@ -75,30 +75,7 @@ export default function UsersTab( { siteId } ) {
 					) ) }
 				</tbody>
 			</table>
-			<div className="msradar-pager">
-				<Button
-					variant="secondary"
-					disabled={ page <= 1 }
-					onClick={ () => setPage( page - 1 ) }
-				>
-					{ __( 'Previous', 'multisite-radar' ) }
-				</Button>
-				<span>
-					{ sprintf(
-						/* translators: 1: current page, 2: number of pages. */
-						__( 'Page %1$d of %2$d', 'multisite-radar' ),
-						page,
-						pages
-					) }
-				</span>
-				<Button
-					variant="secondary"
-					disabled={ page >= pages }
-					onClick={ () => setPage( page + 1 ) }
-				>
-					{ __( 'Next', 'multisite-radar' ) }
-				</Button>
-			</div>
+			<Pager page={ page } pages={ pages } onChange={ setPage } />
 		</>
 	);
 }

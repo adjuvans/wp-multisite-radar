@@ -21,7 +21,7 @@ export function getConfig() {
 /**
  * URL d'une page de l'application, avec ses paramètres de vue.
  *
- * @param {string} view overview, sites, alerts ou settings.
+ * @param {string} view overview, sites, plugins, themes, users, alerts ou settings.
  * @param {Object} args Paramètres d'URL de la vue.
  */
 export function pageUrl( view, args = {} ) {

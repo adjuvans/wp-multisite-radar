@@ -9,6 +9,9 @@ export const PREFERENCES_PATH = buildPath( '/preferences' );
 
 export const DEFAULT_PREFERENCES = {
 	sites: { fields: [], layout: 'table', per_page: 20 },
+	plugins: { fields: [], per_page: 20 },
+	themes: { fields: [], per_page: 20 },
+	users: { fields: [], per_page: 20 },
 	alerts: { fields: [], per_page: 20 },
 };
 
@@ -20,10 +23,12 @@ function plain( value ) {
 
 export function mergePreferences( stored ) {
 	const value = plain( stored );
-	return {
-		sites: { ...DEFAULT_PREFERENCES.sites, ...plain( value.sites ) },
-		alerts: { ...DEFAULT_PREFERENCES.alerts, ...plain( value.alerts ) },
-	};
+	return Object.fromEntries(
+		Object.entries( DEFAULT_PREFERENCES ).map( ( [ view, defaults ] ) => [
+			view,
+			{ ...defaults, ...plain( value[ view ] ) },
+		] )
+	);
 }
 
 /**
@@ -64,7 +69,7 @@ export function usePreferences() {
  * Enregistre les préférences d'une vue après un temps de repos (redimensionnement de colonnes, clics répétés).
  *
  * @param {( view: string, patch: Object ) => Promise} save  save() de usePreferences().
- * @param {string}                                     view  sites ou alerts.
+ * @param {string}                                     view  Vue (clé de DEFAULT_PREFERENCES).
  * @param {number}                                     delay Délai en millisecondes.
  */
 export function useDebouncedSave( save, view, delay = 500 ) {
