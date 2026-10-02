@@ -61,5 +61,61 @@
 		"query": { "orderby": "site_id", "severity": "fatal", "rule": ",,," },
 		"prefs": { "sites": { "per_page": 50 } },
 		"args": { "page": 1, "per_page": 20, "orderby": "rule", "order": "asc" }
+	},
+	{
+		"name": "sites: a rule followed by a line break is ignored",
+		"view": "sites",
+		"query": { "rule": "inactive\n" },
+		"prefs": {},
+		"args": { "page": 1, "per_page": 20, "orderby": "name", "order": "asc" }
+	},
+	{
+		"name": "plugins: defaults",
+		"view": "plugins",
+		"query": {},
+		"prefs": {},
+		"args": { "page": 1, "per_page": 20, "orderby": "name", "order": "asc" }
+	},
+	{
+		"name": "plugins: every parameter",
+		"view": "plugins",
+		"query": { "s": " akismet ", "orderby": "sites_count", "order": "desc", "paged": "2", "status": "unused,bogus,local", "has_update": "1" },
+		"prefs": { "plugins": { "per_page": 50 } },
+		"args": { "page": 2, "per_page": 50, "orderby": "sites_count", "order": "desc", "search": "akismet", "status": "local,unused", "has_update": 1 }
+	},
+	{
+		"name": "plugins: invalid values fall back to the defaults",
+		"view": "plugins",
+		"query": { "orderby": "file", "status": "Unused", "has_update": "yes" },
+		"prefs": { "plugins": { "per_page": 7 } },
+		"args": { "page": 1, "per_page": 20, "orderby": "name", "order": "asc" }
+	},
+	{
+		"name": "themes: every parameter",
+		"view": "themes",
+		"query": { "s": "astra", "status": "missing,used", "has_update": "1", "order": "desc" },
+		"prefs": { "themes": { "per_page": 100 } },
+		"args": { "page": 1, "per_page": 100, "orderby": "name", "order": "desc", "search": "astra", "status": "used,missing", "has_update": 1 }
+	},
+	{
+		"name": "users: defaults",
+		"view": "users",
+		"query": {},
+		"prefs": {},
+		"args": { "page": 1, "per_page": 20, "orderby": "login", "order": "asc" }
+	},
+	{
+		"name": "users: every parameter",
+		"view": "users",
+		"query": { "s": "jo", "orderby": "sites_count", "order": "desc", "paged": "3", "membership": "several", "super_admin": "1" },
+		"prefs": { "users": { "per_page": 10 } },
+		"args": { "page": 3, "per_page": 10, "orderby": "sites_count", "order": "desc", "search": "jo", "membership": "several", "super_admin": 1 }
+	},
+	{
+		"name": "users: invalid values are ignored",
+		"view": "users",
+		"query": { "orderby": "email", "membership": "many", "super_admin": "yes" },
+		"prefs": {},
+		"args": { "page": 1, "per_page": 20, "orderby": "login", "order": "asc" }
 	}
 ]

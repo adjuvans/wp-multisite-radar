@@ -10,10 +10,22 @@ final class PreloadTest extends RestTestCase {
 	public function test_paths_per_view(): void {
 		$prefs = Preferences::defaults();
 
-		$this->assertSame( [ '/multisite-radar/v1/preferences', '/multisite-radar/v1/alerts/summary', '/multisite-radar/v1/scan/status' ], Preload::paths( 'overview', [], $prefs ) );
+		$this->assertSame( [ '/multisite-radar/v1/preferences', '/multisite-radar/v1/alerts/summary', '/multisite-radar/v1/inventory/summary', '/multisite-radar/v1/scan/status' ], Preload::paths( 'overview', [], $prefs ) );
 		$this->assertSame(
 			[ '/multisite-radar/v1/preferences', '/multisite-radar/v1/alerts/summary', '/multisite-radar/v1/sites?order=asc&orderby=name&page=1&per_page=20', '/multisite-radar/v1/sites/12' ],
 			Preload::paths( 'sites', [ 'site' => '12' ], $prefs )
+		);
+		$this->assertSame(
+			[ '/multisite-radar/v1/preferences', '/multisite-radar/v1/inventory/summary', '/multisite-radar/v1/plugins?has_update=1&order=asc&orderby=name&page=1&per_page=20' ],
+			Preload::paths( 'plugins', [ 'has_update' => '1' ], $prefs )
+		);
+		$this->assertSame(
+			[ '/multisite-radar/v1/preferences', '/multisite-radar/v1/inventory/summary', '/multisite-radar/v1/themes?order=asc&orderby=name&page=1&per_page=20&status=unused' ],
+			Preload::paths( 'themes', [ 'status' => 'unused' ], $prefs )
+		);
+		$this->assertSame(
+			[ '/multisite-radar/v1/preferences', '/multisite-radar/v1/users?membership=none&order=asc&orderby=login&page=1&per_page=20' ],
+			Preload::paths( 'users', [ 'membership' => 'none' ], $prefs )
 		);
 		$this->assertSame(
 			[ '/multisite-radar/v1/preferences', '/multisite-radar/v1/alerts/summary', '/multisite-radar/v1/alerts?order=asc&orderby=rule&page=1&per_page=20' ],

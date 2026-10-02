@@ -39,6 +39,8 @@ final class PreferencesTest extends TestCase {
 			[ 'sites' => [ 'layout' => 'list' ] ],
 			[ 'sites' => [ 'fields' => [ 'Bad Field' ] ] ],
 			[ 'alerts' => [ 'layout' => 'grid' ] ],
+			[ 'users' => [ 'layout' => 'grid' ] ],
+			[ 'plugins' => [ 'fields' => [ "name\n" ] ] ],
 			[ 'other' => [] ],
 		] as $patch ) {
 			$result = $this->plugin()->preferences()->update( $user, $patch );
@@ -46,6 +48,33 @@ final class PreferencesTest extends TestCase {
 			$this->assertSame( 'msradar_invalid_preferences', $result->get_error_code() );
 		}
 		$this->assertSame( Preferences::defaults(), $this->plugin()->preferences()->get( $user ) );
+	}
+
+	public function test_the_inventory_views_have_their_own_preferences(): void {
+		$user   = self::factory()->user->create();
+		$result = $this->plugin()->preferences()->update(
+			$user,
+			[
+				'plugins' => [ 'per_page' => 50 ],
+				'users'   => [ 'fields' => [ 'sites_count' ] ],
+			]
+		);
+
+		$this->assertSame(
+			[
+				'fields'   => [],
+				'per_page' => 50,
+			],
+			$result['plugins']
+		);
+		$this->assertSame(
+			[
+				'fields'   => [ 'sites_count' ],
+				'per_page' => 20,
+			],
+			$result['users']
+		);
+		$this->assertSame( Preferences::defaults()['themes'], $result['themes'] );
 	}
 
 	public function test_a_corrupted_view_falls_back_to_its_defaults_without_losing_the_others(): void {

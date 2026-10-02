@@ -13,6 +13,9 @@ final class Menu {
 	public const PAGES = [
 		'overview' => 'multisite-radar',
 		'sites'    => 'multisite-radar-sites',
+		'plugins'  => 'multisite-radar-plugins',
+		'themes'   => 'multisite-radar-themes',
+		'users'    => 'multisite-radar-users',
 		'alerts'   => 'multisite-radar-alerts',
 		'settings' => 'multisite-radar-settings',
 	];
@@ -33,6 +36,9 @@ final class Menu {
 		return [
 			'overview' => __( 'Overview', 'multisite-radar' ),
 			'sites'    => __( 'Sites', 'multisite-radar' ),
+			'plugins'  => __( 'Plugins', 'multisite-radar' ),
+			'themes'   => __( 'Themes', 'multisite-radar' ),
+			'users'    => __( 'Users', 'multisite-radar' ),
 			'alerts'   => __( 'Alerts', 'multisite-radar' ),
 			'settings' => __( 'Settings', 'multisite-radar' ),
 		];

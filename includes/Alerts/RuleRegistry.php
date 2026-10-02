@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class RuleRegistry {
 
-	public const ID_PATTERN = '/^[a-z0-9_]{1,40}$/';
+	public const ID_PATTERN = '/^[a-z0-9_]{1,40}\z/';
 
 	/** @var RuleInterface[] */
 	private array $defaults;

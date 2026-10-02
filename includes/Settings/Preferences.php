@@ -15,16 +15,20 @@ final class Preferences {
 	public const PER_PAGE = [ 10, 20, 50, 100 ];
 
 	public static function defaults(): array {
+		$list = [
+			'fields'   => [],
+			'per_page' => 20,
+		];
 		return [
-			'sites'  => [
+			'sites'   => [
 				'fields'   => [],
 				'layout'   => 'table',
 				'per_page' => 20,
 			],
-			'alerts' => [
-				'fields'   => [],
-				'per_page' => 20,
-			],
+			'plugins' => $list,
+			'themes'  => $list,
+			'users'   => $list,
+			'alerts'  => $list,
 		];
 	}
 
@@ -35,7 +39,7 @@ final class Preferences {
 			'uniqueItems' => true,
 			'items'       => [
 				'type'    => 'string',
-				'pattern' => '^[a-z0-9_]{1,40}$',
+				'pattern' => '^[a-z0-9_]{1,40}\z',
 			],
 		];
 		$per_page = [
@@ -43,11 +47,20 @@ final class Preferences {
 			'enum' => self::PER_PAGE,
 		];
 
+		$list = [
+			'type'                 => 'object',
+			'additionalProperties' => false,
+			'properties'           => [
+				'fields'   => $fields,
+				'per_page' => $per_page,
+			],
+		];
+
 		return [
 			'type'                 => 'object',
 			'additionalProperties' => false,
 			'properties'           => [
-				'sites'  => [
+				'sites'   => [
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => [
@@ -59,14 +72,10 @@ final class Preferences {
 						'per_page' => $per_page,
 					],
 				],
-				'alerts' => [
-					'type'                 => 'object',
-					'additionalProperties' => false,
-					'properties'           => [
-						'fields'   => $fields,
-						'per_page' => $per_page,
-					],
-				],
+				'plugins' => $list,
+				'themes'  => $list,
+				'users'   => $list,
+				'alerts'  => $list,
 			],
 		];
 	}

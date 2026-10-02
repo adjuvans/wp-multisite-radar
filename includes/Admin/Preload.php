@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 final class Preload {
 
 	/**
-	 * @param string $view  overview, sites, alerts ou settings.
+	 * @param string $view  overview, sites, plugins, themes, users, alerts ou settings.
 	 * @param array  $query Paramètres d'URL de la page.
 	 * @param array  $prefs Préférences complètes de l'utilisateur.
 	 * @return string[]
@@ -19,6 +19,7 @@ final class Preload {
 		switch ( $view ) {
 			case 'overview':
 				$paths[] = ViewQuery::path( '/alerts/summary' );
+				$paths[] = ViewQuery::path( '/inventory/summary' );
 				$paths[] = ViewQuery::path( '/scan/status' );
 				break;
 			case 'sites':
@@ -28,6 +29,17 @@ final class Preload {
 				if ( $site_id > 0 ) {
 					$paths[] = ViewQuery::path( '/sites/' . $site_id );
 				}
+				break;
+			case 'plugins':
+				$paths[] = ViewQuery::path( '/inventory/summary' );
+				$paths[] = ViewQuery::path( '/plugins', ViewQuery::plugins( $query, $prefs ) );
+				break;
+			case 'themes':
+				$paths[] = ViewQuery::path( '/inventory/summary' );
+				$paths[] = ViewQuery::path( '/themes', ViewQuery::themes( $query, $prefs ) );
+				break;
+			case 'users':
+				$paths[] = ViewQuery::path( '/users', ViewQuery::users( $query, $prefs ) );
 				break;
 			case 'alerts':
 				$paths[] = ViewQuery::path( '/alerts/summary' );

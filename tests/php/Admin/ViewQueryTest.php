@@ -19,7 +19,28 @@ final class ViewQueryTest extends TestCase {
 	 * @dataProvider cases
 	 */
 	public function test_matches_the_cases_shared_with_the_client( string $view, array $query, array $prefs, array $args ): void {
-		$this->assertSame( $args, 'sites' === $view ? ViewQuery::sites( $query, $prefs ) : ViewQuery::alerts( $query, $prefs ) );
+		$builders = [
+			'sites'   => [ ViewQuery::class, 'sites' ],
+			'alerts'  => [ ViewQuery::class, 'alerts' ],
+			'plugins' => [ ViewQuery::class, 'plugins' ],
+			'themes'  => [ ViewQuery::class, 'themes' ],
+			'users'   => [ ViewQuery::class, 'users' ],
+		];
+		$this->assertSame( $args, call_user_func( $builders[ $view ], $query, $prefs ) );
+	}
+
+	public function test_paths_skip_empty_values_like_the_client(): void {
+		$this->assertSame(
+			'/multisite-radar/v1/users?page=1',
+			ViewQuery::path(
+				'/users',
+				[
+					'page'       => 1,
+					'search'     => '',
+					'membership' => null,
+				]
+			)
+		);
 	}
 
 	public function test_paths_sort_keys_and_encode_values(): void {
@@ -40,5 +61,6 @@ final class ViewQueryTest extends TestCase {
 		$this->assertSame( 12, ViewQuery::site_id( [ 'site' => '12' ] ) );
 		$this->assertSame( 0, ViewQuery::site_id( [ 'site' => '12abc' ] ) );
 		$this->assertSame( 0, ViewQuery::site_id( [] ) );
+		$this->assertSame( 0, ViewQuery::site_id( [ 'site' => "12\n" ] ) );
 	}
 }

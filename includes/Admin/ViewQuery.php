@@ -4,7 +4,11 @@ namespace MultisiteRadar\Admin;
 use MultisiteRadar\Alerts\RuleRegistry;
 use MultisiteRadar\Alerts\Severity;
 use MultisiteRadar\Query\AlertsQuery;
+use MultisiteRadar\Query\InventoryList;
+use MultisiteRadar\Query\PluginsQuery;
 use MultisiteRadar\Query\SitesQuery;
+use MultisiteRadar\Query\ThemesQuery;
+use MultisiteRadar\Query\UsersQuery;
 use MultisiteRadar\Settings\Preferences;
 use MultisiteRadar\Storage\SitesRepository;
 
@@ -12,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Traduit les paramètres d'URL d'une page d'administration en arguments REST, exactement comme le client
- * (src/views/sites/query.js et src/views/alerts/query.js) : le préchargement doit viser la même requête.
+ * (src/views/<vue>/query.js et src/views/inventory/query.js) : le préchargement doit viser la même requête.
  * tests/fixtures/view-queries.json vérifie la parité des deux côtés.
  */
 final class ViewQuery {
@@ -64,18 +68,59 @@ final class ViewQuery {
 		return $args;
 	}
 
-	public static function site_id( array $query ): int {
-		$value = self::text( $query, 'site' );
-		return 1 === preg_match( '/^\d+$/', $value ) && (int) $value > 0 ? (int) $value : 0;
+	public static function plugins( array $query, array $prefs ): array {
+		return self::inventory( $query, $prefs['plugins']['per_page'] ?? null, PluginsQuery::STATUSES );
+	}
+
+	public static function themes( array $query, array $prefs ): array {
+		return self::inventory( $query, $prefs['themes']['per_page'] ?? null, ThemesQuery::STATUSES );
+	}
+
+	public static function users( array $query, array $prefs ): array {
+		$args       = self::base( $query, $prefs['users']['per_page'] ?? null, UsersQuery::ORDERBY, 'login' );
+		$membership = self::text( $query, 'membership' );
+		if ( in_array( $membership, UsersQuery::MEMBERSHIPS, true ) ) {
+			$args['membership'] = $membership;
+		}
+		if ( '1' === self::text( $query, 'super_admin' ) ) {
+			$args['super_admin'] = 1;
+		}
+		return $args;
 	}
 
 	/**
-	 * Chemin REST avec clés triées et valeurs encodées par rawurlencode (le client normalise les deux écritures).
+	 * Plugins et thèmes : arguments communs, statuts dans l'ordre canonique, mises à jour seulement.
+	 *
+	 * @param mixed    $per_page Préférence enregistrée.
+	 * @param string[] $statuses Statuts autorisés.
+	 */
+	private static function inventory( array $query, $per_page, array $statuses ): array {
+		$args   = self::base( $query, $per_page, InventoryList::ORDERBY, 'name' );
+		$status = self::subset( $query, 'status', $statuses );
+		if ( [] !== $status ) {
+			$args['status'] = implode( ',', $status );
+		}
+		if ( '1' === self::text( $query, 'has_update' ) ) {
+			$args['has_update'] = 1;
+		}
+		return $args;
+	}
+
+	public static function site_id( array $query ): int {
+		$value = self::text( $query, 'site' );
+		return 1 === preg_match( '/^\d+\z/', $value ) && (int) $value > 0 ? (int) $value : 0;
+	}
+
+	/**
+	 * Chemin REST avec clés triées, valeurs vides omises et valeurs encodées par rawurlencode (le client normalise les deux écritures).
 	 */
 	public static function path( string $route, array $args = [] ): string {
 		ksort( $args, SORT_STRING );
 		$pairs = [];
 		foreach ( $args as $key => $value ) {
+			if ( null === $value || '' === $value ) {
+				continue;
+			}
 			$pairs[] = rawurlencode( (string) $key ) . '=' . rawurlencode( (string) $value );
 		}
 		return self::NAMESPACE . $route . ( [] === $pairs ? '' : '?' . implode( '&', $pairs ) );
@@ -112,7 +157,7 @@ final class ViewQuery {
 	 */
 	private static function page( array $query ): int {
 		$value = self::text( $query, 'paged' );
-		if ( 1 !== preg_match( '/^\d+$/', $value ) ) {
+		if ( 1 !== preg_match( '/^\d+\z/', $value ) ) {
 			return 1;
 		}
 		return max( 1, min( self::MAX_PAGE, (int) $value ) );
