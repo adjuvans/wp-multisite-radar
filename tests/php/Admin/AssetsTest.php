@@ -13,7 +13,7 @@ final class AssetsTest extends RestTestCase {
 	}
 
 	public function tear_down(): void {
-		foreach ( [ 'msradar-sites', 'msradar-alerts', 'msradar-settings' ] as $handle ) {
+		foreach ( [ 'msradar-overview', 'msradar-sites', 'msradar-alerts', 'msradar-settings', Assets::SHARED_HANDLE ] as $handle ) {
 			wp_dequeue_script( $handle );
 			wp_deregister_script( $handle );
 			wp_dequeue_style( $handle );
@@ -50,10 +50,10 @@ final class AssetsTest extends RestTestCase {
 		$this->assertTrue( $this->assets()->enqueue_view( 'sites' ) );
 
 		$this->assertTrue( wp_script_is( 'msradar-sites', 'enqueued' ) );
-		$this->assertSame( [ 'react', 'wp-api-fetch', 'wp-i18n' ], wp_scripts()->registered['msradar-sites']->deps );
+		$this->assertSame( [ 'react', 'wp-api-fetch', Assets::SHARED_HANDLE, 'wp-i18n' ], wp_scripts()->registered['msradar-sites']->deps );
 		$this->assertSame( 'https://example.test/build/admin/sites.js', wp_scripts()->registered['msradar-sites']->src );
 		$this->assertTrue( wp_style_is( 'msradar-sites', 'enqueued' ) );
-		$this->assertSame( [ 'wp-components' ], wp_styles()->registered['msradar-sites']->deps );
+		$this->assertSame( [ 'wp-components', Assets::SHARED_HANDLE ], wp_styles()->registered['msradar-sites']->deps );
 		$this->assertSame( 'replace', wp_styles()->get_data( 'msradar-sites', 'rtl' ) );
 
 		$config = $this->config_of( 'msradar-sites' );
@@ -66,12 +66,54 @@ final class AssetsTest extends RestTestCase {
 		$this->assertContains( '</script><script>alert(1)</script>', wp_list_pluck( $list['body'], 'name' ), 'The name survives intact once decoded.' );
 	}
 
+	public function test_views_with_dataviews_load_the_shared_chunk_first(): void {
+		$this->login_as_super_admin();
+
+		$this->assertTrue( $this->assets()->enqueue_view( 'sites' ) );
+
+		$chunk = wp_scripts()->registered[ Assets::SHARED_HANDLE ];
+		$this->assertSame( 'https://example.test/build/admin/dataviews.js', $chunk->src );
+		$this->assertSame( 'shared', $chunk->ver );
+		$this->assertSame( 'multisite-radar', $chunk->textdomain, 'The DataViews strings live in the shared chunk.' );
+		$this->assertSame( MSRADAR_DIR . 'languages', $chunk->translations_path );
+		$this->assertSame( 'https://example.test/build/admin/dataviews.css', wp_styles()->registered[ Assets::SHARED_HANDLE ]->src );
+		$this->assertSame( 'replace', wp_styles()->get_data( Assets::SHARED_HANDLE, 'rtl' ) );
+		$this->assertTrue( wp_style_is( Assets::SHARED_HANDLE, 'enqueued' ) );
+	}
+
+	public function test_the_overview_does_not_load_the_shared_chunk(): void {
+		$this->login_as_super_admin();
+
+		$this->assertTrue( $this->assets()->enqueue_view( 'overview' ) );
+
+		$this->assertSame( [ 'wp-api-fetch', 'wp-i18n' ], wp_scripts()->registered['msradar-overview']->deps );
+		$this->assertFalse( wp_script_is( Assets::SHARED_HANDLE, 'registered' ) );
+	}
+
+	public function test_a_build_without_the_shared_chunk_shows_the_missing_build_notice(): void {
+		$dir = trailingslashit( get_temp_dir() ) . 'msradar-build-' . wp_generate_password( 8, false, false ) . '/';
+		wp_mkdir_p( $dir . 'admin' );
+		copy( dirname( __DIR__ ) . '/fixtures/build/admin/sites.asset.php', $dir . 'admin/sites.asset.php' );
+		try {
+			$assets = new Assets( new Menu(), $this->plugin()->preferences(), $dir, 'https://example.test/build/' );
+
+			$this->assertFalse( $assets->enqueue_view( 'sites' ) );
+			$this->assertFalse( wp_script_is( 'msradar-sites', 'enqueued' ) );
+			$this->assertSame( 10, has_action( 'network_admin_notices', [ $assets, 'render_missing_build_notice' ] ) );
+		} finally {
+			unlink( $dir . 'admin/sites.asset.php' );
+			rmdir( $dir . 'admin' );
+			rmdir( $dir );
+		}
+	}
+
 	public function test_the_bundled_dataviews_strings_use_the_plugin_translations(): void {
 		$this->login_as_super_admin();
 		$this->assets()->enqueue_view( 'sites' );
 
 		$this->assertSame( 'multisite-radar', wp_scripts()->registered['msradar-sites']->textdomain );
 		$this->assertSame( MSRADAR_DIR . 'languages', wp_scripts()->registered['msradar-sites']->translations_path );
+		$this->assertSame( 'multisite-radar', wp_scripts()->registered[ Assets::SHARED_HANDLE ]->textdomain );
 		$this->assertContains( Assets::SHARE_TRANSLATIONS, (array) wp_scripts()->get_data( 'msradar-sites', 'before' ) );
 		$this->assertStringContainsString( "i18n.getLocaleData( 'multisite-radar' )", Assets::SHARE_TRANSLATIONS );
 		$this->assertStringContainsString( "i18n.setLocaleData( data, 'default' )", Assets::SHARE_TRANSLATIONS );

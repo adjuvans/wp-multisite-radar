@@ -20,7 +20,7 @@
 	"scripts": {
 		"build": "wp-scripts build",
 		"start": "wp-scripts start",
-		"lint:js": "wp-scripts lint-js src tests/js tests/e2e bin",
+		"lint:js": "wp-scripts lint-js src tests/js tests/e2e bin webpack.config.js",
 		"wp-env": "wp-env",
 		"e2e:setup": "wp-env run cli sh wp-content/plugins/multisite-radar/tests/e2e/setup.sh",
 		"test:e2e": "WP_BASE_URL=${WP_BASE_URL:-http://localhost:8888} wp-scripts test-playwright --config playwright.config.js",
