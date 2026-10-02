@@ -45,6 +45,7 @@ export default function OverviewView() {
 	const { canManage } = getConfig();
 	const summary = useResource( buildPath( '/alerts/summary' ) );
 	const status = useResource( buildPath( '/scan/status' ) );
+	const inventory = useResource( buildPath( '/inventory/summary' ) );
 	const scan = useScan();
 	const data = summary.data;
 	const firstRun =
@@ -67,7 +68,7 @@ export default function OverviewView() {
 					label={ __( 'Loading the overview…', 'multisite-radar' ) }
 				/>
 			) }
-			{ data && <Tiles summary={ data } /> }
+			{ data && <Tiles summary={ data } inventory={ inventory.data } /> }
 			<div className="msradar-overview__columns">
 				{ data && <ToReview rules={ data.by_rule } /> }
 				<ScanPanel

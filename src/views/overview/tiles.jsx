@@ -6,7 +6,7 @@ import { formatNumber } from '../../utils/format';
 
 const LEVELS = { error: 3, warning: 2, info: 1 };
 
-export function Tiles( { summary } ) {
+export function Tiles( { summary, inventory = null } ) {
 	const tiles = [
 		{
 			key: 'sites',
@@ -46,6 +46,40 @@ export function Tiles( { summary } ) {
 			href: pageUrl( 'sites', { alert_level: 'info' } ),
 		},
 	];
+	if ( inventory ) {
+		const { plugins, themes } = inventory;
+		tiles.push(
+			{
+				key: 'unused-plugins',
+				label: __( 'Unused plugins', 'multisite-radar' ),
+				value: plugins.unused,
+				href: pageUrl( 'plugins', { status: 'unused' } ),
+			},
+			{
+				key: 'unused-themes',
+				label: __( 'Unused themes', 'multisite-radar' ),
+				value: themes.unused,
+				href: pageUrl( 'themes', { status: 'unused' } ),
+			},
+			{
+				key: 'updates',
+				label: __( 'Updates available', 'multisite-radar' ),
+				value: plugins.updates + themes.updates,
+				detail: sprintf(
+					/* translators: 1: number of plugins with an update, 2: number of themes with an update. */
+					__( 'Plugins: %1$d · Themes: %2$d', 'multisite-radar' ),
+					plugins.updates,
+					themes.updates
+				),
+				href: pageUrl(
+					plugins.updates === 0 && themes.updates > 0
+						? 'themes'
+						: 'plugins',
+					{ has_update: '1' }
+				),
+			}
+		);
+	}
 	return (
 		<ul className="msradar-tiles">
 			{ tiles.map( ( tile ) => (

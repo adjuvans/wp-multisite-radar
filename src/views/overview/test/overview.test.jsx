@@ -13,6 +13,10 @@ vi.mock( '@wordpress/a11y', () => ( { speak: vi.fn() } ) );
 
 const SITES_URL =
 	'https://example.test/wp-admin/network/admin.php?page=multisite-radar-sites';
+const PLUGINS_URL =
+	'https://example.test/wp-admin/network/admin.php?page=multisite-radar-plugins';
+const THEMES_URL =
+	'https://example.test/wp-admin/network/admin.php?page=multisite-radar-themes';
 
 function summary( overrides = {} ) {
 	return {
@@ -55,10 +59,30 @@ function summary( overrides = {} ) {
 	};
 }
 
-function renderView( { canManage = true, data = summary() } = {} ) {
+function inventory( overrides = {} ) {
+	return {
+		pending_sites: 2,
+		plugins: {
+			installed: 9,
+			network: 2,
+			unused: 3,
+			missing: 0,
+			updates: 0,
+		},
+		themes: { installed: 4, unused: 2, missing: 0, updates: 1 },
+		...overrides,
+	};
+}
+
+function renderView( {
+	canManage = true,
+	data = summary(),
+	stock = inventory(),
+} = {} ) {
 	const preload = {
 		'/multisite-radar/v1/preferences': { body: {}, headers: {} },
 		'/multisite-radar/v1/alerts/summary': { body: data, headers: {} },
+		'/multisite-radar/v1/inventory/summary': { body: stock, headers: {} },
 		'/multisite-radar/v1/scan/status': {
 			body: {
 				total: 12,
@@ -74,7 +98,7 @@ function renderView( { canManage = true, data = summary() } = {} ) {
 	window.msradarAdmin = {
 		view: 'overview',
 		canManage,
-		pages: { sites: SITES_URL },
+		pages: { sites: SITES_URL, plugins: PLUGINS_URL, themes: THEMES_URL },
 		preload,
 	};
 	const registry = createRegistry();
@@ -162,4 +186,24 @@ test( 'Analyse all sites starts a full analysis', () => {
 		method: 'POST',
 		data: { scope: 'all' },
 	} );
+} );
+
+test( 'inventory tiles lead to the unused plugins and themes and to the updates', async () => {
+	renderView();
+
+	expect(
+		screen.getByRole( 'link', { name: /3\s*Unused plugins/ } )
+	).toHaveAttribute( 'href', `${ PLUGINS_URL }&status=unused` );
+	expect(
+		screen.getByRole( 'link', { name: /2\s*Unused themes/ } )
+	).toHaveAttribute( 'href', `${ THEMES_URL }&status=unused` );
+	const updates = screen.getByRole( 'link', {
+		name: /1\s*Updates available/,
+	} );
+	expect( updates ).toHaveAttribute( 'href', `${ THEMES_URL }&has_update=1` );
+	expect(
+		within( updates ).getByText( 'Plugins: 0 · Themes: 1' )
+	).toBeInTheDocument();
+	await act( () => new Promise( ( resolve ) => setTimeout( resolve, 0 ) ) );
+	expect( apiFetch ).not.toHaveBeenCalled();
 } );
