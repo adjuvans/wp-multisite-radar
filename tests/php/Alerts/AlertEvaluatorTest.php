@@ -27,7 +27,7 @@ final class AlertEvaluatorTest extends TestCase {
 	}
 
 	public function test_no_alert_clears_previous_values(): void {
-		$record = $this->build_record( [ 'users_count' => 4, 'alert_level' => 3, 'alerts_count' => 1, 'alert_rules' => ',no_users,' ] );
+		$record = $this->build_record( [ 'users_count' => 4, 'admins_count' => 1, 'alert_level' => 3, 'alerts_count' => 1, 'alert_rules' => ',no_users,' ] );
 
 		$this->fresh_evaluator()->apply( $record, time() );
 
@@ -107,7 +107,7 @@ final class AlertEvaluatorTest extends TestCase {
 
 		$registry = RuleRegistry::create_default();
 
-		$this->assertSame( [ 'no_users', 'inactive', 'high_media', 'always' ], array_keys( $registry->all() ) );
+		$this->assertSame( [ 'no_users', 'inactive', 'high_media', 'no_admin', 'heavy_autoload', 'search_hidden', 'cron_overdue', 'always' ], array_keys( $registry->all() ) );
 	}
 
 	public function test_formatter_builds_labels_and_messages(): void {

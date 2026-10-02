@@ -137,6 +137,7 @@ final class QueueTest extends TestCase {
 		$months = static fn ( int $months ): array => [ 'alerts' => [ 'rules' => [ 'inactive' => [ 'params' => [ 'months' => $months ] ] ] ] ];
 		$props  = [
 			'users_count'       => 1,
+			'admins_count'      => 1,
 			'scanned_at'        => '2026-09-01 00:00:00',
 			'last_activity_gmt' => gmdate( 'Y-m-d H:i:s', time() - 100 * DAY_IN_SECONDS ),
 		];
@@ -177,7 +178,7 @@ final class QueueTest extends TestCase {
 		$this->make_record( 3302, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
 		$this->queue->recompute_alerts();
 		$table = Schema::sites_table();
-		$wpdb->update( $table, [ 'users_count' => 4 ], [ 'site_id' => 3302 ] );
+		$wpdb->update( $table, [ 'users_count' => 4, 'admins_count' => 1 ], [ 'site_id' => 3302 ] );
 		$writes = [];
 		$spy    = static function ( string $query ) use ( &$writes, $table ): string {
 			if ( 0 === strpos( $query, 'UPDATE `' . $table . '`' ) && 1 === preg_match( '/`site_id` = (\d+)/', $query, $match ) ) {

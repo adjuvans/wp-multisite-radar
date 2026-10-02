@@ -1,9 +1,13 @@
 <?php
 namespace MultisiteRadar\Alerts;
 
+use MultisiteRadar\Alerts\Rules\CronOverdueRule;
+use MultisiteRadar\Alerts\Rules\HeavyAutoloadRule;
 use MultisiteRadar\Alerts\Rules\HighMediaRule;
 use MultisiteRadar\Alerts\Rules\InactiveRule;
+use MultisiteRadar\Alerts\Rules\NoAdminRule;
 use MultisiteRadar\Alerts\Rules\NoUsersRule;
+use MultisiteRadar\Alerts\Rules\SearchHiddenRule;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,7 +32,17 @@ final class RuleRegistry {
 	}
 
 	public static function create_default(): self {
-		return new self( [ new NoUsersRule(), new InactiveRule(), new HighMediaRule() ] );
+		return new self(
+			[
+				new NoUsersRule(),
+				new InactiveRule(),
+				new HighMediaRule(),
+				new NoAdminRule(),
+				new HeavyAutoloadRule(),
+				new SearchHiddenRule(),
+				new CronOverdueRule(),
+			]
+		);
 	}
 
 	/**

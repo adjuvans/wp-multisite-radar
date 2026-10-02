@@ -4,9 +4,14 @@ namespace MultisiteRadar\Tests\Alerts;
 use MultisiteRadar\Alerts\Alert;
 use MultisiteRadar\Alerts\RuleInterface;
 use MultisiteRadar\Alerts\RuleRegistry;
+use MultisiteRadar\Alerts\Rules\CronOverdueRule;
+use MultisiteRadar\Alerts\Rules\HeavyAutoloadRule;
 use MultisiteRadar\Alerts\Rules\HighMediaRule;
 use MultisiteRadar\Alerts\Rules\InactiveRule;
+use MultisiteRadar\Alerts\Rules\NoAdminRule;
 use MultisiteRadar\Alerts\Rules\NoUsersRule;
+use MultisiteRadar\Alerts\Rules\SearchHiddenRule;
+use MultisiteRadar\Alerts\Severity;
 use MultisiteRadar\Storage\SiteRecord;
 use MultisiteRadar\Tests\TestCase;
 
@@ -46,10 +51,83 @@ final class RulesTest extends TestCase {
 		$this->assertSame( '1,000 media files (threshold: 1,000)', $rule->message( $alert->args ) );
 	}
 
-	public function test_default_params_satisfy_their_schema(): void {
-		foreach ( [ new NoUsersRule(), new InactiveRule(), new HighMediaRule() ] as $rule ) {
-			$this->assertTrue( rest_validate_value_from_schema( $rule->default_params(), $rule->params_schema(), 'params' ) );
+	public function test_every_default_rule_is_well_formed(): void {
+		foreach ( RuleRegistry::create_default()->all() as $id => $rule ) {
+			$this->assertSame( 1, preg_match( RuleRegistry::ID_PATTERN, $id ), $id );
+			$this->assertNotSame( '', $rule->label(), $id );
+			$this->assertNotSame( '', $rule->description(), $id );
+			$this->assertTrue( Severity::is_valid( $rule->default_severity() ), $id );
+			$this->assertSame( 'object', $rule->params_schema()['type'], $id );
+			$this->assertFalse( $rule->params_schema()['additionalProperties'], $id );
+			$this->assertTrue( rest_validate_value_from_schema( $rule->default_params(), $rule->params_schema(), 'params' ), $id );
 		}
+	}
+
+	public function test_the_default_rules_follow_the_order_of_the_spec(): void {
+		$this->assertSame(
+			[ 'no_users', 'inactive', 'high_media', 'no_admin', 'heavy_autoload', 'search_hidden', 'cron_overdue' ],
+			array_keys( RuleRegistry::create_default()->all() )
+		);
+	}
+
+	public function test_no_admin_leaves_sites_without_accounts_to_no_users(): void {
+		$rule = new NoAdminRule();
+
+		$this->assertNotNull( $rule->evaluate( $this->build_record( [ 'users_count' => 3, 'admins_count' => 0 ] ), [], time() ) );
+		$this->assertNull( $rule->evaluate( $this->build_record( [ 'users_count' => 3, 'admins_count' => 1 ] ), [], time() ) );
+		$this->assertNull( $rule->evaluate( $this->build_record( [ 'users_count' => 0, 'admins_count' => 0 ] ), [], time() ), 'no_users already flags a site without accounts.' );
+		$this->assertNull( $rule->evaluate( $this->build_record( [ 'users_count' => 3, 'scanned_at' => null ] ), [], time() ) );
+		$this->assertSame( 'No account has the administrator role on this site.', $rule->message( [] ) );
+	}
+
+	public function test_heavy_autoload(): void {
+		$rule = new HeavyAutoloadRule();
+
+		$alert = $rule->evaluate( $this->build_record( [ 'autoload_bytes' => 800 * KB_IN_BYTES ] ), [ 'kilobytes' => 800 ], time() );
+		$this->assertSame( [ 'kilobytes' => 800, 'threshold' => 800 ], $alert->args );
+		$this->assertNull( $rule->evaluate( $this->build_record( [ 'autoload_bytes' => 800 * KB_IN_BYTES - 1 ] ), [ 'kilobytes' => 800 ], time() ) );
+		$this->assertNull( $rule->evaluate( $this->build_record( [ 'autoload_bytes' => null ] ), [ 'kilobytes' => 800 ], time() ), 'Not measured yet: no alert.' );
+		$this->assertSame( '1,024 KB of autoloaded options (threshold: 800 KB)', $rule->message( [ 'kilobytes' => 1024, 'threshold' => 800 ] ) );
+	}
+
+	public function test_search_hidden_ignores_the_sites_that_are_not_served(): void {
+		$rule = new SearchHiddenRule();
+
+		$this->assertNotNull( $rule->evaluate( $this->build_record( [ 'is_public' => false ] ), [], time() ) );
+		$this->assertNull( $rule->evaluate( $this->build_record( [ 'is_public' => true ] ), [], time() ) );
+		foreach ( [ 'is_archived', 'is_spam', 'is_deleted' ] as $flag ) {
+			$this->assertNull( $rule->evaluate( $this->build_record( [ 'is_public' => false, $flag => true ] ), [], time() ), $flag );
+		}
+		$this->assertSame( 'Search engines are asked not to index this site.', $rule->message( [] ) );
+	}
+
+	public function test_cron_overdue_measures_the_delay_at_the_time_of_the_analysis(): void {
+		$rule   = new CronOverdueRule();
+		$later  = (int) strtotime( '2026-12-01 00:00:00 UTC' );
+		$record = fn ( string $oldest, array $props = [] ): SiteRecord => $this->build_record(
+			array_merge(
+				[
+					'scanned_at' => '2026-09-01 12:00:00',
+					'data'       => [
+						'cron' => [
+							'overdue_count'      => 4,
+							'oldest_overdue_gmt' => $oldest,
+						],
+					],
+				],
+				$props
+			)
+		);
+
+		$alert = $rule->evaluate( $record( '2026-08-31 06:00:00' ), [ 'hours' => 24 ], $later );
+		$this->assertSame( [ 'count' => 4, 'hours' => 30 ], $alert->args );
+		$this->assertNull( $rule->evaluate( $record( '2026-08-31 13:00:00' ), [ 'hours' => 24 ], $later ), 'Three months later, the delay is still the one seen at the analysis.' );
+		$this->assertNull( $rule->evaluate( $this->build_record( [ 'scanned_at' => '2026-09-01 12:00:00' ] ), [ 'hours' => 24 ], $later ), 'Analysed before 2.0.0-beta.4: no data, no alert.' );
+		foreach ( [ 'is_archived', 'is_spam', 'is_deleted' ] as $flag ) {
+			$this->assertNull( $rule->evaluate( $record( '2026-08-01 00:00:00', [ $flag => true ] ), [ 'hours' => 24 ], $later ), $flag );
+		}
+		$this->assertSame( 'At the last analysis, 4 scheduled tasks were overdue; the oldest had been waiting for 1 day.', $rule->message( [ 'count' => 4, 'hours' => 30 ] ) );
+		$this->assertSame( 'At the last analysis, 1 scheduled task was overdue; the oldest had been waiting for 2 days.', $rule->message( [ 'count' => 1, 'hours' => 48 ] ) );
 	}
 
 	public function test_rules_with_an_invalid_identifier_are_ignored(): void {

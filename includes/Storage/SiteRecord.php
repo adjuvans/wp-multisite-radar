@@ -111,4 +111,11 @@ final class SiteRecord {
 	public function alert_rule_ids(): array {
 		return array_values( array_filter( explode( ',', $this->alert_rules ) ) );
 	}
+
+	/**
+	 * Vrai si WordPress sert le site : ni archivé, ni indésirable, ni supprimé.
+	 */
+	public function is_served(): bool {
+		return ! $this->is_archived && ! $this->is_spam && ! $this->is_deleted;
+	}
 }

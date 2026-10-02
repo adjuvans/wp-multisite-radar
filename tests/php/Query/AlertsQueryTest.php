@@ -19,14 +19,16 @@ final class AlertsQueryTest extends TestCase {
 		$this->assertSame( 1, $summary['pending_sites'] );
 		$this->assertSame( 2, $summary['sites_with_alerts'] );
 		$this->assertSame( [ 'error' => 1, 'warning' => 1, 'info' => 0 ], $summary['by_severity'] );
+		$this->assertSame( array_keys( $this->plugin()->rules()->all() ), wp_list_pluck( $summary['by_rule'], 'rule' ) );
 		$this->assertSame(
 			[
 				[ 'rule' => 'no_users', 'label' => 'Site without users', 'severity' => 'error', 'enabled' => true, 'count' => 1 ],
 				[ 'rule' => 'inactive', 'label' => 'Inactive site', 'severity' => 'warning', 'enabled' => true, 'count' => 1 ],
 				[ 'rule' => 'high_media', 'label' => 'Many media files', 'severity' => 'info', 'enabled' => true, 'count' => 1 ],
 			],
-			$summary['by_rule']
+			array_slice( $summary['by_rule'], 0, 3 )
 		);
+		$this->assertSame( [ 0 ], array_values( array_unique( wp_list_pluck( array_slice( $summary['by_rule'], 3 ), 'count' ) ) ), 'No site raises the other rules.' );
 	}
 
 	private function seed_alerts(): void {
