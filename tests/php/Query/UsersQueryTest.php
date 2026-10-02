@@ -126,14 +126,51 @@ final class UsersQueryTest extends TestCase {
 			$first = $this->query()->list( [ 'search' => 'radar_' ] );
 			$again = $this->query()->list( [ 'search' => 'radar_' ] );
 			$this->assertSame( $first, $again );
-			$this->assertSame( 2, $queries, 'One count and one page, then the cache.' );
+			$this->assertSame( 1, $queries, 'One count of the memberships of the page, then the cache.' );
 
 			add_user_to_blog( $this->site_b, $this->solo, 'subscriber' );
 			$after = $this->query()->list( [ 'search' => 'radar_' ] );
 		} finally {
 			remove_filter( 'query', $count );
 		}
-		$this->assertSame( 4, $queries, 'The same request is read again once a membership changed.' );
+		$this->assertSame( 2, $queries, 'The same request is read again once a membership changed.' );
 		$this->assertSame( [ 2, 0, 2 ], wp_list_pluck( $after['items'], 'sites_count' ) );
+	}
+
+	public function test_the_default_listing_does_not_aggregate_every_membership(): void {
+		$queries  = [];
+		$record = static function ( string $query ) use ( &$queries ): string {
+			$queries[] = $query;
+			return $query;
+		};
+		add_filter( 'query', $record );
+		try {
+			$result = $this->query()->list( [ 'search' => 'radar_' ] );
+		} finally {
+			remove_filter( 'query', $record );
+		}
+
+		$this->assertSame( [ 2, 0, 1 ], wp_list_pluck( $result['items'], 'sites_count' ) );
+		$this->assertSame( 3, $result['total'] );
+		$aggregated = array_filter( $queries, static fn ( string $query ): bool => false !== strpos( $query, 'GROUP BY m.user_id) AS c' ) );
+		$this->assertSame( [], array_values( $aggregated ), 'No derived table over the whole usermeta.' );
+		$counted = array_filter( $queries, static fn ( string $query ): bool => false !== strpos( $query, 'm.user_id IN (' ) );
+		$this->assertCount( 1, $counted, 'Memberships are counted for the page only.' );
+	}
+
+	public function test_a_duplicate_key_for_the_main_site_counts_it_once(): void {
+		global $wpdb;
+		add_user_to_blog( 1, $this->nobody, 'subscriber' );
+		update_user_meta( $this->nobody, $wpdb->base_prefix . '1_capabilities', [ 'subscriber' => true ] );
+
+		$this->assertSame( 1, $this->find( 'radar_nobody' )['sites_count'] );
+		$sorted = $this->query()->list(
+			[
+				'search'  => 'radar_nobody',
+				'orderby' => 'sites_count',
+			]
+		);
+		$this->assertSame( 1, $sorted['items'][0]['sites_count'], 'The derived-table path counts it once too.' );
+		$this->assertNotContains( 'radar_nobody', $this->logins( [ 'membership' => 'several' ] ) );
 	}
 }

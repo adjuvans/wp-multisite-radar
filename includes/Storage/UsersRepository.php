@@ -31,11 +31,10 @@ final class UsersRepository {
 	 */
 	public function query( array $args ): array {
 		global $wpdb;
-		$base        = $wpdb->base_prefix;
-		$memberships = 'SELECT m.user_id, COUNT(*) AS sites_count FROM %i AS m INNER JOIN %i AS b ON b.blog_id = (CASE WHEN m.meta_key = %s THEN 1 ELSE CAST(SUBSTRING_INDEX(SUBSTRING(m.meta_key, %d), %s, 1) AS UNSIGNED) END) WHERE m.meta_key LIKE %s AND m.meta_key REGEXP %s GROUP BY m.user_id';
-		$params      = [
-			$wpdb->users,
-			$wpdb->usermeta,
+		$base = $wpdb->base_prefix;
+		// COUNT(DISTINCT) : une clé {base}1_capabilities à côté de {base}capabilities ne compte pas le site 1 deux fois.
+		$join   = 'INNER JOIN %i AS b ON b.blog_id = (CASE WHEN m.meta_key = %s THEN 1 ELSE CAST(SUBSTRING_INDEX(SUBSTRING(m.meta_key, %d), %s, 1) AS UNSIGNED) END) WHERE m.meta_key LIKE %s AND m.meta_key REGEXP %s';
+		$params = [
 			$wpdb->blogs,
 			$base . 'capabilities',
 			strlen( $base ) + 1,
@@ -44,11 +43,15 @@ final class UsersRepository {
 			'^' . $base . '([0-9]+_)?capabilities$',
 		];
 
-		$where = [];
+		$filtered   = '' !== (string) $args['membership'] && in_array( $args['membership'], [ 'none', 'several' ], true );
+		$derived    = $filtered || 'sites_count' === $args['orderby'];
+		$conditions = [];
+		$where      = [];
 		if ( '' !== (string) $args['search'] ) {
-			$like    = '%' . $wpdb->esc_like( (string) $args['search'] ) . '%';
-			$where[] = '(u.user_login LIKE %s OR u.display_name LIKE %s)';
-			array_push( $params, $like, $like );
+			$like         = '%' . $wpdb->esc_like( (string) $args['search'] ) . '%';
+			$where[]      = '(u.user_login LIKE %s OR u.display_name LIKE %s)';
+			$conditions[] = $like;
+			$conditions[] = $like;
 		}
 		if ( 'none' === $args['membership'] ) {
 			$where[] = 'c.sites_count IS NULL';
@@ -58,28 +61,63 @@ final class UsersRepository {
 		if ( null !== $args['logins'] ) {
 			$logins = array_values( array_map( 'strval', (array) $args['logins'] ) );
 			// Une liste vide ne retient personne : jamais tous les comptes.
-			$where[] = [] === $logins ? '1 = 0' : 'u.user_login IN (' . implode( ',', array_fill( 0, count( $logins ), '%s' ) ) . ')';
-			$params  = array_merge( $params, $logins );
+			$where[]    = [] === $logins ? '1 = 0' : 'u.user_login IN (' . implode( ',', array_fill( 0, count( $logins ), '%s' ) ) . ')';
+			$conditions = array_merge( $conditions, $logins );
 		}
 
-		$from      = "%i AS u LEFT JOIN ({$memberships}) AS c ON c.user_id = u.ID";
 		$condition = [] === $where ? '1 = 1' : implode( ' AND ', $where );
 		$sort      = self::ORDERBY[ $args['orderby'] ] ?? self::ORDERBY['login'];
 		$direction = 'desc' === $args['order'] ? 'DESC' : 'ASC';
 		$per_page  = (int) $args['per_page'];
 		$offset    = ( (int) $args['page'] - 1 ) * $per_page;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $from et $condition ne contiennent que des fragments fixes et des placeholders ; $sort vient d'une liste blanche ; $direction vaut ASC ou DESC.
-		$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$from} WHERE {$condition}", $params ) );
-		self::check_read();
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT u.ID, u.user_login, u.display_name, u.user_registered, COALESCE(c.sites_count, 0) AS sites_count FROM {$from} WHERE {$condition} ORDER BY {$sort} {$direction}, u.ID ASC LIMIT %d OFFSET %d",
-				array_merge( $params, [ $per_page, $offset ] )
-			),
-			ARRAY_A
-		);
-		self::check_read();
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $join, $from et $condition ne contiennent que des fragments fixes et des placeholders ; $sort vient d'une liste blanche ; $direction vaut ASC ou DESC.
+		if ( $derived ) {
+			// Filtre d'appartenance ou tri par nombre de sites : la table dérivée agrège les appartenances de tous les comptes.
+			$from   = "%i AS u LEFT JOIN (SELECT m.user_id, COUNT(DISTINCT b.blog_id) AS sites_count FROM %i AS m {$join} GROUP BY m.user_id) AS c ON c.user_id = u.ID";
+			$prefix = array_merge( [ $wpdb->users, $wpdb->usermeta ], $params );
+			$total  = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$from} WHERE {$condition}", array_merge( $prefix, $conditions ) ) );
+			self::check_read();
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT u.ID, u.user_login, u.display_name, u.user_registered, COALESCE(c.sites_count, 0) AS sites_count FROM {$from} WHERE {$condition} ORDER BY {$sort} {$direction}, u.ID ASC LIMIT %d OFFSET %d",
+					array_merge( $prefix, $conditions, [ $per_page, $offset ] )
+				),
+				ARRAY_A
+			);
+			self::check_read();
+		} else {
+			$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i AS u WHERE {$condition}", array_merge( [ $wpdb->users ], $conditions ) ) );
+			self::check_read();
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT u.ID, u.user_login, u.display_name, u.user_registered FROM %i AS u WHERE {$condition} ORDER BY {$sort} {$direction}, u.ID ASC LIMIT %d OFFSET %d",
+					array_merge( [ $wpdb->users ], $conditions, [ $per_page, $offset ] )
+				),
+				ARRAY_A
+			);
+			self::check_read();
+			$rows = (array) $rows;
+			if ( [] !== $rows ) {
+				// Les appartenances ne sont comptées que pour les comptes de la page.
+				$ids    = array_map( static fn ( array $row ): int => (int) $row['ID'], $rows );
+				$counts = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT m.user_id, COUNT(DISTINCT b.blog_id) AS sites_count FROM %i AS m ' . $join . ' AND m.user_id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ') GROUP BY m.user_id',
+						array_merge( [ $wpdb->usermeta ], $params, $ids )
+					),
+					ARRAY_A
+				);
+				self::check_read();
+				$by_user = [];
+				foreach ( (array) $counts as $count ) {
+					$by_user[ (int) $count['user_id'] ] = (int) $count['sites_count'];
+				}
+				foreach ( $rows as $i => $row ) {
+					$rows[ $i ]['sites_count'] = $by_user[ (int) $row['ID'] ] ?? 0;
+				}
+			}
+		}
 		// phpcs:enable
 
 		return [

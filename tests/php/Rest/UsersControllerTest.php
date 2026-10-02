@@ -43,7 +43,7 @@ final class UsersControllerTest extends RestTestCase {
 		$suppress = $wpdb->suppress_errors( true );
 		add_filter( 'query', $break );
 		try {
-			$response = $this->request( 'GET', '/users', [ 'search' => 'nobody-matches-this' ] );
+			$response = $this->request( 'GET', '/users', [ 'search' => 'admin' ] );
 		} finally {
 			remove_filter( 'query', $break );
 			$wpdb->suppress_errors( $suppress );
