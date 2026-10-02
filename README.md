@@ -4,6 +4,8 @@ Audit réseau pour WordPress Multisite (successeur de Network Plugin Utilities 1
 
 Pages du menu réseau « Multisite Radar » : Vue d'ensemble, Sites, Plugins, Thèmes, Utilisateurs, Alertes, Réglages.
 
+Règles d'alertes livrées : site sans utilisateurs, site sans administrateur, site inactif, beaucoup de médias, thème actif manquant, mises à jour en attente, adresse en http sur un réseau en https, quota d'envoi presque atteint, autoload trop lourd, masqué aux moteurs de recherche, tâches planifiées en retard. D'autres extensions peuvent en ajouter avec le filtre `msradar_alert_rules`.
+
 - Spec : `docs/superpowers/specs/2026-10-01-multisite-radar-v2-design.md`
 - Plans : `docs/superpowers/plans/`
 

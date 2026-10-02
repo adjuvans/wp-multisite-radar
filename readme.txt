@@ -3,7 +3,7 @@ Tags: multisite, network, audit, inventory, admin
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.0-beta.3
+Stable tag: 2.0.0-beta.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -15,9 +15,16 @@ Multisite Radar gives network administrators a single, always up-to-date view of
 
 Data is collected in the background with lightweight SQL queries, so the network admin screens stay fast on networks with thousands of sites. The Overview, Sites, Alerts and Settings screens open instantly, and the Sites screen exports the current view as CSV or JSON; an optional "network sites" block, shortcode and menu items replace the 1.x menu. Nothing is sent to external services.
 
+Health alerts flag sites without users or administrators, inactive sites, large media libraries, missing themes, pending updates, http addresses on an https network, nearly full upload quotas, heavy autoloaded options, sites hidden from search engines and overdue scheduled tasks. Each rule can be switched off, given another severity and tuned in the settings.
+
 Source code: https://github.com/adjuvans/wp-multisite-radar
 
 == Changelog ==
+
+= 2.0.0-beta.4 =
+* Advanced health: disk, database and autoload sizes of each site, overdue scheduled tasks.
+* Eight new alert rules, from missing themes to pending updates and nearly full upload quotas.
+* Every alert rule can be switched off, given another severity and tuned in the settings.
 
 = 2.0.0-beta.3 =
 * New Plugins, Themes and Users pages: what each site uses, unused plugins and themes, available updates, accounts attached to no site.

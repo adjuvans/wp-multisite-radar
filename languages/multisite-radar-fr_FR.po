@@ -380,7 +380,7 @@ msgstr "%s : <groupName />"
 #. translators: 1: current page, 2: number of pages.
 #: build/admin/dataviews.js:56
 #: build/admin/plugins.js:2
-#: build/admin/sites.js:18
+#: build/admin/sites.js:20
 #: build/admin/themes.js:2
 #, js-format
 msgid "Page %1$d of %2$d"
@@ -942,24 +942,28 @@ msgstr "Réessayer"
 
 #: build/admin/alerts.js:1
 #: build/admin/overview.js:2
+#: build/admin/settings.js:1
 #: build/admin/sites.js:1
 msgid "Error"
 msgstr "Erreur"
 
 #: build/admin/alerts.js:1
 #: build/admin/overview.js:2
+#: build/admin/settings.js:1
 #: build/admin/sites.js:1
 msgid "Warning"
 msgstr "Avertissement"
 
 #: build/admin/alerts.js:1
 #: build/admin/overview.js:2
+#: build/admin/settings.js:1
 #: build/admin/sites.js:1
 msgid "Info"
 msgstr "Info"
 
 #: build/admin/alerts.js:1
 #: build/admin/overview.js:2
+#: build/admin/settings.js:1
 #: build/admin/sites.js:1
 msgid "No alert"
 msgstr "Aucune alerte"
@@ -975,7 +979,7 @@ msgstr[0] "%1$s · %2$d alerte"
 msgstr[1] "%1$s · %2$d alertes"
 
 #: build/admin/alerts.js:2
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 msgid "Site"
 msgstr "Site"
 
@@ -984,6 +988,7 @@ msgid "Rule"
 msgstr "Règle"
 
 #: build/admin/alerts.js:2
+#: build/admin/settings.js:1
 msgid "Severity"
 msgstr "Gravité"
 
@@ -996,13 +1001,13 @@ msgid "View the site"
 msgstr "Afficher la fiche du site"
 
 #: build/admin/alerts.js:2
-#: build/admin/sites.js:16
-#: build/admin/sites.js:20
+#: build/admin/sites.js:17
+#: build/admin/sites.js:22
 msgid "Site dashboard"
 msgstr "Tableau de bord du site"
 
 #: build/admin/alerts.js:2
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 msgid "Search sites"
 msgstr "Rechercher des sites"
 
@@ -1021,7 +1026,7 @@ msgid "%1$d of %2$d sites analysed"
 msgstr "Sites analysés : %1$d sur %2$d"
 
 #: build/admin/overview.js:2
-#: build/admin/settings.js:1
+#: build/admin/settings.js:3
 msgid "Analysis"
 msgstr "Analyse"
 
@@ -1113,29 +1118,29 @@ msgid "Start the analysis"
 msgstr "Lancer l’analyse"
 
 #: build/admin/overview.js:7
-#: build/admin/sites.js:19
+#: build/admin/sites.js:21
 msgid "Analysis started."
 msgstr "Analyse lancée."
 
 #. translators: 1: number of sites analysed, 2: number of sites to analyse.
 #: build/admin/overview.js:8
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 #, js-format
 msgid "%1$d of %2$d sites analysed."
 msgstr "Sites analysés : %1$d sur %2$d."
 
 #: build/admin/overview.js:8
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 msgid "The analysis continues in the background."
 msgstr "L’analyse se poursuit en arrière-plan."
 
 #: build/admin/overview.js:8
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 msgid "Analysis complete."
 msgstr "Analyse terminée."
 
 #: build/admin/overview.js:8
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 msgid "The analysis could not be run."
 msgstr "L’analyse n’a pas pu être effectuée."
 
@@ -1217,51 +1222,51 @@ msgstr[1] "%d champs requièrent votre attention"
 msgid "More details"
 msgstr "Plus de détails"
 
-#: build/admin/settings.js:1
+#: build/admin/settings.js:2
 msgid "Content types that count as activity"
 msgstr "Types de contenu pris en compte pour l’activité"
 
-#: build/admin/settings.js:1
+#: build/admin/settings.js:2
 msgid "Publishing or updating one of these types counts as activity (last activity, inactivity alert). Other keys can be typed in."
 msgstr "La publication ou la mise à jour d’un contenu de ces types compte comme une activité (dernière activité, alerte d’inactivité). Vous pouvez saisir d’autres clés."
 
-#: build/admin/settings.js:1
+#: build/admin/settings.js:2
 msgid "Use content type keys: lowercase letters, digits, \"-\" and \"_\", 20 characters at most."
 msgstr "Utilisez des clés de type de contenu : lettres minuscules, chiffres, « - » et « _ », 20 caractères au maximum."
 
-#: build/admin/settings.js:1
+#: build/admin/settings.js:2
 msgid "Only list the content types of these plugins"
 msgstr "N’afficher que les types de contenu de ces extensions"
 
-#: build/admin/settings.js:1
+#: build/admin/settings.js:2
 msgid "Leave empty to list the content types of every plugin."
 msgstr "Laissez vide pour afficher les types de contenu de toutes les extensions."
 
-#: build/admin/settings.js:1
+#: build/admin/settings.js:2
 msgid "Full analysis every (days)"
 msgstr "Intervalle entre deux analyses complètes (jours)"
 
-#: build/admin/settings.js:1
+#: build/admin/settings.js:2
 msgid "Every site is analysed again at this interval, to catch changes made directly in the database."
 msgstr "Chaque site est analysé de nouveau à cet intervalle, pour rattraper les modifications faites directement dans la base de données."
 
-#: build/admin/settings.js:1
+#: build/admin/settings.js:2
 msgid "Enable the network sites menu (block, shortcode and menu items)"
 msgstr "Activer le menu des sites du réseau (bloc, code court et éléments de menu)"
 
-#: build/admin/settings.js:1
+#: build/admin/settings.js:3
 msgid "Settings saved."
 msgstr "Réglages enregistrés."
 
-#: build/admin/settings.js:1
+#: build/admin/settings.js:3
 msgid "The settings could not be saved."
 msgstr "Les réglages n’ont pas pu être enregistrés."
 
-#: build/admin/settings.js:1
+#: build/admin/settings.js:3
 msgid "Network sites menu"
 msgstr "Menu des sites du réseau"
 
-#: build/admin/settings.js:1
+#: build/admin/settings.js:3
 msgid "Save settings"
 msgstr "Enregistrer les réglages"
 
@@ -1303,54 +1308,54 @@ msgstr "%s Go"
 msgid "%s TB"
 msgstr "%s To"
 
-#: build/admin/sites.js:7
+#: build/admin/sites.js:8
 msgid "Public"
 msgstr "Public"
 
-#: build/admin/sites.js:7
+#: build/admin/sites.js:8
 msgid "Private"
 msgstr "Privé"
 
-#: build/admin/sites.js:7
+#: build/admin/sites.js:8
 msgid "Archived"
 msgstr "Archivé"
 
-#: build/admin/sites.js:7
+#: build/admin/sites.js:8
 msgid "Spam"
 msgstr "Indésirable"
 
-#: build/admin/sites.js:7
+#: build/admin/sites.js:8
 msgid "Deleted"
 msgstr "Marqué pour suppression"
 
-#: build/admin/sites.js:7
+#: build/admin/sites.js:8
 msgid "WordPress"
 msgstr "WordPress"
 
 #. translators: %s: plugin folder name.
-#: build/admin/sites.js:9
+#: build/admin/sites.js:10
 #, js-format
 msgid "Plugin: %s"
 msgstr "Extension : %s"
 
 #. translators: %s: must-use plugin name.
-#: build/admin/sites.js:10
+#: build/admin/sites.js:11
 #, js-format
 msgid "Must-use plugin: %s"
 msgstr "Extension indispensable : %s"
 
 #. translators: %s: theme folder name.
-#: build/admin/sites.js:12
+#: build/admin/sites.js:13
 #, js-format
 msgid "Theme: %s"
 msgstr "Thème : %s"
 
-#: build/admin/sites.js:12
+#: build/admin/sites.js:13
 msgid "Unknown"
 msgstr "Inconnue"
 
-#: build/admin/sites.js:12
-#: build/admin/sites.js:18
+#: build/admin/sites.js:13
+#: build/admin/sites.js:20
 #: build/admin/users.js:1
 #: build/blocks/sites-list/index.js:1
 #: includes/Export/PluginsExport.php:18
@@ -1359,67 +1364,67 @@ msgstr "Inconnue"
 msgid "Name"
 msgstr "Nom"
 
-#: build/admin/sites.js:12
+#: build/admin/sites.js:13
 msgid "Origin"
 msgstr "Origine"
 
-#: build/admin/sites.js:12
+#: build/admin/sites.js:13
 msgid "Total"
 msgstr "Total"
 
 #. translators: %s: "Content types" or "Taxonomies".
-#: build/admin/sites.js:13
+#: build/admin/sites.js:14
 #, js-format
 msgid "%s: none."
 msgstr "%s : aucun élément."
 
-#: build/admin/sites.js:13
-#: build/admin/sites.js:20
+#: build/admin/sites.js:14
+#: build/admin/sites.js:22
 msgid "Content types"
 msgstr "Types de contenu"
 
-#: build/admin/sites.js:13
+#: build/admin/sites.js:14
 msgid "Published"
 msgstr "Publié"
 
-#: build/admin/sites.js:13
+#: build/admin/sites.js:14
 msgid "Taxonomies"
 msgstr "Taxonomies"
 
-#: build/admin/sites.js:13
+#: build/admin/sites.js:14
 msgid "Terms"
 msgstr "Termes"
 
 #: build/admin/plugins.js:4
-#: build/admin/sites.js:13
+#: build/admin/sites.js:14
 #: build/admin/themes.js:5
 msgid "Not installed"
 msgstr "Introuvable"
 
-#: build/admin/sites.js:13
-#: build/admin/sites.js:16
-#: build/admin/sites.js:20
+#: build/admin/sites.js:14
+#: build/admin/sites.js:17
+#: build/admin/sites.js:22
 #: build/admin/themes.js:5
 #: includes/Export/SitesColumns.php:21
 msgid "Theme"
 msgstr "Thème"
 
 #. translators: %s: parent theme folder name.
-#: build/admin/sites.js:14
+#: build/admin/sites.js:15
 #, js-format
 msgid "child theme of %s"
 msgstr "thème enfant de %s"
 
-#: build/admin/sites.js:14
+#: build/admin/sites.js:15
 msgid "Plugins active on this site only"
 msgstr "Extensions activées sur ce site uniquement"
 
-#: build/admin/sites.js:14
+#: build/admin/sites.js:15
 msgid "None."
 msgstr "Aucune."
 
 #. translators: %d: number of network-activated plugins.
-#: build/admin/sites.js:15
+#: build/admin/sites.js:16
 #, js-format
 msgid "%d plugin is active on the whole network."
 msgid_plural "%d plugins are active on the whole network."
@@ -1427,26 +1432,26 @@ msgstr[0] "%d extension est activée sur tout le réseau."
 msgstr[1] "%d extensions sont activées sur tout le réseau."
 
 #. translators: 1: date of the failed analysis, 2: error message.
-#: build/admin/sites.js:16
+#: build/admin/sites.js:17
 #, js-format
 msgid "The last analysis failed on %1$s: %2$s"
 msgstr "La dernière analyse a échoué le %1$s : %2$s"
 
-#: build/admin/sites.js:16
+#: build/admin/sites.js:17
 msgid "The content types of this site have not yet been read in its own context, so their labels and origins are not verified. Run \"wp multisite-radar scan --probe\" to read them now."
 msgstr "Les types de contenu de ce site n’ont pas encore été relevés dans son propre contexte : leurs libellés et leurs origines ne sont donc pas vérifiés. Lancez « wp multisite-radar scan --probe » pour les relever maintenant."
 
-#: build/admin/sites.js:16
+#: build/admin/sites.js:17
 msgid "Address"
 msgstr "Adresse"
 
-#: build/admin/sites.js:16
+#: build/admin/sites.js:17
 msgid "Administration"
 msgstr "Administration"
 
 #: build/admin/plugins.js:4
-#: build/admin/sites.js:16
-#: build/admin/sites.js:20
+#: build/admin/sites.js:17
+#: build/admin/sites.js:22
 #: build/admin/themes.js:5
 #: includes/Export/PluginsExport.php:21
 #: includes/Export/SitesColumns.php:20
@@ -1454,121 +1459,121 @@ msgstr "Administration"
 msgid "Status"
 msgstr "État"
 
-#: build/admin/sites.js:16
-#: build/admin/sites.js:19
-#: build/admin/sites.js:20
+#: build/admin/sites.js:17
+#: build/admin/sites.js:21
+#: build/admin/sites.js:22
 #: includes/Admin/Menu.php:41
 #: includes/Export/SitesColumns.php:22
 msgid "Users"
 msgstr "Comptes"
 
 #. translators: 1: number of users, 2: number of administrators.
-#: build/admin/sites.js:17
+#: build/admin/sites.js:18
 #, js-format
 msgid "%1$s, including %2$s administrator"
 msgid_plural "%1$s, including %2$s administrators"
 msgstr[0] "%1$s, dont %2$s administrateur"
 msgstr[1] "%1$s, dont %2$s administrateurs"
 
-#: build/admin/sites.js:17
-#: build/admin/sites.js:20
+#: build/admin/sites.js:18
+#: build/admin/sites.js:22
 #: includes/Export/SitesColumns.php:24
 msgid "Published content"
 msgstr "Contenus publiés"
 
-#: build/admin/sites.js:17
-#: build/admin/sites.js:20
+#: build/admin/sites.js:18
+#: build/admin/sites.js:22
 #: includes/Export/SitesColumns.php:25
 msgid "Media"
 msgstr "Médias"
 
-#: build/admin/sites.js:17
-#: build/admin/sites.js:20
+#: build/admin/sites.js:19
+#: build/admin/sites.js:22
 msgid "Last activity"
 msgstr "Dernière activité"
 
-#: build/admin/sites.js:17
-#: build/admin/sites.js:20
+#: build/admin/sites.js:19
+#: build/admin/sites.js:22
 msgid "Analysed"
 msgstr "Analysé le"
 
-#: build/admin/sites.js:17
-#: build/admin/sites.js:20
+#: build/admin/sites.js:19
+#: build/admin/sites.js:22
 msgid "Pending"
 msgstr "En attente"
 
-#: build/admin/sites.js:18
+#: build/admin/sites.js:20
 #: includes/Alerts/Rules/NoUsersRule.php:49
 msgid "No user is attached to this site."
 msgstr "Aucun compte n’est rattaché à ce site."
 
-#: build/admin/sites.js:18
+#: build/admin/sites.js:20
 #: build/admin/users.js:1
 msgid "Login"
 msgstr "Identifiant"
 
-#: build/admin/sites.js:18
+#: build/admin/sites.js:20
 msgid "Roles"
 msgstr "Rôles"
 
-#: build/admin/sites.js:18
+#: build/admin/sites.js:20
 #: build/admin/users.js:1
 msgid "Super admin"
 msgstr "Super-admin"
 
 #: build/admin/plugins.js:1
-#: build/admin/sites.js:17
+#: build/admin/sites.js:19
 #: build/admin/themes.js:1
 msgid "Previous"
 msgstr "Précédent"
 
 #: build/admin/plugins.js:2
-#: build/admin/sites.js:18
+#: build/admin/sites.js:20
 #: build/admin/themes.js:2
 msgid "Next"
 msgstr "Suivant"
 
-#: build/admin/sites.js:18
+#: build/admin/sites.js:20
 #: build/admin/users.js:1
 msgid "Loading users…"
 msgstr "Chargement des comptes…"
 
 #. translators: %d: site ID.
-#: build/admin/sites.js:19
-#: includes/Query/SitesQuery.php:168
+#: build/admin/sites.js:21
+#: includes/Query/SitesQuery.php:169
 #: includes/SitesMenu/Renderer.php:56
 #, js-format,php-format
 msgid "Site #%d"
 msgstr "Site n° %d"
 
-#: build/admin/sites.js:19
+#: build/admin/sites.js:21
 msgid "Previous site"
 msgstr "Site précédent"
 
-#: build/admin/sites.js:19
+#: build/admin/sites.js:21
 msgid "Next site"
 msgstr "Site suivant"
 
-#: build/admin/sites.js:19
+#: build/admin/sites.js:21
 msgid "Loading the site…"
 msgstr "Chargement du site…"
 
-#: build/admin/sites.js:19
+#: build/admin/sites.js:21
 msgid "Summary"
 msgstr "Récapitulatif"
 
-#: build/admin/sites.js:19
+#: build/admin/sites.js:21
 msgid "Content"
 msgstr "Contenu"
 
-#: build/admin/sites.js:19
+#: build/admin/sites.js:21
 msgid "Extensions"
 msgstr "Extensions et thème"
 
-#: build/admin/sites.js:19
-#: build/admin/sites.js:20
+#: build/admin/sites.js:21
+#: build/admin/sites.js:22
 #: includes/Admin/Menu.php:42
-#: includes/Export/SitesColumns.php:31
+#: includes/Export/SitesColumns.php:32
 msgid "Alerts"
 msgstr "Alertes"
 
@@ -1580,7 +1585,7 @@ msgstr "Exporter"
 
 #: build/admin/plugins.js:1
 #: build/admin/sites.js:1
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 #: build/admin/themes.js:1
 msgid "Export as CSV"
 msgstr "Exporter comme CSV"
@@ -1591,48 +1596,50 @@ msgstr "Exporter comme CSV"
 msgid "Export as JSON"
 msgstr "Exporter comme JSON"
 
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 msgid "Verified"
 msgstr "Vérifié"
 
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 msgid "Outdated"
 msgstr "Obsolète"
 
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 msgid "Never read"
 msgstr "Jamais relevé"
 
-#: build/admin/sites.js:20
+#: build/admin/sites.js:18
+#: build/admin/sites.js:22
 msgid "Disk"
 msgstr "Disque"
 
-#: build/admin/sites.js:20
+#: build/admin/sites.js:18
+#: build/admin/sites.js:22
 msgid "Database"
 msgstr "Base de données"
 
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 msgid "Alert rule"
 msgstr "Règle d’alerte"
 
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 msgid "View details"
 msgstr "Afficher les détails"
 
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 msgid "Visit site"
 msgstr "Aller sur le site"
 
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 msgid "Analyse again"
 msgstr "Réanalyser"
 
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 msgid "No site matches this view."
 msgstr "Aucun site ne correspond à cette vue."
 
 #. translators: 1: number of sites analysed, 2: number of sites to analyse.
-#: build/admin/sites.js:21
+#: build/admin/sites.js:23
 #, js-format
 msgid "Analysing: %1$d of %2$d sites…"
 msgstr "Analyse en cours : %1$d sur %2$d sites…"
@@ -1718,7 +1725,7 @@ msgid "Multisite Radar is an audit tool for network administrators. It collects 
 msgstr "Multisite Radar est un outil d’audit destiné aux administrateurs du réseau. Il ne collecte aucune donnée sur les visiteurs et n’effectue aucune requête externe. Pour dresser l’inventaire du réseau, il conserve dans la base de données du réseau une copie de données que WordPress détient déjà : pour chaque site, les ID et les identifiants de connexion de 50 administrateurs et éditeurs au plus, ainsi que le nombre de comptes par rôle. Cette copie est actualisée en arrière-plan et supprimée lors de la désinstallation de l’extension. Lorsqu’un compte est supprimé, les sites auxquels il appartenait sont analysés de nouveau."
 
 #. translators: %s: alert rule identifier.
-#: includes/Alerts/RuleRegistry.php:54
+#: includes/Alerts/RuleRegistry.php:81
 #, php-format
 msgid "The alert rule \"%s\" was ignored: identifiers may only contain lowercase letters, digits and underscores (40 characters at most)."
 msgstr "La règle d’alerte « %s » a été ignorée : les identifiants ne peuvent contenir que des lettres minuscules, des chiffres et des tirets bas (40 caractères au maximum)."
@@ -1731,12 +1738,12 @@ msgstr "Beaucoup de médias"
 msgid "The media library has reached the threshold number of files."
 msgstr "Le nombre de fichiers de la médiathèque atteint le seuil."
 
-#: includes/Alerts/Rules/HighMediaRule.php:38
+#: includes/Alerts/Rules/HighMediaRule.php:39
 msgid "Number of media files that raises the alert."
 msgstr "Nombre de fichiers médias à partir duquel l’alerte est déclenchée."
 
 #. translators: 1: number of media files, 2: alert threshold.
-#: includes/Alerts/Rules/HighMediaRule.php:67
+#: includes/Alerts/Rules/HighMediaRule.php:68
 #, php-format
 msgid "%1$s media file (threshold: %2$s)"
 msgid_plural "%1$s media files (threshold: %2$s)"
@@ -1751,12 +1758,12 @@ msgstr "Site inactif"
 msgid "No content of the tracked types has been published or updated for a while."
 msgstr "Aucun contenu des types suivis n’a été publié ni mis à jour depuis un certain temps."
 
-#: includes/Alerts/Rules/InactiveRule.php:38
+#: includes/Alerts/Rules/InactiveRule.php:39
 msgid "Months without activity before the alert is raised."
 msgstr "Nombre de mois sans activité avant le déclenchement de l’alerte."
 
 #. translators: %d: number of months without activity.
-#: includes/Alerts/Rules/InactiveRule.php:66
+#: includes/Alerts/Rules/InactiveRule.php:67
 #, php-format
 msgid "Inactive for %d month"
 msgid_plural "Inactive for %d months"
@@ -1811,31 +1818,32 @@ msgstr "Administrateurs"
 msgid "Disk usage (bytes)"
 msgstr "Espace disque utilisé (octets)"
 
-#: includes/Export/SitesColumns.php:27
+#: includes/Export/SitesColumns.php:28
 msgid "Database size (bytes)"
 msgstr "Taille de la base de données (octets)"
 
-#: includes/Export/SitesColumns.php:28
+#: includes/Export/SitesColumns.php:29
 msgid "Autoloaded options (bytes)"
 msgstr "Options chargées automatiquement (octets)"
 
-#: includes/Export/SitesColumns.php:29
+#: includes/Export/SitesColumns.php:30
 msgid "Last activity (UTC)"
 msgstr "Dernière activité (UTC)"
 
-#: includes/Export/SitesColumns.php:30
+#: includes/Export/SitesColumns.php:31
 msgid "Alert level"
 msgstr "Niveau d’alerte"
 
-#: includes/Export/SitesColumns.php:32
+#: build/admin/settings.js:3
+#: includes/Export/SitesColumns.php:33
 msgid "Alert rules"
 msgstr "Règles d’alerte"
 
-#: includes/Export/SitesColumns.php:33
+#: includes/Export/SitesColumns.php:34
 msgid "Content types status"
 msgstr "État des types de contenu"
 
-#: includes/Export/SitesColumns.php:34
+#: includes/Export/SitesColumns.php:35
 msgid "Analysed (UTC)"
 msgstr "Analysé le (UTC)"
 
@@ -1843,7 +1851,7 @@ msgstr "Analysé le (UTC)"
 msgid "Network Plugin Utilities 1.x is still loaded. Remove it: Multisite Radar replaces it and has taken over its settings."
 msgstr "Network Plugin Utilities 1.x est toujours chargée. Supprimez-la : Multisite Radar la remplace et a repris ses réglages."
 
-#: includes/Plugin.php:183
+#: includes/Plugin.php:191
 msgid "Multisite Radar requires a WordPress Multisite network. It does nothing on a single site."
 msgstr "Multisite Radar nécessite un réseau WordPress Multisite et n’a aucun effet sur un site unique."
 
@@ -1935,6 +1943,7 @@ msgstr "sites"
 #: build/admin/alerts.js:1
 #: build/admin/overview.js:1
 #: build/admin/plugins.js:2
+#: build/admin/settings.js:2
 #: build/admin/sites.js:1
 #: build/admin/themes.js:2
 #: build/admin/users.js:1
@@ -1968,7 +1977,7 @@ msgid "Loading the overview…"
 msgstr "Chargement de la vue d’ensemble…"
 
 #: build/admin/plugins.js:2
-#: build/admin/sites.js:20
+#: build/admin/sites.js:22
 #: build/admin/themes.js:2
 msgid "Loading sites…"
 msgstr "Chargement des sites…"
@@ -2181,3 +2190,234 @@ msgstr "Ce thème n’est ni installé ni utilisé par aucun site."
 #: build/admin/themes.js:4
 msgid "This installation has several networks. Plugin and theme files are shared by all of them: what is unused on this network may be used on another one."
 msgstr "Cette installation compte plusieurs réseaux. Les fichiers des extensions et des thèmes leur sont communs : ce qui est inutilisé sur ce réseau peut servir sur un autre."
+
+#: build/admin/settings.js:1
+msgid "Enabled"
+msgstr "Activée"
+
+#. translators: %s: default severity of the rule, such as "Warning".
+#: build/admin/settings.js:2
+#, js-format
+msgid "Default (%s)"
+msgstr "Par défaut (%s)"
+
+#: build/admin/settings.js:2
+msgid "Measure the disk space used by each site"
+msgstr "Mesurer l’espace disque utilisé par chaque site"
+
+#: build/admin/settings.js:2
+msgid "Size of the uploads folder of each site. A measure that takes more than two seconds stops there and is shown as a minimum."
+msgstr "Taille du dossier d’envoi de chaque site. Une mesure qui dure plus de deux secondes s’arrête là et s’affiche comme un minimum."
+
+#. translators: %s: name of an alert rule.
+#: build/admin/settings.js:3
+#, js-format
+msgid "%s (disabled)"
+msgstr "%s (désactivée)"
+
+#: build/admin/settings.js:3
+msgid "Saving recomputes the alerts of every site in the background, from the data of their last analysis."
+msgstr "L’enregistrement recalcule en arrière-plan les alertes de chaque site, à partir des données de sa dernière analyse."
+
+#: build/admin/settings.js:3
+msgid "Loading alert rules…"
+msgstr "Chargement des règles d’alerte…"
+
+#: build/admin/sites.js:7
+#, js-format
+msgid "at least %s"
+msgstr "au moins %s"
+
+#: build/admin/sites.js:18
+msgid "Autoloaded options"
+msgstr "Options chargées automatiquement"
+
+#: build/admin/sites.js:18
+msgid "Scheduled tasks"
+msgstr "Tâches planifiées"
+
+#: build/admin/sites.js:18
+msgid "None overdue"
+msgstr "Aucune en retard"
+
+#. translators: 1: number of overdue scheduled tasks, 2: date the oldest one was due.
+#: build/admin/sites.js:19
+#, js-format
+msgid "%1$s overdue at the last analysis, due since %2$s"
+msgid_plural "%1$s overdue at the last analysis, the oldest due since %2$s"
+msgstr[0] "%1$s en retard lors de la dernière analyse, échue depuis le %2$s"
+msgstr[1] "%1$s en retard lors de la dernière analyse, la plus ancienne échue depuis le %2$s"
+
+#: includes/Alerts/Rules/CronOverdueRule.php:18
+msgid "Overdue scheduled tasks"
+msgstr "Tâches planifiées en retard"
+
+#: includes/Alerts/Rules/CronOverdueRule.php:22
+msgid "At the last analysis, scheduled tasks (WP-Cron) of the site had been waiting past their due time. Archived, spam and deleted sites are ignored: their tasks cannot run."
+msgstr "Lors de la dernière analyse, des tâches planifiées (WP-Cron) du site attendaient depuis plus longtemps que leur échéance. Les sites archivés, indésirables et supprimés sont ignorés : leurs tâches ne peuvent pas s’exécuter."
+
+#: includes/Alerts/Rules/CronOverdueRule.php:38
+msgid "Delay (hours)"
+msgstr "Retard (heures)"
+
+#: includes/Alerts/Rules/CronOverdueRule.php:39
+msgid "Hours the oldest overdue task had been waiting, at the last analysis, before the alert is raised."
+msgstr "Nombre d’heures d’attente de la plus ancienne tâche en retard, lors de la dernière analyse, à partir duquel l’alerte se déclenche."
+
+#. translators: 1: number of overdue scheduled tasks, 2: how long the oldest one had been waiting, such as "2 days".
+#: includes/Alerts/Rules/CronOverdueRule.php:81
+#, php-format
+msgid "At the last analysis, %1$s scheduled task was overdue; the oldest had been waiting for %2$s."
+msgid_plural "At the last analysis, %1$s scheduled tasks were overdue; the oldest had been waiting for %2$s."
+msgstr[0] "Lors de la dernière analyse, %1$s tâche planifiée était en retard ; la plus ancienne attendait depuis %2$s."
+msgstr[1] "Lors de la dernière analyse, %1$s tâches planifiées étaient en retard ; la plus ancienne attendait depuis %2$s."
+
+#: includes/Alerts/Rules/DiskQuotaRule.php:25
+msgid "Upload quota almost reached"
+msgstr "Quota d’envoi presque atteint"
+
+#: includes/Alerts/Rules/DiskQuotaRule.php:29
+msgid "The uploads of the site fill most of their space quota. Only when upload quotas are enabled in the network settings and the disk usage is measured."
+msgstr "Les fichiers envoyés par le site occupent la plus grande part de son quota d’espace. Uniquement lorsque les quotas d’envoi sont activés dans les réglages du réseau et que l’espace disque est mesuré."
+
+#: includes/Alerts/Rules/DiskQuotaRule.php:45
+msgid "Share of the quota"
+msgstr "Part du quota"
+
+#: includes/Alerts/Rules/DiskQuotaRule.php:46
+msgid "Percentage of the upload quota that raises the alert."
+msgstr "Pourcentage du quota d’envoi à partir duquel l’alerte se déclenche."
+
+#. translators: 1: disk space used in megabytes, 2: upload quota in megabytes.
+#: includes/Alerts/Rules/DiskQuotaRule.php:82
+#, php-format
+msgid "%1$s MB used of the %2$s MB upload quota"
+msgstr "%1$s Mo utilisés sur un quota d’envoi de %2$s Mo"
+
+#: includes/Alerts/Rules/HeavyAutoloadRule.php:18
+msgid "Heavy autoloaded options"
+msgstr "Options chargées automatiquement trop lourdes"
+
+#: includes/Alerts/Rules/HeavyAutoloadRule.php:22
+msgid "The options that WordPress loads on every page of the site weigh more than the threshold, which slows the whole site down."
+msgstr "Les options que WordPress charge sur chaque page du site pèsent plus que le seuil, ce qui ralentit tout le site."
+
+#: includes/Alerts/Rules/HeavyAutoloadRule.php:38
+msgid "Threshold (KB)"
+msgstr "Seuil (Ko)"
+
+#: includes/Alerts/Rules/HeavyAutoloadRule.php:39
+msgid "Size of the autoloaded options, in kilobytes, that raises the alert."
+msgstr "Taille des options chargées automatiquement, en kilo-octets, à partir de laquelle l’alerte se déclenche."
+
+#. translators: 1: size of the autoloaded options in kilobytes, 2: alert threshold in kilobytes.
+#: includes/Alerts/Rules/HeavyAutoloadRule.php:67
+#, php-format
+msgid "%1$s KB of autoloaded options (threshold: %2$s KB)"
+msgstr "%1$s Ko d’options chargées automatiquement (seuil : %2$s Ko)"
+
+#: includes/Alerts/Rules/HighMediaRule.php:38
+msgid "Number of media files"
+msgstr "Nombre de médias"
+
+#: includes/Alerts/Rules/InactiveRule.php:38
+msgid "Months without activity"
+msgstr "Mois sans activité"
+
+#: includes/Alerts/Rules/InsecureUrlRule.php:25
+msgid "Address in http on an https network"
+msgstr "Adresse en http sur un réseau en https"
+
+#: includes/Alerts/Rules/InsecureUrlRule.php:29
+msgid "The address of the site, or its WordPress address, starts with http:// while the main site of the network uses https://."
+msgstr "L’adresse du site, ou son adresse WordPress, commence par http:// alors que le site principal du réseau utilise https://."
+
+#. translators: %s: address of the site.
+#: includes/Alerts/Rules/InsecureUrlRule.php:63
+#, php-format
+msgid "The address %s uses http while the network uses https."
+msgstr "L’adresse %s utilise http alors que le réseau utilise https."
+
+#: includes/Alerts/Rules/MissingThemeRule.php:25
+msgid "Missing active theme"
+msgstr "Thème actif manquant"
+
+#: includes/Alerts/Rules/MissingThemeRule.php:29
+msgid "The active theme of the site, or its parent theme, is not installed on the network."
+msgstr "Le thème actif du site, ou son thème parent, n’est pas installé sur le réseau."
+
+#. translators: %s: folder of the missing parent theme.
+#: includes/Alerts/Rules/MissingThemeRule.php:79
+#, php-format
+msgid "The parent theme \"%s\" of the active theme is not installed."
+msgstr "Le thème parent « %s » du thème actif n’est pas installé."
+
+#. translators: %s: folder of the missing theme.
+#: includes/Alerts/Rules/MissingThemeRule.php:85
+#, php-format
+msgid "The active theme \"%s\" is not installed."
+msgstr "Le thème actif « %s » n’est pas installé."
+
+#: includes/Alerts/Rules/NoAdminRule.php:18
+msgid "Site without administrator"
+msgstr "Site sans administrateur"
+
+#: includes/Alerts/Rules/NoAdminRule.php:22
+msgid "The site has accounts, but none of them has the administrator role. Super admins are not counted."
+msgstr "Le site a des comptes, mais aucun n’a le rôle administrateur. Les super administrateurs ne sont pas comptés."
+
+#: includes/Alerts/Rules/NoAdminRule.php:52
+msgid "No account has the administrator role on this site."
+msgstr "Aucun compte n’a le rôle administrateur sur ce site."
+
+#: includes/Alerts/Rules/SearchHiddenRule.php:18
+msgid "Hidden from search engines"
+msgstr "Masqué aux moteurs de recherche"
+
+#: includes/Alerts/Rules/SearchHiddenRule.php:22
+msgid "The site asks search engines not to index it (Settings > Reading). Archived, spam and deleted sites are ignored."
+msgstr "Le site demande aux moteurs de recherche de ne pas l’indexer (Réglages > Lecture). Les sites archivés, indésirables et supprimés sont ignorés."
+
+#: includes/Alerts/Rules/SearchHiddenRule.php:53
+msgid "Search engines are asked not to index this site."
+msgstr "Les moteurs de recherche sont invités à ne pas indexer ce site."
+
+#: includes/Alerts/Rules/UpdatesPendingRule.php:25
+msgid "Pending updates"
+msgstr "Mises à jour en attente"
+
+#: includes/Alerts/Rules/UpdatesPendingRule.php:29
+msgid "A plugin activated on the site, its theme or its parent theme has an update available. Plugins activated on the whole network are not counted. Read from the update checks of WordPress, without any external request."
+msgstr "Une extension activée sur le site, son thème ou son thème parent a une mise à jour disponible. Les extensions activées sur tout le réseau ne sont pas comptées. Lu dans les vérifications de mises à jour de WordPress, sans aucune requête externe."
+
+#. translators: %s: number of plugins.
+#: includes/Alerts/Rules/UpdatesPendingRule.php:88
+#, php-format
+msgid "%s plugin"
+msgid_plural "%s plugins"
+msgstr[0] "%s extension"
+msgstr[1] "%s extensions"
+
+#. translators: %s: number of themes.
+#: includes/Alerts/Rules/UpdatesPendingRule.php:92
+#, php-format
+msgid "%s theme"
+msgid_plural "%s themes"
+msgstr[0] "%s thème"
+msgstr[1] "%s thèmes"
+
+#. translators: 1: number of plugins, such as "2 plugins", 2: number of themes, such as "1 theme".
+#: includes/Alerts/Rules/UpdatesPendingRule.php:96
+#, php-format
+msgid "Updates available for %1$s and %2$s"
+msgstr "Mises à jour disponibles pour %1$s et %2$s"
+
+#. translators: %s: number of plugins or themes, such as "2 plugins".
+#: includes/Alerts/Rules/UpdatesPendingRule.php:99
+#, php-format
+msgid "Updates available for %s"
+msgstr "Mises à jour disponibles pour %s"
+
+#: includes/Export/SitesColumns.php:27
+msgid "Disk usage is an estimate"
+msgstr "Mesure du disque partielle"

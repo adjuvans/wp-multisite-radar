@@ -13,7 +13,10 @@ Points relevés pendant l'exécution du plan M2 (`2026-10-01-multisite-radar-m2-
 - motifs `ID_PATTERN` et `^\d+$` terminés par `\z`, `ViewQuery::path()` aligné sur `buildPath()` (2.0.0-beta.3, plan M3) ;
 - `webpack.config.js` couvert par `lint:js`, remplacement de `DependencyExtractionWebpackPlugin` vérifié (2.0.0-beta.3, plan M3) ;
 - `npm run plugin-zip` appelle `make dist` (2.0.0-beta.3, plan M3) ;
-- commentaire de l'exclusion axe précisé (2.0.0-beta.3, plan M3).
+- commentaire de l'exclusion axe précisé (2.0.0-beta.3, plan M3) ;
+- Réglages : l'état « modifié » redevient faux au retour à la valeur initiale, et l'enregistrement n'envoie que les valeurs modifiées (2.0.0-beta.4, plan M4) ;
+- `Plugin.php` : le `use` de `ThemesController` est dans l'ordre alphabétique (2.0.0-beta.4, plan M4) ;
+- commentaire de l'audit d'accessibilité : l'exclusion vaut pour toutes les pages auditées (2.0.0-beta.4, plan M4).
 
 ## 1. À traiter avant la 2.0 finale
 
@@ -52,7 +55,6 @@ Tous jugés « peuvent attendre » par la revue finale.
 - `useUrlState` perd les paramètres inconnus et le `#hash`, et n'écoute pas `popstate`.
 - Sites : `layout=table` est écrit dans l'URL après tout changement de vue ; en grille, `badgeFields` est perdu au premier chargement avec `?layout=grid`.
 - Vue d'ensemble : deux `<progress>` pendant une analyse (FirstRun et ScanPanel) ; FirstRun masque son bouton au lieu de le désactiver.
-- Réglages : l'état « modifié » reste vrai après un retour à la valeur initiale ; l'enregistrement envoie les trois champs d'analyse (le dernier enregistrement l'emporte entre deux admins).
 - Fiche : le focus revient sur `body` si la ligne d'origine a été remplacée ; pas de pagination au-delà de la dernière page des comptes.
 
 **Outillage et tests.**
@@ -74,7 +76,7 @@ Points relevés pendant l'exécution du plan M3 (`2026-10-02-multisite-radar-m3-
 - Comptage des comptes : les sites archivés, indésirables ou supprimés comptent comme des rattachements alors que le docblock cite `get_blogs_of_user()`, qui les exclut. Le drapeau super-admin est comparé avec `in_array` sensible à la casse, alors que le `IN` de SQL ignore la casse.
 - Le motif du schéma REST terminé par `\z` n'est pas une expression régulière JavaScript valide si un client lit un jour le schéma.
 - `InventoryExport::check()` lit sans filtre, et l'écriture du marqueur d'interruption n'est pas protégée dans le `catch`.
-- `LIGHT_VIEWS` est écrit deux fois, dans `Assets` (PHP) et dans `webpack.config.js`. Dans `Plugin.php`, le `use` de `ThemesController` n'est pas dans l'ordre alphabétique.
+- `LIGHT_VIEWS` est écrit deux fois, dans `Assets` (PHP) et dans `webpack.config.js`.
 
 **JS.**
 - Le câblage des préférences de vue (`localPrefs`, `onChangeView`, `samePrefs`, `savePrefs`, une douzaine de lignes) est recopié dans les vues Sites, Alertes, Inventaire et Utilisateurs. Un hook `useViewPreferences( view )` le centraliserait ; aujourd'hui, changer ce comportement demande quatre modifications.
@@ -85,4 +87,25 @@ Points relevés pendant l'exécution du plan M3 (`2026-10-02-multisite-radar-m3-
 **Tests et outillage.**
 - Cas non couverts côté PHP : un dossier de thème numérique, un rôle accordé sans définition (repli sur l'identifiant), un test REST d'une règle terminée par un saut de ligne, un export interrompu des plugins et des thèmes. Les tests 500 des plugins, des thèmes et de l'inventaire ne coupent qu'une des requêtes. Le test de départage des tris est faible (MySQL peut rendre l'ordre de la clé primaire de toute façon).
 - Cas non couverts côté JS : thème utilisé seulement comme parent dans la liste, `describeSite` sans `site.theme`, pas de page jamais vide pendant le chargement d'une nouvelle page, panneau sur plusieurs pages, `columnsFor` sans champs, branchement du lien d'export, branche « plugins seulement » et « les deux » de la tuile des mises à jour (seule « thèmes seulement » est testée). Le test du badge super-admin n'est pas limité à la ligne de l'administrateur, et la vue Utilisateurs n'est testée que dans le cas heureux préchargé.
-- `tests/e2e/setup.sh` ne se répare pas si le retrait de l'utilisateur échoue après son insertion. Le commentaire de l'audit d'accessibilité dit « Page Réglages » alors que l'exclusion s'applique à toutes les pages auditées.
+- `tests/e2e/setup.sh` ne se répare pas si le retrait de l'utilisateur échoue après son insertion.
+
+## 4. Reportés par le plan M4
+
+Points mineurs relevés pendant l'exécution du plan M4 (`2026-10-02-multisite-radar-m4-health.md`), par les revues de tâche, et laissés pour plus tard.
+
+**PHP.**
+- `DiskMeter` : un lien symbolique saute le compteur `++$seen`, donc un dossier qui n'en contient que n'atteint jamais le contrôle du budget en cours de dossier. `scandir()` charge un dossier d'un coup : un seul dossier énorme peut dépasser le budget (le noter dans le docblock, ou passer à `DirectoryIterator`). Un sous-dossier illisible est ignoré et le résultat reste « complet ».
+- Taille des tables : `is_main_site()` vaut aussi pour le site principal d'un réseau secondaire (préfixe numéroté) ; sans conséquence, mais `$prefix === $wpdb->base_prefix` serait exact.
+- `disk_quota` : un quota de 0 Mo propre au site ne déclenche jamais l'alerte (WordPress le lit comme « aucun envoi autorisé ») ; ni testé, ni documenté.
+- `NetworkStateWatcher::check()` n'a ni `try/catch` ni `msradar_error` (rien ne lève aujourd'hui dans `signature()`). Un lot de recalcul en cours peut réécrire son curseur après que `check()` l'a supprimé : les sites avant le curseur gardent leurs alertes jusqu'au recalcul quotidien.
+
+**JS.**
+- Fiche d'un site : avec `overdue_count` > 0 et `oldest_overdue_gmt` nul, `cronSummary` affiche « échue depuis — ».
+- Réglages : `changes()` compare les tableaux avec `JSON.stringify` (changer l'ordre des types d'activité compte comme une modification, sans que ce soit écrit) et `SCAN_KEYS` est une liste blanche manuelle.
+- `rules-card.jsx` : `@param {Function} props.onChange` ajoute un quatrième avertissement jsdoc au lint ; `ruleForm()` n'a pas de docblock.
+
+**Tests et outillage.**
+- Non couverts côté PHP : le contrôle de budget en cours de dossier (les tests n'utilisent que 0.0), le repli quand `information_schema` renvoie `NULL` (sans privilège), `scanned_at` nul pour `search_hidden`, `heavy_autoload` et `cron_overdue` (seule `no_admin` l'est), `deleted_theme`, `upgrader_process_complete` et le transient `update_themes` (même chemin de code), `_fields` sur `/alert-rules` et l'encodage `{}` sur la réponse envoyée ou préchargée (testé seulement sur `get_data()`).
+- `SchemaTest::test_version_2_adds_the_siteurl_column` vérifie maintenant la version 3 : son nom est trompeur. `RulesTest` (thème manquant) suppose `twentytwentyfive` installé (commenté).
+- Non couverts côté JS : la branche nulle de `cron` (tiret) ; un test de la fiche s'intitule « dashes » mais passe `overdue_count` à 0 ; pas de test de `changes()` pour un réglage de type tableau (`analysis_plugins`).
+- E2E des réglages : `months=6` est rétabli hors d'un `finally`/`afterEach` ; un échec en cours de test laisse 9. `.first()` sur les textes d'alerte tolère les doublons, et le champ numérique est cherché tantôt dans l'application, tantôt dans la page.

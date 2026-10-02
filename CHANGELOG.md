@@ -1,5 +1,15 @@
 # Changelog — Multisite Radar
 
+## [2.0.0-beta.4] - 2026-10-02
+
+### Jalon M4 — Santé avancée
+- Nouvelles mesures de chaque site : espace disque du dossier d'envoi (mesure bornée à 2 secondes, affichée « au moins … » si elle s'arrête avant la fin), taille des tables, poids des options chargées automatiquement, tâches planifiées en retard. Repli sur `SHOW TABLE STATUS` quand `information_schema` est refusé.
+- Huit nouvelles règles d'alertes : site sans administrateur, thème actif manquant, mises à jour en attente, adresse en http sur un réseau en https, quota d'envoi presque atteint, options chargées automatiquement trop lourdes, site masqué aux moteurs de recherche, tâches planifiées en retard.
+- Réglages : section « Règles d'alertes » (activer, gravité, paramètres de chaque règle, y compris les règles ajoutées par d'autres extensions) et interrupteur « Mesurer l'espace disque ». Seules les valeurs modifiées sont enregistrées.
+- REST : `GET /alert-rules` ; la fiche d'un site expose `cron`, les listes `disk_is_estimate`.
+- Les alertes sont recalculées dès que la liste des mises à jour disponibles, les thèmes installés, les quotas d'envoi ou l'adresse du site principal changent.
+- La mise à jour relance une analyse complète du réseau pour remplir les nouvelles mesures (version de schéma 3).
+
 ## [2.0.0-beta.3] - 2026-10-02
 
 ### Jalon M3 — Inventaire croisé
