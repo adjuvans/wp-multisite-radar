@@ -371,4 +371,142 @@ final class SiteCollectorTest extends TestCase {
 
 		$this->assertSame( 'https://example.test/wp', $this->collect( $site_id )->siteurl );
 	}
+
+	public function test_weighs_the_autoloaded_options_only(): void {
+		$site_id = self::factory()->blog->create();
+		$before  = $this->collect( $site_id );
+		switch_to_blog( $site_id );
+		add_option( 'msradar_test_hot', str_repeat( 'a', 5000 ), '', true );
+		add_option( 'msradar_test_cold', str_repeat( 'b', 7000 ), '', false );
+		restore_current_blog();
+
+		$this->assertSame( 5000, $this->collect( $site_id )->autoload_bytes - $before->autoload_bytes );
+	}
+
+	public function test_the_main_site_weighs_its_own_tables_only(): void {
+		global $wpdb;
+		$queries = [];
+		$spy     = static function ( string $query ) use ( &$queries ): string {
+			if ( false !== strpos( $query, 'information_schema' ) ) {
+				$queries[] = $query;
+			}
+			return $query;
+		};
+		add_filter( 'query', $spy );
+		$record = $this->collect( get_main_site_id() );
+		remove_filter( 'query', $spy );
+
+		$this->assertGreaterThan( 0, (int) $record->db_bytes );
+		$this->assertCount( 1, $queries );
+		$this->assertStringContainsString( "'" . $wpdb->base_prefix . "posts'", $queries[0] );
+		$this->assertStringNotContainsString( "'" . $wpdb->base_prefix . "users'", $queries[0] );
+		$this->assertStringNotContainsString( "'" . $wpdb->base_prefix . "msradar_sites'", $queries[0] );
+		$this->assertSame( 0, preg_match( "/'" . preg_quote( $wpdb->base_prefix, '/' ) . '\d+_/', $queries[0] ), 'No table of another site is listed.' );
+	}
+
+	public function test_the_table_status_is_read_when_information_schema_is_refused(): void {
+		global $wpdb;
+		$statuses = 0;
+		$filter   = static function ( string $query ) use ( &$statuses ): string {
+			if ( false !== strpos( $query, 'information_schema' ) ) {
+				return 'SELECT * FROM msradar_no_such_table';
+			}
+			if ( 0 === strpos( $query, 'SHOW TABLE STATUS' ) ) {
+				++$statuses;
+			}
+			return $query;
+		};
+		add_filter( 'query', $filter );
+		$record = $this->collect( get_main_site_id() );
+		remove_filter( 'query', $filter );
+
+		$this->assertSame( 1, $statuses );
+		$this->assertGreaterThan( 0, (int) $record->db_bytes );
+	}
+
+	public function test_the_database_size_is_unknown_when_no_source_answers(): void {
+		$filter = static function ( string $query ): string {
+			return false !== strpos( $query, 'information_schema' ) || 0 === strpos( $query, 'SHOW TABLE STATUS' )
+				? 'SELECT * FROM msradar_no_such_table'
+				: $query;
+		};
+		add_filter( 'query', $filter );
+		$record = $this->collect( get_main_site_id() );
+		remove_filter( 'query', $filter );
+
+		$this->assertNull( $record->db_bytes );
+		$this->assertGreaterThan( 0, $record->users_count, 'The rest of the analysis is unaffected.' );
+	}
+
+	public function test_site_tables_of_the_main_site_leave_out_other_sites_and_network_tables(): void {
+		$names   = [ 'wp_posts', 'wp_options', 'wp_users', 'wp_usermeta', 'wp_blogs', 'wp_msradar_sites', 'wp_2_posts', 'wp_12_options', 'wp_wc_orders', 'wp_2fa_codes' ];
+		$network = [ 'wp_users', 'wp_usermeta', 'wp_blogs', 'wp_msradar_sites' ];
+
+		$this->assertSame( [ 'wp_posts', 'wp_options', 'wp_wc_orders', 'wp_2fa_codes' ], SiteCollector::site_tables( $names, 'wp_', true, $network ) );
+		$this->assertSame( [ 'wp_2_posts', 'wp_2_options' ], SiteCollector::site_tables( [ 'wp_2_posts', 'wp_2_options' ], 'wp_2_', false, $network ) );
+	}
+
+	public function test_counts_the_scheduled_tasks_already_due(): void {
+		$now  = 1790000000;
+		$cron = [
+			$now - 7200 => [
+				'hook_a' => [
+					'k1' => [],
+					'k2' => [],
+				],
+			],
+			$now - 60   => [ 'hook_b' => [ 'k3' => [] ] ],
+			$now + 60   => [ 'hook_c' => [ 'k4' => [] ] ],
+			$now - 9000 => [],
+			'version'   => 2,
+		];
+
+		$this->assertSame(
+			[
+				'overdue_count'      => 3,
+				'oldest_overdue_gmt' => gmdate( 'Y-m-d H:i:s', $now - 7200 ),
+			],
+			SiteCollector::overdue_tasks( $cron, $now )
+		);
+		$this->assertSame(
+			[
+				'overdue_count'      => 0,
+				'oldest_overdue_gmt' => null,
+			],
+			SiteCollector::overdue_tasks( 'corrupted', $now )
+		);
+	}
+
+	public function test_stores_the_overdue_tasks_and_the_own_upload_quota_of_the_site(): void {
+		$site_id = self::factory()->blog->create();
+		$due     = time() - 3 * HOUR_IN_SECONDS;
+		update_blog_option(
+			$site_id,
+			'cron',
+			[
+				$due      => [
+					'msradar_test' => [
+						'abc' => [
+							'schedule' => false,
+							'args'     => [],
+						],
+					],
+				],
+				'version' => 2,
+			]
+		);
+		update_blog_option( $site_id, 'blog_upload_space', '50' );
+
+		$record = $this->collect( $site_id );
+
+		$this->assertSame(
+			[
+				'overdue_count'      => 1,
+				'oldest_overdue_gmt' => gmdate( 'Y-m-d H:i:s', $due ),
+			],
+			$record->data['cron']
+		);
+		$this->assertSame( 50, $record->data['options']['upload_space_mb'] );
+		$this->assertNull( $this->collect( self::factory()->blog->create() )->data['options']['upload_space_mb'], 'A site without its own quota follows the network.' );
+	}
 }

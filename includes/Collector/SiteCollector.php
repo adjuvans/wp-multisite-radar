@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Collector;
 
+use MultisiteRadar\Install\Schema;
 use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Storage\SiteRecord;
 use MultisiteRadar\Support\PlainText;
@@ -44,21 +45,26 @@ final class SiteCollector {
 			return null;
 		}
 
+		$now        = time();
+		$network_id = (int) $site->site_id; // WP_Site::$site_id contient l'ID du réseau.
+
 		$prefix   = $wpdb->get_blog_prefix( $site_id );
 		$suppress = $wpdb->suppress_errors( true );
 		try {
-			$options = $this->read_options( $prefix );
-			$counts  = $this->read_post_counts( $prefix );
-			$terms   = $this->read_term_counts( $prefix );
-			$last    = $this->read_last_content( $prefix );
-			$users   = $this->read_users( $prefix, $this->role_names( $options[ $prefix . 'user_roles' ] ?? null ) );
+			$options  = $this->read_options( $prefix );
+			$counts   = $this->read_post_counts( $prefix );
+			$terms    = $this->read_term_counts( $prefix );
+			$last     = $this->read_last_content( $prefix );
+			$users    = $this->read_users( $prefix, $this->role_names( $options[ $prefix . 'user_roles' ] ?? null ) );
+			$autoload = $this->read_autoload_bytes( $prefix );
+			$db_bytes = $this->read_db_bytes( $prefix, is_main_site( $site_id, $network_id ) );
 		} finally {
 			$wpdb->suppress_errors( $suppress );
 		}
 
-		$disk = $this->measure_disk( $site_id, (int) $site->site_id );
+		$disk = $this->measure_disk( $site_id, $network_id );
 
-		$raw_sitewide    = get_network_option( (int) $site->site_id, 'active_sitewide_plugins', [] );
+		$raw_sitewide    = get_network_option( $network_id, 'active_sitewide_plugins', [] );
 		$network_plugins = Fingerprint::network_plugin_files( $raw_sitewide );
 		$active_plugins  = Fingerprint::plugin_files( $options['active_plugins'] ?? null );
 		$stylesheet      = self::string_option( $options, 'stylesheet' );
@@ -67,7 +73,7 @@ final class SiteCollector {
 		$status          = RegistryProbe::status(
 			$raw_registry,
 			Fingerprint::from_raw( $options['active_plugins'] ?? null, $raw_sitewide, $options['stylesheet'] ?? null, $options['template'] ?? null ),
-			time()
+			$now
 		);
 		$registry        = is_array( $raw_registry ) ? $raw_registry : [];
 		$post_types      = $this->merge_post_types( $counts, (array) ( $registry['post_types'] ?? [] ), $status );
@@ -78,7 +84,7 @@ final class SiteCollector {
 
 		$record                    = new SiteRecord();
 		$record->site_id           = $site_id;
-		$record->network_id        = (int) $site->site_id; // WP_Site::$site_id contient l'ID du réseau.
+		$record->network_id        = $network_id;
 		$record->name              = PlainText::from_html( self::string_option( $options, 'blogname' ) );
 		$record->siteurl           = $siteurl;
 		$record->url               = '' !== $home ? $home : ( '' !== $siteurl ? $siteurl : 'http://' . $site->domain . $site->path );
@@ -94,6 +100,8 @@ final class SiteCollector {
 		$record->media_count       = (int) ( $attachments['inherit'] ?? 0 ) + (int) ( $attachments['publish'] ?? 0 );
 		$record->disk_bytes        = $disk['bytes'];
 		$record->disk_is_estimate  = $disk['estimate'];
+		$record->db_bytes          = $db_bytes;
+		$record->autoload_bytes    = $autoload;
 		$record->last_activity_gmt = null !== $last ? $last['date_gmt'] : null;
 		$record->registry_status   = $status;
 		$record->data              = [
@@ -106,22 +114,24 @@ final class SiteCollector {
 			'plugins_local' => array_values( array_diff( $active_plugins, $network_plugins ) ),
 			'last_content'  => $last,
 			'options'       => [
-				'blog_public' => (int) ( $options['blog_public'] ?? 1 ),
-				'siteurl'     => $siteurl,
-				'home'        => $home,
-				'locale'      => $this->locale( $options, (int) $site->site_id ),
+				'blog_public'     => (int) ( $options['blog_public'] ?? 1 ),
+				'siteurl'         => $siteurl,
+				'home'            => $home,
+				'locale'          => $this->locale( $options, $network_id ),
+				'upload_space_mb' => self::upload_space( $options ),
 			],
+			'cron'          => self::overdue_tasks( $options['cron'] ?? null, $now ),
 		];
 		$record->dirty             = false;
 		$record->dirty_since       = null;
-		$record->scanned_at        = current_time( 'mysql', true );
+		$record->scanned_at        = gmdate( 'Y-m-d H:i:s', $now );
 
 		return $record;
 	}
 
 	private function read_options( string $prefix ): array {
 		global $wpdb;
-		$names = [ 'blogname', 'siteurl', 'home', 'stylesheet', 'template', 'active_plugins', 'blog_public', 'WPLANG', RegistryProbe::OPTION, $prefix . 'user_roles' ];
+		$names = [ 'blogname', 'siteurl', 'home', 'stylesheet', 'template', 'active_plugins', 'blog_public', 'WPLANG', 'cron', 'blog_upload_space', RegistryProbe::OPTION, $prefix . 'user_roles' ];
 		$rows  = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT option_name, option_value FROM %i WHERE option_name IN (' . implode( ',', array_fill( 0, count( $names ), '%s' ) ) . ')',
@@ -136,6 +146,128 @@ final class SiteCollector {
 			$options[ (string) $row['option_name'] ] = maybe_unserialize( $row['option_value'] );
 		}
 		return $options;
+	}
+
+	/**
+	 * Poids des options chargées à chaque requête du site, avec les valeurs d'autoload de WordPress (spec §3.3, n° 5).
+	 */
+	private function read_autoload_bytes( string $prefix ): int {
+		global $wpdb;
+		$values = array_values( array_map( 'strval', wp_autoload_values_to_autoload() ) );
+		$total  = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT SUM(LENGTH(option_value)) FROM %i WHERE autoload IN (' . implode( ',', array_fill( 0, count( $values ), '%s' ) ) . ')',
+				array_merge( [ $prefix . 'options' ], $values )
+			)
+		);
+		$this->guard();
+		return (int) $total;
+	}
+
+	/**
+	 * Taille des tables du site (données et index), lue dans information_schema pour une liste explicite de tables,
+	 * avec repli sur SHOW TABLE STATUS. Null si aucune des deux sources ne répond : un hébergeur peut les refuser, et
+	 * l'analyse du site continue (spec §3.3, n° 7 et §14).
+	 */
+	private function read_db_bytes( string $prefix, bool $main ): ?int {
+		global $wpdb;
+		$names = $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $prefix ) . '%' ) );
+		if ( '' !== $wpdb->last_error ) {
+			return null;
+		}
+		$tables = self::site_tables( array_map( 'strval', (array) $names ), $prefix, $main, self::network_tables() );
+		if ( [] === $tables ) {
+			return null;
+		}
+
+		$size = $wpdb->get_var(
+			$wpdb->prepare( 'SELECT SUM(DATA_LENGTH + INDEX_LENGTH) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN (' . implode( ',', array_fill( 0, count( $tables ), '%s' ) ) . ')', $tables )
+		);
+		// empty() et non une comparaison stricte avec '' : PHPStan type last_error sans chaîne vide.
+		if ( empty( $wpdb->last_error ) && null !== $size ) {
+			return (int) $size;
+		}
+
+		$rows = $wpdb->get_results( $wpdb->prepare( 'SHOW TABLE STATUS WHERE Name IN (' . implode( ',', array_fill( 0, count( $tables ), '%s' ) ) . ')', $tables ), ARRAY_A );
+		if ( ! empty( $wpdb->last_error ) || [] === (array) $rows ) {
+			return null;
+		}
+		$total = 0;
+		foreach ( (array) $rows as $row ) {
+			$total += (int) ( $row['Data_length'] ?? 0 ) + (int) ( $row['Index_length'] ?? 0 );
+		}
+		return $total;
+	}
+
+	/**
+	 * Tables communes au réseau : elles ne pèsent pas dans la base du site principal (écart E6 du plan M4).
+	 *
+	 * @return string[]
+	 */
+	private static function network_tables(): array {
+		global $wpdb;
+		return array_values( array_merge( array_map( 'strval', $wpdb->tables( 'global' ) ), Schema::tables() ) );
+	}
+
+	/**
+	 * Tables d'un site parmi celles dont le nom commence par son préfixe. Le site principal partage le préfixe de base
+	 * avec les tables des autres sites (« {base}<id>_ ») et celles du réseau : elles sont écartées.
+	 *
+	 * @param string[] $names          Résultat de SHOW TABLES LIKE '{prefix}%'.
+	 * @param string[] $network_tables Tables globales du réseau, préfixe compris.
+	 * @return string[]
+	 */
+	public static function site_tables( array $names, string $prefix, bool $main, array $network_tables ): array {
+		$numbered = '/^' . preg_quote( $prefix, '/' ) . '\d+_/';
+		return array_values(
+			array_filter(
+				$names,
+				static function ( string $name ) use ( $prefix, $main, $numbered, $network_tables ): bool {
+					if ( 0 !== strpos( $name, $prefix ) ) {
+						return false;
+					}
+					return ! $main || ( 1 !== preg_match( $numbered, $name ) && ! in_array( $name, $network_tables, true ) );
+				}
+			)
+		);
+	}
+
+	/**
+	 * Tâches planifiées du site déjà échues au moment de l'analyse. La règle cron_overdue mesure leur retard par
+	 * rapport à cette date (écart E1 du plan M4).
+	 *
+	 * @param mixed $cron Option cron du site.
+	 * @return array{overdue_count: int, oldest_overdue_gmt: string|null}
+	 */
+	public static function overdue_tasks( $cron, int $now ): array {
+		$count  = 0;
+		$oldest = null;
+		foreach ( is_array( $cron ) ? $cron : [] as $timestamp => $hooks ) {
+			if ( ! is_int( $timestamp ) || $timestamp > $now || ! is_array( $hooks ) ) {
+				continue;
+			}
+			$events = 0;
+			foreach ( $hooks as $instances ) {
+				$events += is_array( $instances ) ? count( $instances ) : 0;
+			}
+			if ( 0 === $events ) {
+				continue;
+			}
+			$count += $events;
+			$oldest = null === $oldest ? $timestamp : min( $oldest, $timestamp );
+		}
+		return [
+			'overdue_count'      => $count,
+			'oldest_overdue_gmt' => null === $oldest ? null : gmdate( 'Y-m-d H:i:s', $oldest ),
+		];
+	}
+
+	/**
+	 * Quota d'envoi propre au site (option blog_upload_space), en Mo ; null s'il suit celui du réseau.
+	 */
+	private static function upload_space( array $options ): ?int {
+		$value = $options['blog_upload_space'] ?? null;
+		return is_numeric( $value ) ? (int) $value : null;
 	}
 
 	/**
