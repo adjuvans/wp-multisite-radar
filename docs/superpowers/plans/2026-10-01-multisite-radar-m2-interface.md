@@ -6257,7 +6257,7 @@ Expected: PASS.
 
 Run: `npm run build`
 
-Ouvrir `http://wp-network-plugin-utilities.test:8080/wp-admin/network/admin.php?page=multisite-radar-sites` en super-admin. Le menu « Multisite Radar » affiche quatre sous-pages ; chaque page affiche son titre et un conteneur vide (les vues arrivent aux tâches 14 à 18). Dans la console du navigateur :
+Ouvrir `http://wp-multisite-radar.test:8080/wp-admin/network/admin.php?page=multisite-radar-sites` en super-admin. Le menu « Multisite Radar » affiche quatre sous-pages ; chaque page affiche son titre et un conteneur vide (les vues arrivent aux tâches 14 à 18). Dans la console du navigateur :
 
 ```js
 Object.keys( window.msradarAdmin.preload )
@@ -11551,7 +11551,7 @@ Expected : les trois fichiers sont dans l'archive. Celle-ci ne contient ni `src/
 Run: `npm run wp-env -- start && npm run e2e:setup && npm run test:e2e; npm run wp-env -- stop`
 Expected: PASS.
 
-Vérifier dans le WordPress local (`http://wp-network-plugin-utilities.test:8080/wp-admin/network/`) :
+Vérifier dans le WordPress local (`http://wp-multisite-radar.test:8080/wp-admin/network/`) :
 - les quatre pages s'affichent ;
 - le parcours Vue d'ensemble → Sites filtrés → fiche → export fonctionne ;
 - le site « Blog RH » (`/rh/`) montre `demo_event` avec son origine.

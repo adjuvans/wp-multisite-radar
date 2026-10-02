@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Multisite Radar
- * Plugin URI:        https://github.com/adjuvans/wp-network-plugin-utilities
+ * Plugin URI:        https://github.com/adjuvans/wp-multisite-radar
  * Description:       Network-wide audit for WordPress Multisite: sites, content types, users, plugins, themes and health alerts.
  * Version:           2.0.0-beta.3
  * Requires at least: 6.9

@@ -23,8 +23,8 @@ msgstr "Multisite Radar"
 
 #. Plugin URI of the plugin
 #: multisite-radar.php
-msgid "https://github.com/adjuvans/wp-network-plugin-utilities"
-msgstr "https://github.com/adjuvans/wp-network-plugin-utilities"
+msgid "https://github.com/adjuvans/wp-multisite-radar"
+msgstr "https://github.com/adjuvans/wp-multisite-radar"
 
 #. Description of the plugin
 #: multisite-radar.php

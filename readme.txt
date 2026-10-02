@@ -15,7 +15,7 @@ Multisite Radar gives network administrators a single, always up-to-date view of
 
 Data is collected in the background with lightweight SQL queries, so the network admin screens stay fast on networks with thousands of sites. The Overview, Sites, Alerts and Settings screens open instantly, and the Sites screen exports the current view as CSV or JSON; an optional "network sites" block, shortcode and menu items replace the 1.x menu. Nothing is sent to external services.
 
-Source code: https://github.com/adjuvans/wp-network-plugin-utilities
+Source code: https://github.com/adjuvans/wp-multisite-radar
 
 == Changelog ==
 

@@ -590,4 +590,4 @@ Chaque jalon fait l'objet de son propre plan d'implémentation.
 
 ## 15. Questions ouvertes
 
-- Renommer le dépôt GitHub `adjuvans/wp-network-plugin-utilities` en `multisite-radar` (non bloquant).
+- ~~Renommer le dépôt GitHub~~ : fait le 2026-10-02, le dépôt est `adjuvans/wp-multisite-radar`.

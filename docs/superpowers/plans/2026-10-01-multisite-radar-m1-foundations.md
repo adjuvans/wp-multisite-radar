@@ -148,7 +148,7 @@ Responsabilités :
 - [ ] **Step 1: Étiqueter la 1.x et retirer son code**
 
 ```bash
-cd /home/dev/wp-network-plugin-utilities
+cd /home/dev/wp-multisite-radar
 git tag -a v1.7.0 main -m "Network Plugin Utilities 1.7.0 (dernière version 1.x)"
 git mv network-plugin-utilities/LICENSE LICENSE
 git mv network-plugin-utilities/CHANGELOG.md CHANGELOG.md
@@ -377,7 +377,7 @@ Attendu : les quatre binaires sont listés.
 #!/usr/bin/env bash
 # Crée la base de test dans le conteneur MariaDB de la VM et la donne à l'utilisateur « wordpress ».
 set -euo pipefail
-CONTAINER="${DB_CONTAINER:-wp-network-plugin-utilities-db}"
+CONTAINER="${DB_CONTAINER:-wp-multisite-radar-db}"
 DB="${WP_TESTS_DB_NAME:-wordpress_test}"
 docker exec -i "$CONTAINER" sh -c 'mariadb -uroot -p"$MARIADB_ROOT_PASSWORD"' <<SQL
 CREATE DATABASE IF NOT EXISTS \`${DB}\`;
@@ -520,7 +520,7 @@ Expected: échec. PHP signale que `multisite-radar.php` est introuvable (`Failed
 <?php
 /**
  * Plugin Name:       Multisite Radar
- * Plugin URI:        https://github.com/adjuvans/wp-network-plugin-utilities
+ * Plugin URI:        https://github.com/adjuvans/wp-multisite-radar
  * Description:       Network-wide audit for WordPress Multisite: sites, content types, users, plugins, themes and health alerts.
  * Version:           2.0.0-dev
  * Requires at least: 6.9
@@ -649,7 +649,7 @@ Multisite Radar gives network administrators a single, always up-to-date view of
 
 Data is collected in the background with lightweight SQL queries, so the dashboard stays fast on networks with thousands of sites. Nothing is sent to external services.
 
-Source code: https://github.com/adjuvans/wp-network-plugin-utilities
+Source code: https://github.com/adjuvans/wp-multisite-radar
 
 == Changelog ==
 
@@ -703,16 +703,16 @@ Si PHPCS signale une règle qui contredit les Global Constraints, corriger le co
 
 - [ ] **Step 17: Brancher le plugin dans le WordPress local**
 
-Le dossier du dépôt est déjà lié par symlink en `wp-content/plugins/wp-network-plugin-utilities`. On le remplace par un lien `multisite-radar` et on retire l'ancienne entrée réseau, dont le fichier n'existe plus.
+Le dossier du dépôt est déjà lié par symlink en `wp-content/plugins/wp-multisite-radar`. On le remplace par un lien `multisite-radar` et on retire l'ancienne entrée réseau, dont le fichier n'existe plus.
 
 ```bash
 cd /home/dev/wp
-ln -sfn /home/dev/wp-network-plugin-utilities wp-content/plugins/multisite-radar
-wp eval '$p = get_site_option( "active_sitewide_plugins", array() ); unset( $p["wp-network-plugin-utilities/network-plugin-utilities.php"] ); update_site_option( "active_sitewide_plugins", $p );'
-rm wp-content/plugins/wp-network-plugin-utilities
+ln -sfn /home/dev/wp-multisite-radar wp-content/plugins/multisite-radar
+wp eval '$p = get_site_option( "active_sitewide_plugins", array() ); unset( $p["wp-multisite-radar/network-plugin-utilities.php"] ); update_site_option( "active_sitewide_plugins", $p );'
+rm wp-content/plugins/wp-multisite-radar
 wp plugin activate multisite-radar --network
 wp plugin list --fields=name,status | grep multisite-radar
-cd /home/dev/wp-network-plugin-utilities
+cd /home/dev/wp-multisite-radar
 ```
 
 Expected : `multisite-radar	active-network`.
@@ -2221,7 +2221,7 @@ Expected: `OK`.
 cd /home/dev/wp
 wp plugin deactivate multisite-radar --network && wp plugin activate multisite-radar --network
 wp eval 'global $wpdb; echo $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->base_prefix}msradar_sites" ), " ", get_site_option( "msradar_db_version" ), PHP_EOL;'
-cd /home/dev/wp-network-plugin-utilities
+cd /home/dev/wp-multisite-radar
 ```
 
 Expected : `1 1`, soit une ligne pour le site principal et la version de schéma 1.
@@ -5664,7 +5664,7 @@ wp plugin deactivate multisite-radar --network && wp plugin activate multisite-r
 wp cron event list --fields=hook,recurrence --format=csv | grep msradar
 wp cron event run msradar_process_queue
 wp eval 'global $wpdb; print_r( $wpdb->get_row( "SELECT site_id, name, users_count, content_count, registry_status, scanned_at FROM {$wpdb->base_prefix}msradar_sites WHERE site_id = 1", ARRAY_A ) );'
-cd /home/dev/wp-network-plugin-utilities
+cd /home/dev/wp-multisite-radar
 ```
 
 Expected :
@@ -7272,7 +7272,7 @@ Expected: `OK`.
 cd /home/dev/wp
 wp eval 'wp_set_current_user( 1 ); $r = rest_do_request( new WP_REST_Request( "GET", "/multisite-radar/v1/sites" ) ); echo $r->get_status(), " ", $r->get_headers()["X-WP-Total"], PHP_EOL; echo wp_json_encode( $r->get_data()[0] ), PHP_EOL;'
 wp eval '$r = rest_do_request( new WP_REST_Request( "GET", "/multisite-radar/v1/sites" ) ); echo $r->get_status(), PHP_EOL;'
-cd /home/dev/wp-network-plugin-utilities
+cd /home/dev/wp-multisite-radar
 ```
 
 Expected :
@@ -8008,7 +8008,7 @@ wp multisite-radar scan --all --probe
 wp multisite-radar sites list
 wp multisite-radar sites list --format=json --fields=id,name,registry_status,alert_level
 wp multisite-radar scan --site=999999; echo "exit=$?"
-cd /home/dev/wp-network-plugin-utilities
+cd /home/dev/wp-multisite-radar
 ```
 
 Expected :
@@ -8101,7 +8101,7 @@ wp eval 'define( "WP_UNINSTALL_PLUGIN", "multisite-radar/multisite-radar.php" );
 wp eval 'global $wpdb; var_dump( $wpdb->get_var( $wpdb->prepare( "SHOW TABLES LIKE %s", $wpdb->base_prefix . "msradar_sites" ) ), get_site_option( "msradar_db_version" ), get_option( "msradar_registry" ) );'
 wp plugin activate multisite-radar --network
 wp eval 'global $wpdb; echo $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->base_prefix}msradar_sites" ), PHP_EOL;'
-cd /home/dev/wp-network-plugin-utilities
+cd /home/dev/wp-multisite-radar
 ```
 
 Expected :
@@ -8221,13 +8221,13 @@ add_action(
 );
 PHP
 wp site create --slug=rh --title="Blog RH"
-RH="wp-network-plugin-utilities.test/rh/"
+RH="wp-multisite-radar.test/rh/"
 wp plugin activate msradar-demo-cpt --url="$RH"
 for i in 1 2 3; do wp post create --post_type=demo_event --post_status=publish --post_title="Event $i" --url="$RH" --porcelain; done
 wp multisite-radar scan --all --probe
 wp multisite-radar sites list --fields=id,name,registry_status,content_count,alert_level
 wp eval 'wp_set_current_user( 1 ); foreach ( [ 1, 2 ] as $id ) { $d = rest_do_request( new WP_REST_Request( "GET", "/multisite-radar/v1/sites/$id" ) )->get_data(); echo $id, " ", wp_json_encode( array_values( wp_list_filter( $d["post_types"], [ "name" => "demo_event" ] ) ) ), PHP_EOL; }'
-cd /home/dev/wp-network-plugin-utilities
+cd /home/dev/wp-multisite-radar
 ```
 
 Expected :
