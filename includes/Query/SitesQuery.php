@@ -143,6 +143,7 @@ final class SitesQuery {
 				],
 				'last_content' => $last,
 				'options'      => is_array( $data['options'] ?? null ) ? $data['options'] : [],
+				'cron'         => self::cron( $data ),
 				'alerts'       => $this->formatter->format( (array) ( $data['alerts'] ?? [] ) ),
 				'extensions'   => $this->extensions_for( $record ),
 				'scan_error'   => is_array( $data['scan_error'] ?? null ) ? [
@@ -194,6 +195,7 @@ final class SitesQuery {
 				'content_count'     => $record->content_count,
 				'media_count'       => $record->media_count,
 				'disk_bytes'        => $record->disk_bytes,
+				'disk_is_estimate'  => $record->disk_is_estimate,
 				'db_bytes'          => $record->db_bytes,
 				'autoload_bytes'    => $record->autoload_bytes,
 				'last_activity_gmt' => self::date( (string) $record->last_activity_gmt ),
@@ -220,6 +222,22 @@ final class SitesQuery {
 
 	private static function date( string $gmt ): ?string {
 		return '' === $gmt || '0000-00-00 00:00:00' === $gmt ? null : mysql_to_rfc3339( $gmt );
+	}
+
+	/**
+	 * Tâches planifiées en retard lors de la dernière analyse ; null pour une ligne analysée avant la 2.0.0-beta.4.
+	 *
+	 * @return array{overdue_count: int, oldest_overdue_gmt: string|null}|null
+	 */
+	private static function cron( array $data ): ?array {
+		$cron = $data['cron'] ?? null;
+		if ( ! is_array( $cron ) ) {
+			return null;
+		}
+		return [
+			'overdue_count'      => (int) ( $cron['overdue_count'] ?? 0 ),
+			'oldest_overdue_gmt' => self::date( (string) ( $cron['oldest_overdue_gmt'] ?? '' ) ),
+		];
 	}
 
 	private function is_network_active( string $plugin ): bool {

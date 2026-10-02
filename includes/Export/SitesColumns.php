@@ -24,6 +24,7 @@ final class SitesColumns {
 			'content_count'     => __( 'Published content', 'multisite-radar' ),
 			'media_count'       => __( 'Media', 'multisite-radar' ),
 			'disk_bytes'        => __( 'Disk usage (bytes)', 'multisite-radar' ),
+			'disk_is_estimate'  => __( 'Disk usage is an estimate', 'multisite-radar' ),
 			'db_bytes'          => __( 'Database size (bytes)', 'multisite-radar' ),
 			'autoload_bytes'    => __( 'Autoloaded options (bytes)', 'multisite-radar' ),
 			'last_activity_gmt' => __( 'Last activity (UTC)', 'multisite-radar' ),

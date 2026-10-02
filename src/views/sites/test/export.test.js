@@ -51,3 +51,13 @@ test( 'the export URL carries the nonce, the filters, the columns and the select
 		include: '3,1',
 	} );
 } );
+
+test( 'the disk column brings the estimate flag along', () => {
+	expect( exportColumns( [ 'disk_bytes' ] ) ).toEqual( [
+		'id',
+		'name',
+		'url',
+		'disk_bytes',
+		'disk_is_estimate',
+	] );
+} );

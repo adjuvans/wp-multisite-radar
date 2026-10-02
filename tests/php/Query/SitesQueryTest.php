@@ -247,4 +247,36 @@ final class SitesQueryTest extends TestCase {
 			$wpdb->suppress_errors( $suppress );
 		}
 	}
+
+	public function test_exposes_the_disk_estimate_and_the_overdue_tasks(): void {
+		$this->make_record(
+			191,
+			[
+				'name'             => 'Measured',
+				'disk_bytes'       => 2048,
+				'disk_is_estimate' => true,
+				'scanned_at'       => '2026-09-01 00:00:00',
+				'data'             => [
+					'cron' => [
+						'overdue_count'      => 2,
+						'oldest_overdue_gmt' => '2026-08-31 06:00:00',
+					],
+				],
+			]
+		);
+		$this->make_record( 192, [ 'scanned_at' => '2026-09-01 00:00:00' ] );
+		$query = $this->plugin()->sites_query();
+
+		$item = $query->list( [ 'include' => [ 191 ] ] )['items'][0];
+		$this->assertSame( 2048, $item['disk_bytes'] );
+		$this->assertTrue( $item['disk_is_estimate'] );
+		$this->assertSame(
+			[
+				'overdue_count'      => 2,
+				'oldest_overdue_gmt' => '2026-08-31T06:00:00',
+			],
+			$query->get( 191 )['cron']
+		);
+		$this->assertNull( $query->get( 192 )['cron'], 'Analysed before 2.0.0-beta.4.' );
+	}
 }

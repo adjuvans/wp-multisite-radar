@@ -305,6 +305,10 @@ final class SitesController extends Controller {
 				'content_count'     => $int,
 				'media_count'       => $int,
 				'disk_bytes'        => $nullable_int,
+				'disk_is_estimate'  => [
+					'type'     => 'boolean',
+					'readonly' => true,
+				],
 				'db_bytes'          => $nullable_int,
 				'autoload_bytes'    => $nullable_int,
 				'last_activity_gmt' => $date,

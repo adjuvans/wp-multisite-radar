@@ -71,6 +71,21 @@ export function formatBytes( bytes ) {
 	);
 }
 
+/**
+ * Espace disque d'un site. Une mesure arrêtée par son budget de temps est un minimum (écart E5 du plan M4).
+ *
+ * @param {?number} bytes    Octets mesurés.
+ * @param {boolean} estimate Mesure partielle.
+ */
+export function formatDisk( bytes, estimate = false ) {
+	const size = formatBytes( bytes );
+	if ( ! estimate || bytes === null || bytes === undefined ) {
+		return size;
+	}
+	/* translators: %s: disk size, such as "1.2 GB". */
+	return sprintf( __( 'at least %s', 'multisite-radar' ), size );
+}
+
 export function displayUrl( url ) {
 	return ( url || '' ).replace( /^https?:\/\//, '' ).replace( /\/$/, '' );
 }

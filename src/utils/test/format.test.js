@@ -2,6 +2,7 @@ import { beforeAll, expect, test } from 'vitest';
 import {
 	displayUrl,
 	formatBytes,
+	formatDisk,
 	formatNumber,
 	formatRelative,
 	parseGmt,
@@ -42,4 +43,11 @@ test( 'relative dates and display URLs', () => {
 	expect( displayUrl( 'https://example.test/rh/' ) ).toBe(
 		'example.test/rh'
 	);
+} );
+
+test( 'a disk measure cut short by its time budget is a minimum', () => {
+	expect( formatDisk( 2048 ) ).toBe( '2 KB' );
+	expect( formatDisk( 2048, false ) ).toBe( '2 KB' );
+	expect( formatDisk( 2048, true ) ).toBe( 'at least 2 KB' );
+	expect( formatDisk( null, true ) ).toBe( '—' );
 } );

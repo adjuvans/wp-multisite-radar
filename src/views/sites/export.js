@@ -8,7 +8,7 @@ const FIELD_COLUMNS = {
 	users_count: [ 'users_count', 'admins_count' ],
 	content_count: [ 'content_count' ],
 	media_count: [ 'media_count' ],
-	disk_bytes: [ 'disk_bytes' ],
+	disk_bytes: [ 'disk_bytes', 'disk_is_estimate' ],
 	db_bytes: [ 'db_bytes' ],
 	last_activity_gmt: [ 'last_activity_gmt' ],
 	alert_level: [ 'alert_level', 'alerts_count', 'alert_rules' ],

@@ -348,3 +348,54 @@ test( 'changing site restarts the users list at page 1', async () => {
 		'/multisite-radar/v1/sites/13/users?page=1&per_page=20',
 	] );
 } );
+
+test( 'the summary shows the measures of the last analysis', () => {
+	setup( {
+		siteId: 15,
+		preload: {
+			'/multisite-radar/v1/sites/15': {
+				body: {
+					...DETAIL,
+					id: 15,
+					disk_bytes: 1048576,
+					disk_is_estimate: true,
+					db_bytes: 2097152,
+					autoload_bytes: 10240,
+					cron: {
+						overdue_count: 3,
+						oldest_overdue_gmt: '2026-08-31T06:00:00',
+					},
+				},
+				headers: {},
+			},
+		},
+	} );
+
+	expect( screen.getByText( 'at least 1 MB' ) ).toBeInTheDocument();
+	expect( screen.getByText( '2 MB' ) ).toBeInTheDocument();
+	expect( screen.getByText( '10 KB' ) ).toBeInTheDocument();
+	expect(
+		screen.getByText( /^3 overdue at the last analysis/ )
+	).toBeInTheDocument();
+} );
+
+test( 'a site analysed before the measures existed shows dashes, and no overdue task says so', () => {
+	setup( {
+		siteId: 16,
+		preload: {
+			'/multisite-radar/v1/sites/16': {
+				body: {
+					...DETAIL,
+					id: 16,
+					cron: { overdue_count: 0, oldest_overdue_gmt: null },
+				},
+				headers: {},
+			},
+		},
+	} );
+
+	expect( screen.getByText( 'None overdue' ) ).toBeInTheDocument();
+	expect(
+		within( screen.getByRole( 'dialog' ) ).getAllByText( '—' ).length
+	).toBeGreaterThanOrEqual( 3 );
+} );

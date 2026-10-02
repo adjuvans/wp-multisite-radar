@@ -8,6 +8,7 @@ import {
 	displayUrl,
 	formatBytes,
 	formatDateTime,
+	formatDisk,
 	formatNumber,
 	formatRelative,
 } from '../../utils/format';
@@ -80,7 +81,8 @@ export function getSitesFields( rules = [] ) {
 			type: 'integer',
 			label: __( 'Disk', 'multisite-radar' ),
 			filterBy: false,
-			render: ( { item } ) => formatBytes( item.disk_bytes ),
+			render: ( { item } ) =>
+				formatDisk( item.disk_bytes, item.disk_is_estimate ),
 		},
 		{
 			id: 'db_bytes',
