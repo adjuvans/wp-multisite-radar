@@ -4,6 +4,7 @@ import { info, wordpress } from '@wordpress/icons';
 import { pageUrl } from '../../admin/config';
 import { DataViews } from '../../components/data-views';
 import ErrorNotice from '../../components/error-notice';
+import Skeleton from '../../components/skeleton';
 import { useDebouncedSave, usePreferences } from '../../hooks/use-preferences';
 import { useResource } from '../../hooks/use-resource';
 import { useUrlState } from '../../hooks/use-url-state';
@@ -87,16 +88,23 @@ export default function AlertsView() {
 					totalItems: list.total || 0,
 					totalPages: list.totalPages || 0,
 				} }
-				isLoading={ list.isLoading && ! list.data }
+				isLoading={ false }
 				getItemId={ ( item ) => item.id }
 				searchLabel={ __( 'Search sites', 'multisite-radar' ) }
 				empty={
-					<p className="msradar-empty">
-						{ __(
-							'No alert matches this view.',
-							'multisite-radar'
-						) }
-					</p>
+					list.isLoading ? (
+						<Skeleton
+							lines={ 5 }
+							label={ __( 'Loading alerts…', 'multisite-radar' ) }
+						/>
+					) : (
+						<p className="msradar-empty">
+							{ __(
+								'No alert matches this view.',
+								'multisite-radar'
+							) }
+						</p>
+					)
 				}
 			/>
 		</div>

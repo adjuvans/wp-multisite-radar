@@ -3,6 +3,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { getConfig } from '../../admin/config';
 import { DataViews } from '../../components/data-views';
 import ErrorNotice from '../../components/error-notice';
+import Skeleton from '../../components/skeleton';
 import { useDebouncedSave, usePreferences } from '../../hooks/use-preferences';
 import { useResource } from '../../hooks/use-resource';
 import { useScan } from '../../hooks/use-scan';
@@ -98,19 +99,26 @@ export default function SitesView() {
 					totalItems: list.total || 0,
 					totalPages: list.totalPages || 0,
 				} }
-				isLoading={ list.isLoading && ! list.data }
+				isLoading={ false }
 				getItemId={ ( item ) => String( item.id ) }
 				isItemClickable={ () => true }
 				onClickItem={ openSite }
 				searchLabel={ __( 'Search sites', 'multisite-radar' ) }
 				header={ <ExportMenu state={ state } fields={ view.fields } /> }
 				empty={
-					<p className="msradar-empty">
-						{ __(
-							'No site matches this view.',
-							'multisite-radar'
-						) }
-					</p>
+					list.isLoading ? (
+						<Skeleton
+							lines={ 5 }
+							label={ __( 'Loading sites…', 'multisite-radar' ) }
+						/>
+					) : (
+						<p className="msradar-empty">
+							{ __(
+								'No site matches this view.',
+								'multisite-radar'
+							) }
+						</p>
+					)
 				}
 			/>
 			{ scan.running && (

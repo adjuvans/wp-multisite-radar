@@ -212,3 +212,15 @@ test( 'a search with apostrophe, plus, percent, accents and a non-breaking space
 	await settle();
 	expect( apiFetch ).not.toHaveBeenCalled();
 } );
+
+test( 'a list that is not preloaded shows a skeleton, not a spinner', () => {
+	window.history.replaceState(
+		null,
+		'',
+		'/wp-admin/network/admin.php?page=multisite-radar-sites&s=nothing-preloaded'
+	);
+	const { container } = renderView();
+
+	expect( screen.getByText( 'Loading sites…' ) ).toBeInTheDocument();
+	expect( container.querySelector( '.components-spinner' ) ).toBeNull();
+} );

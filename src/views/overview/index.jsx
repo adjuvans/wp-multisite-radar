@@ -2,6 +2,7 @@ import { Button, Notice } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { getConfig } from '../../admin/config';
 import ErrorNotice from '../../components/error-notice';
+import Skeleton from '../../components/skeleton';
 import { useResource } from '../../hooks/use-resource';
 import { useScan } from '../../hooks/use-scan';
 import { buildPath } from '../../store/paths';
@@ -58,6 +59,12 @@ export default function OverviewView() {
 					total={ data.total_sites }
 					scan={ scan }
 					canManage={ canManage }
+				/>
+			) }
+			{ ! data && ! summary.error && (
+				<Skeleton
+					lines={ 2 }
+					label={ __( 'Loading the overview…', 'multisite-radar' ) }
 				/>
 			) }
 			{ data && <Tiles summary={ data } /> }

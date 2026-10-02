@@ -2,6 +2,7 @@ import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import ErrorNotice from '../../components/error-notice';
+import Skeleton from '../../components/skeleton';
 import { useResource } from '../../hooks/use-resource';
 import { buildPath } from '../../store/paths';
 
@@ -17,9 +18,10 @@ export default function UsersTab( { siteId } ) {
 	}
 	if ( ! users.data ) {
 		return (
-			<p aria-busy="true">
-				{ __( 'Loading users…', 'multisite-radar' ) }
-			</p>
+			<Skeleton
+				lines={ 4 }
+				label={ __( 'Loading users…', 'multisite-radar' ) }
+			/>
 		);
 	}
 	if ( users.data.length === 0 ) {

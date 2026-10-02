@@ -81,3 +81,35 @@ test( 'renders the preloaded alerts without any request', async () => {
 	).toBeInTheDocument();
 	expect( apiFetch ).not.toHaveBeenCalled();
 } );
+
+test( 'a list that is not preloaded shows a skeleton', () => {
+	window.history.replaceState(
+		null,
+		'',
+		'/wp-admin/network/admin.php?page=multisite-radar-alerts&s=nothing-preloaded'
+	);
+	const preload = {
+		'/multisite-radar/v1/preferences': { body: {}, headers: {} },
+		'/multisite-radar/v1/alerts/summary': {
+			body: { by_rule: [] },
+			headers: {},
+		},
+	};
+	window.msradarAdmin = {
+		view: 'alerts',
+		canManage: true,
+		pages: {},
+		preload,
+	};
+	const registry = createRegistry();
+	registry.register( noticesStore );
+	registry.register( createCoreStore( preload ) );
+
+	render(
+		<RegistryProvider value={ registry }>
+			<AlertsView />
+		</RegistryProvider>
+	);
+
+	expect( screen.getByText( 'Loading alerts…' ) ).toBeInTheDocument();
+} );
