@@ -3,7 +3,7 @@ Tags: multisite, network, audit, inventory, admin
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.0-beta.1
+Stable tag: 2.0.0-beta.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -18,6 +18,10 @@ Data is collected in the background with lightweight SQL queries, so the network
 Source code: https://github.com/adjuvans/wp-network-plugin-utilities
 
 == Changelog ==
+
+= 2.0.0-beta.2 =
+* The interface is available in French, including the table controls.
+* Every plugin page shows the plugin version next to its title, and a footer with the author, the licence and the third-party licences.
 
 = 2.0.0-beta.1 =
 * First beta: network admin screens (Overview, Sites with a side panel, Alerts, Settings), per-user display preferences, CSV and JSON exports.

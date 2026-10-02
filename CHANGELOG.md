@@ -1,6 +1,6 @@
 # Changelog — Multisite Radar
 
-## [Non publié]
+## [2.0.0-beta.2] - 2026-10-02
 
 - Interface en français : traduction fr_FR livrée dans `languages/`, y compris les textes de DataViews (filtres, pagination, colonnes), repris de la traduction officielle de WordPress quand elle existe.
 - Pastille de version à côté du titre de chaque page, orange pour une version préliminaire.
