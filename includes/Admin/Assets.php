@@ -12,6 +12,13 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Assets {
 
+	/**
+	 * DataViews, embarqué dans chaque bundle, traduit ses textes dans le domaine « default » : ses chaînes sont
+	 * extraites dans les traductions du plugin (bin/i18n.sh), recopiées ici dans ce domaine avant l'exécution du
+	 * bundle. Sans traduction chargée (anglais), il n'y a rien à recopier.
+	 */
+	public const SHARE_TRANSLATIONS = "( function ( i18n ) { var data = i18n.getLocaleData( 'multisite-radar' ); if ( data && Object.keys( data ).length > 1 ) { i18n.setLocaleData( data, 'default' ); } } )( window.wp.i18n );";
+
 	private Menu $menu;
 	private Preferences $preferences;
 	private string $build_dir;
@@ -50,6 +57,7 @@ final class Assets {
 
 		wp_enqueue_script( $handle, $this->build_url . 'admin/' . $view . '.js', (array) ( $asset['dependencies'] ?? [] ), $version, true );
 		wp_set_script_translations( $handle, 'multisite-radar', MSRADAR_DIR . 'languages' );
+		wp_add_inline_script( $handle, self::SHARE_TRANSLATIONS, 'before' );
 		wp_add_inline_script( $handle, 'window.msradarAdmin = ' . wp_json_encode( $this->config( $view ), JSON_HEX_TAG | JSON_HEX_AMP ) . ';', 'before' );
 
 		if ( is_readable( $this->build_dir . 'admin/' . $view . '.css' ) ) {

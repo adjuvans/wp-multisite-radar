@@ -6,7 +6,7 @@ DIST_DIR := dist
 ZIP       = $(SLUG)-$(VERSION).zip
 
 # Entrées autorisées à la racine du paquet ; toute autre entrée fait échouer « make dist ».
-DIST_ALLOWED := LICENSE build includes $(SLUG).php readme.txt uninstall.php
+DIST_ALLOWED := LICENSE build includes languages $(SLUG).php readme.txt uninstall.php
 
 # Port wp-env des tests de bout en bout : make e2e WP_ENV_PORT=8890 si 8888 est occupé.
 WP_ENV_PORT       ?= 8888
@@ -15,7 +15,7 @@ WP_BASE_URL       ?= http://localhost:$(WP_ENV_PORT)
 export WP_ENV_PORT WP_ENV_TESTS_PORT WP_BASE_URL
 
 .DEFAULT_GOAL := help
-.PHONY: help install build dist deploy-test deploy-prod lint test check e2e e2e-stop version clean
+.PHONY: help install build i18n dist deploy-test deploy-prod lint test check e2e e2e-stop version clean
 
 help: ## Affiche cette aide
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "} {printf "  %-12s %s\n", $$1, $$2}'
@@ -33,9 +33,13 @@ install: node_modules vendor ## Installe les dépendances npm et Composer
 build: node_modules ## Compile l'interface dans build/
 	npm run build
 
-dist: node_modules ## Produit dist/multisite-radar-<version>.zip, prêt à installer
+i18n: build ## Régénère le catalogue de traductions, vérifie le français et le compile (WP-CLI)
+	bin/i18n.sh
+
+dist: node_modules ## Produit dist/multisite-radar-<version>.zip, traductions comprises, prêt à installer
 	npm run version:check
 	npm run build
+	bin/i18n.sh
 	rm -rf $(DIST_DIR)
 	mkdir -p $(DIST_DIR)/$(SLUG)
 	rsync -a --exclude-from=.distignore ./ $(DIST_DIR)/$(SLUG)/

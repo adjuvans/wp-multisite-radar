@@ -19,7 +19,7 @@ final class HighMediaRule implements RuleInterface {
 	}
 
 	public function description(): string {
-		return __( 'The media library holds more files than the threshold.', 'multisite-radar' );
+		return __( 'The media library has reached the threshold number of files.', 'multisite-radar' );
 	}
 
 	public function default_severity(): string {

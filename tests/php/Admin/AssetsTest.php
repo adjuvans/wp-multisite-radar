@@ -23,8 +23,16 @@ final class AssetsTest extends RestTestCase {
 	}
 
 	private function config_of( string $handle ): array {
-		$inline = trim( implode( "\n", (array) wp_scripts()->get_data( $handle, 'before' ) ) );
-		$this->assertStringStartsWith( 'window.msradarAdmin = ', $inline );
+		$scripts = array_values(
+			array_filter(
+				(array) wp_scripts()->get_data( $handle, 'before' ),
+				static function ( $script ): bool {
+					return 0 === strpos( trim( (string) $script ), 'window.msradarAdmin = ' );
+				}
+			)
+		);
+		$this->assertCount( 1, $scripts );
+		$inline = trim( (string) $scripts[0] );
 		$this->assertStringNotContainsString( '</script>', $inline );
 		return json_decode( substr( $inline, strlen( 'window.msradarAdmin = ' ), -1 ), true );
 	}
@@ -56,6 +64,17 @@ final class AssetsTest extends RestTestCase {
 		$this->assertSame( Menu::url( 'sites' ), $config['pages']['sites'] );
 		$list = $config['preload']['/multisite-radar/v1/sites?order=asc&orderby=name&page=1&per_page=20'];
 		$this->assertContains( '</script><script>alert(1)</script>', wp_list_pluck( $list['body'], 'name' ), 'The name survives intact once decoded.' );
+	}
+
+	public function test_the_bundled_dataviews_strings_use_the_plugin_translations(): void {
+		$this->login_as_super_admin();
+		$this->assets()->enqueue_view( 'sites' );
+
+		$this->assertSame( 'multisite-radar', wp_scripts()->registered['msradar-sites']->textdomain );
+		$this->assertSame( MSRADAR_DIR . 'languages', wp_scripts()->registered['msradar-sites']->translations_path );
+		$this->assertContains( Assets::SHARE_TRANSLATIONS, (array) wp_scripts()->get_data( 'msradar-sites', 'before' ) );
+		$this->assertStringContainsString( "i18n.getLocaleData( 'multisite-radar' )", Assets::SHARE_TRANSLATIONS );
+		$this->assertStringContainsString( "i18n.setLocaleData( data, 'default' )", Assets::SHARE_TRANSLATIONS );
 	}
 
 	public function test_a_throwing_preload_leaves_the_page_working_without_that_response(): void {

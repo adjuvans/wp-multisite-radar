@@ -59,8 +59,16 @@ final class MenuTest extends TestCase {
 		unset( $_GET['page'] );
 
 		$this->assertStringContainsString( '<div id="msradar-app" class="msradar-app" data-view="alerts"></div>', $html );
-		$this->assertStringContainsString( '<h1>Alerts</h1>', $html );
+		$this->assertStringContainsString( '<h1 class="wp-heading-inline">Alerts</h1>', $html );
+		$this->assertStringContainsString( Menu::version_badge( MSRADAR_VERSION ), $html );
+		$this->assertStringContainsString( '<hr class="wp-header-end">', $html );
 		$this->assertStringContainsString( '<noscript>', $html );
+	}
+
+	public function test_the_version_badge_flags_pre_releases(): void {
+		$this->assertSame( '<span class="msradar-version">2.0.0</span>', Menu::version_badge( '2.0.0' ) );
+		$this->assertSame( '<span class="msradar-version is-prerelease" title="Pre-release version">2.0.0-beta.1</span>', Menu::version_badge( '2.0.0-beta.1' ) );
+		$this->assertSame( '<span class="msradar-version">&lt;b&gt;</span>', Menu::version_badge( '<b>' ) );
 	}
 
 	public function test_urls_point_to_the_network_admin(): void {

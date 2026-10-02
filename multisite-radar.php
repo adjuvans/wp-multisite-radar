@@ -6,7 +6,8 @@
  * Version:           2.0.0-beta.1
  * Requires at least: 6.9
  * Requires PHP:      7.4
- * Author:            Cyrille de Gourcy
+ * Author:            ADJUVANS
+ * Author URI:        https://adjuvans.fr
  * License:           GPL-3.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain:       multisite-radar

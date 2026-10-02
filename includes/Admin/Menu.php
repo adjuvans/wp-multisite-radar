@@ -67,10 +67,25 @@ final class Menu {
 		$view  = self::current_view();
 		$title = 'overview' === $view ? __( 'Multisite Radar', 'multisite-radar' ) : self::titles()[ $view ];
 		printf(
-			'<div class="wrap msradar-wrap"><h1>%1$s</h1><div id="msradar-app" class="msradar-app" data-view="%2$s"></div><noscript><div class="notice notice-error"><p>%3$s</p></div></noscript></div>',
+			'<div class="wrap msradar-wrap"><h1 class="wp-heading-inline">%1$s</h1>%2$s<hr class="wp-header-end"><div id="msradar-app" class="msradar-app" data-view="%3$s"></div><noscript><div class="notice notice-error"><p>%4$s</p></div></noscript></div>',
 			esc_html( $title ),
+			self::version_badge( MSRADAR_VERSION ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by version_badge().
 			esc_attr( $view ),
 			esc_html__( 'Multisite Radar needs JavaScript to display this page.', 'multisite-radar' )
+		);
+	}
+
+	/**
+	 * Pastille de version affichée à côté du titre ; une version préliminaire (« -beta.1 », « -rc.2 »…) est signalée.
+	 */
+	public static function version_badge( string $version ): string {
+		if ( false === strpos( $version, '-' ) ) {
+			return sprintf( '<span class="msradar-version">%s</span>', esc_html( $version ) );
+		}
+		return sprintf(
+			'<span class="msradar-version is-prerelease" title="%1$s">%2$s</span>',
+			esc_attr__( 'Pre-release version', 'multisite-radar' ),
+			esc_html( $version )
 		);
 	}
 }

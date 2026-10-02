@@ -2,6 +2,7 @@
 namespace MultisiteRadar;
 
 use MultisiteRadar\Admin\Assets;
+use MultisiteRadar\Admin\Footer;
 use MultisiteRadar\Admin\Menu;
 use MultisiteRadar\Admin\Privacy;
 use MultisiteRadar\Alerts\AlertEvaluator;
@@ -81,6 +82,8 @@ final class Plugin {
 
 	private ?Assets $assets = null;
 
+	private ?Footer $footer = null;
+
 	private ?Privacy $privacy = null;
 
 	private ?SitesListCache $sites_list_cache = null;
@@ -95,6 +98,7 @@ final class Plugin {
 	}
 
 	public function boot(): void {
+		add_action( 'init', [ $this, 'load_textdomain' ] );
 		if ( ! is_multisite() ) {
 			add_action( 'admin_notices', [ $this, 'render_multisite_notice' ] );
 			return;
@@ -113,12 +117,21 @@ final class Plugin {
 			$this->export()->register();
 			$this->admin_menu()->register();
 			$this->assets()->register();
+			$this->footer()->register();
 			$this->privacy()->register();
 		}
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			RadarCommand::register( $this );
 		}
+	}
+
+	/**
+	 * Traductions livrées dans languages/ (générées par « make i18n ») ; un paquet de langue de WordPress.org,
+	 * s'il existe, reste prioritaire.
+	 */
+	public function load_textdomain(): void {
+		load_plugin_textdomain( 'multisite-radar', false, dirname( plugin_basename( MSRADAR_FILE ) ) . '/languages' ); // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- the plugin ships its own translations.
 	}
 
 	public function register_rest_routes(): void {
@@ -246,6 +259,10 @@ final class Plugin {
 
 	public function assets(): Assets {
 		return $this->assets ??= new Assets( $this->admin_menu(), $this->preferences(), MSRADAR_DIR . 'build/', MSRADAR_URL . 'build/' );
+	}
+
+	public function footer(): Footer {
+		return $this->footer ??= new Footer( $this->admin_menu(), MSRADAR_DIR . 'build/', MSRADAR_URL . 'build/' );
 	}
 
 	public function privacy(): Privacy {

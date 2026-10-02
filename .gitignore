@@ -54,3 +54,8 @@ dist/
 
 /artifacts/
 .wp-env.override.json
+
+# Traductions compilées par « make i18n » (les .pot et .po sont versionnés)
+/languages/*.mo
+/languages/*.l10n.php
+/languages/*.json

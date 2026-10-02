@@ -3,6 +3,13 @@
 	"description": "Network-wide audit for WordPress Multisite.",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
+	"authors": [
+		{
+			"name": "ADJUVANS",
+			"email": "contact@adjuvans.fr",
+			"homepage": "https://adjuvans.fr"
+		}
+	],
 	"require": {
 		"php": ">=7.4"
 	},

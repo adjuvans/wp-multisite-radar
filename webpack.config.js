@@ -6,6 +6,7 @@
 const path = require( 'path' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
+const { LicenseWebpackPlugin } = require( 'license-webpack-plugin' );
 
 const VIEWS = [ 'overview', 'sites', 'alerts', 'settings' ];
 
@@ -25,6 +26,16 @@ const plugins = defaultConfig.plugins.map( ( plugin ) =>
 						: undefined,
 		  } )
 		: plugin
+);
+
+// build/third-party-licenses.txt : chaque paquet embarqué (DataViews et ses dépendances) avec le texte de sa
+// licence, comme l'exige la licence MIT. Le pied de page des pages du plugin y renvoie (Admin\Footer).
+plugins.push(
+	new LicenseWebpackPlugin( {
+		perChunkOutput: false,
+		outputFilename: 'third-party-licenses.txt',
+		addBanner: false,
+	} )
 );
 
 module.exports = {

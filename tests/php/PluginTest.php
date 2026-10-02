@@ -18,4 +18,11 @@ final class PluginTest extends TestCase {
 	public function test_instance_is_a_singleton(): void {
 		$this->assertSame( Plugin::instance(), Plugin::instance() );
 	}
+
+	public function test_translations_shipped_in_the_languages_folder_are_registered_on_init(): void {
+		$this->assertSame( 10, has_action( 'init', [ Plugin::instance(), 'load_textdomain' ] ) );
+		Plugin::instance()->load_textdomain();
+		// Locale sans fichier de traduction : le registre se rabat sur le dossier déclaré par le plugin.
+		$this->assertSame( WP_PLUGIN_DIR . '/' . dirname( plugin_basename( MSRADAR_FILE ) ) . '/languages/', $GLOBALS['wp_textdomain_registry']->get( 'multisite-radar', 'xx_XX' ) );
+	}
 }

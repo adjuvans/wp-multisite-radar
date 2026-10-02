@@ -11,6 +11,7 @@ Le `Makefile` regroupe les commandes ci-dessous (`make` seul affiche l'aide) :
 
 ```bash
 make install          # dépendances npm et Composer
+make i18n             # catalogue .pot, vérification et compilation des traductions (WP-CLI)
 make dist             # dist/multisite-radar-<version>.zip, filtré par .distignore
 make check            # lint + tests PHPUnit et Vitest
 make e2e WP_ENV_PORT=8890   # bout en bout ; make e2e-stop pour arrêter wp-env
@@ -18,6 +19,8 @@ make version VERSION=2.0.0  # en-tête, constante, readme.txt, package.json et l
 ```
 
 Le zip de `make dist` contient le même arbre que celui validé par Plugin Check en CI. Ce n'est pas le cas de `npm run plugin-zip`, qui ajoute `package.json` et `README.md`.
+
+Traductions : les textes source sont en anglais ; `languages/multisite-radar-fr_FR.po` fournit le français. `make i18n` régénère `languages/multisite-radar.pot` à partir du PHP et du JS compilé, y compris les textes de DataViews, fusionne les `.po`, puis compile les fichiers chargés par WordPress (`.mo`, `.l10n.php`, `.json`, non versionnés). Il échoue tant qu'une chaîne n'est pas traduite : la compléter dans le `.po` et relancer. `make dist` passe par la même étape.
 
 Déploiement FTP (requiert `lftp`) : copier `.env.example` en `.env`, puis renseigner les accès de test et de production.
 

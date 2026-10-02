@@ -2,7 +2,11 @@
 
 ## [Non publié]
 
-- Outillage : `Makefile` (`make dist`, `make check`, `make e2e`, `make version`), déploiement FTP vers les serveurs de test et de production (`make deploy-test`, `make deploy-prod`, paramètres dans `.env`).
+- Interface en français : traduction fr_FR livrée dans `languages/`, y compris les textes de DataViews (filtres, pagination, colonnes), repris de la traduction officielle de WordPress quand elle existe.
+- Pastille de version à côté du titre de chaque page, orange pour une version préliminaire.
+- Pied de page des pages du plugin : signature ADJUVANS (adjuvans.fr, contact@adjuvans.fr), licence GPL-3.0 ou ultérieure, licences tierces (`build/third-party-licenses.txt`, généré au build) et version du plugin.
+- Auteur du plugin : ADJUVANS.
+- Outillage : `Makefile` (`make dist`, `make i18n`, `make check`, `make e2e`, `make version`), déploiement FTP vers les serveurs de test et de production (`make deploy-test`, `make deploy-prod`, paramètres dans `.env`).
 
 ## [2.0.0-beta.1] - 2026-10-01
 

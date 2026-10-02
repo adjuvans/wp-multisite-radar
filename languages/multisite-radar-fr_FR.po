@@ -1,0 +1,2301 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Multisite Radar 2.0.0-beta.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/multisite-radar\n"
+"Last-Translator: ADJUVANS <contact@adjuvans.fr>\n"
+"Language-Team: French (France)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-10-02T11:24:13+00:00\n"
+"PO-Revision-Date: 2026-10-02 00:00+0000\n"
+"Language: fr_FR\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Domain: multisite-radar\n"
+"X-Generator: WP-CLI 2.12.0\n"
+
+#. Plugin Name of the plugin
+#: multisite-radar.php
+#: includes/Admin/Menu.php:43
+#: includes/Admin/Menu.php:68
+msgid "Multisite Radar"
+msgstr "Multisite Radar"
+
+#. Plugin URI of the plugin
+#: multisite-radar.php
+msgid "https://github.com/adjuvans/wp-network-plugin-utilities"
+msgstr "https://github.com/adjuvans/wp-network-plugin-utilities"
+
+#. Description of the plugin
+#: multisite-radar.php
+msgid "Network-wide audit for WordPress Multisite: sites, content types, users, plugins, themes and health alerts."
+msgstr "Audit à l’échelle du réseau pour WordPress Multisite : sites, types de contenu, comptes, extensions, thèmes et alertes de santé."
+
+#. Author of the plugin
+#: multisite-radar.php
+msgid "ADJUVANS"
+msgstr "ADJUVANS"
+
+#. Author URI of the plugin
+#: multisite-radar.php
+msgid "https://adjuvans.fr"
+msgstr "https://adjuvans.fr"
+
+#: build/admin/alerts.js:1
+#: build/admin/overview.js:1
+#: build/admin/settings.js:1
+#: build/admin/sites.js:1
+msgid "The request failed. Check your connection and try again."
+msgstr "La requête a échoué. Vérifiez votre connexion et réessayez."
+
+#: build/admin/alerts.js:1
+#: build/admin/overview.js:1
+#: build/admin/settings.js:1
+#: build/admin/sites.js:1
+msgid "This page could not be displayed. Reload it; if the problem persists, check the browser console."
+msgstr "Cette page n’a pas pu être affichée. Rechargez-la ; si le problème persiste, consultez la console du navigateur."
+
+#. translators: comma as in the character ','
+#: build/admin/alerts.js:3
+#: build/admin/settings.js:3
+#: build/admin/sites.js:3
+msgid "Comma"
+msgstr "Virgule"
+
+#. translators: period as in the character '.'
+#: build/admin/alerts.js:5
+#: build/admin/settings.js:5
+#: build/admin/sites.js:5
+msgid "Period"
+msgstr "Point"
+
+#. translators: backtick as in the character '`'
+#: build/admin/alerts.js:7
+#: build/admin/settings.js:7
+#: build/admin/sites.js:7
+msgid "Backtick"
+msgstr "Accent grave"
+
+#. translators: tilde as in the character '~'
+#: build/admin/alerts.js:9
+#: build/admin/settings.js:9
+#: build/admin/sites.js:9
+msgid "Tilde"
+msgstr "Tilde"
+
+#. translators: %s: keyboard shortcut.
+#: build/admin/alerts.js:12
+#: build/admin/settings.js:12
+#: build/admin/sites.js:12
+#, js-format
+msgid "Keyboard shortcut: %s"
+msgstr "Raccourci clavier : %s"
+
+#. translators: accessibility text appended to link text
+#: build/admin/alerts.js:14
+#: build/admin/settings.js:14
+#: build/admin/sites.js:14
+msgid "(opens in a new tab)"
+msgstr "(ouvre un nouvel onglet)"
+
+#: build/admin/alerts.js:14
+#: build/admin/settings.js:14
+#: build/admin/sites.js:14
+msgid "Notifications"
+msgstr "Notifications"
+
+#: build/admin/alerts.js:14
+#: build/admin/settings.js:14
+#: build/admin/sites.js:14
+msgid "Loading"
+msgstr "Chargement"
+
+#. translators: 1: Calendar type. 2: Current month and year.
+#: build/admin/alerts.js:17
+#: build/admin/settings.js:17
+#: build/admin/sites.js:17
+#, js-format
+msgid "%1$s, %2$s"
+msgstr "%1$s, %2$s"
+
+#: build/admin/alerts.js:17
+#: build/admin/settings.js:17
+#: build/admin/sites.js:17
+msgid "Date calendar"
+msgstr "Calendrier de dates"
+
+#: build/admin/alerts.js:17
+#: build/admin/settings.js:17
+#: build/admin/sites.js:17
+msgid "Date range calendar"
+msgstr "Calendrier de plage de dates"
+
+#: build/admin/alerts.js:17
+#: build/admin/settings.js:17
+#: build/admin/sites.js:17
+msgid "Navigation bar"
+msgstr "Barre de navigation"
+
+#. translators: %s is the full date (e.g. "Monday, April 29, 2025")
+#: build/admin/alerts.js:20
+#: build/admin/alerts.js:26
+#: build/admin/settings.js:20
+#: build/admin/settings.js:26
+#: build/admin/sites.js:20
+#: build/admin/sites.js:26
+#, js-format
+msgid "Today, %s"
+msgstr "Aujourd’hui, %s"
+
+#: build/admin/alerts.js:20
+#: build/admin/settings.js:20
+#: build/admin/sites.js:20
+msgid "Next month"
+msgstr "Mois suivant"
+
+#: build/admin/alerts.js:20
+#: build/admin/settings.js:20
+#: build/admin/sites.js:20
+msgid "Previous month"
+msgstr "Mois précédent"
+
+#. translators: %s is the full date (e.g. "Monday, April 29, 2025")
+#: build/admin/alerts.js:23
+#: build/admin/settings.js:23
+#: build/admin/sites.js:23
+#, js-format
+msgid "Today, %s, selected"
+msgstr "Aujourd’hui, %s, sélectionnée"
+
+#. translators: %s is the full date (e.g. "Monday, April 29, 2025")
+#: build/admin/alerts.js:29
+#: build/admin/settings.js:29
+#: build/admin/sites.js:29
+#, js-format
+msgid "%s, selected"
+msgstr "%s, sélectionnée"
+
+#: build/admin/alerts.js:29
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:29
+#: build/admin/settings.js:194
+#: build/admin/sites.js:29
+#: build/admin/sites.js:194
+msgid "Required"
+msgstr "Obligatoire"
+
+#: build/admin/alerts.js:29
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:29
+#: build/admin/settings.js:194
+#: build/admin/sites.js:29
+#: build/admin/sites.js:194
+msgid "Optional"
+msgstr "Facultatif"
+
+#: build/admin/alerts.js:29
+#: build/admin/settings.js:29
+#: build/admin/sites.js:29
+msgid "More details follow the field."
+msgstr "Plus de détails suivent ce champ."
+
+#: build/admin/alerts.js:29
+#: build/admin/settings.js:29
+#: build/admin/sites.js:29
+msgid "Sort ascending"
+msgstr "Ordre croissant"
+
+#: build/admin/alerts.js:29
+#: build/admin/settings.js:29
+#: build/admin/sites.js:29
+msgid "Sort descending"
+msgstr "Ordre décroissant"
+
+#: build/admin/alerts.js:29
+#: build/admin/settings.js:29
+#: build/admin/sites.js:29
+msgid "Increment"
+msgstr "Incrémenter"
+
+#: build/admin/alerts.js:29
+#: build/admin/settings.js:29
+#: build/admin/sites.js:29
+msgid "Decrement"
+msgstr "Décrémenter"
+
+#: build/admin/alerts.js:29
+#: build/admin/alerts.js:32
+#: build/admin/settings.js:29
+#: build/admin/settings.js:32
+#: build/admin/settings.js:200
+#: build/admin/sites.js:29
+#: build/admin/sites.js:32
+#: build/admin/sites.js:212
+msgid "Close"
+msgstr "Fermer"
+
+#: build/admin/alerts.js:29
+#: build/admin/alerts.js:32
+#: build/admin/alerts.js:188
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:29
+#: build/admin/settings.js:32
+#: build/admin/settings.js:188
+#: build/admin/settings.js:191
+#: build/admin/sites.js:29
+#: build/admin/sites.js:32
+#: build/admin/sites.js:188
+#: build/admin/sites.js:191
+msgid "Reset"
+msgstr "Réinitialiser"
+
+#: build/admin/alerts.js:29
+#: build/admin/settings.js:29
+#: build/admin/sites.js:29
+msgid "Copied!"
+msgstr "Copié !"
+
+#: build/admin/alerts.js:29
+#: build/admin/settings.js:29
+#: build/admin/sites.js:29
+msgid "Copy"
+msgstr "Copier"
+
+#: build/admin/alerts.js:29
+#: build/admin/settings.js:29
+#: build/admin/sites.js:29
+msgid "Hex color"
+msgstr "Couleur hexadécimale"
+
+#: build/admin/alerts.js:29
+#: build/admin/settings.js:29
+#: build/admin/sites.js:29
+msgid "Color format"
+msgstr "Format de couleur"
+
+#: build/admin/alerts.js:29
+#: build/admin/settings.js:29
+#: build/admin/sites.js:29
+msgid "No items found"
+msgstr "Aucun élément trouvé"
+
+#: build/admin/alerts.js:29
+#: build/admin/settings.js:29
+#: build/admin/sites.js:29
+msgid "Item selected."
+msgstr "Élément sélectionné."
+
+#. translators: %d: number of results.
+#: build/admin/alerts.js:32
+#: build/admin/alerts.js:38
+#: build/admin/settings.js:32
+#: build/admin/settings.js:38
+#: build/admin/sites.js:32
+#: build/admin/sites.js:38
+#, js-format
+msgid "%d result found, use up and down arrow keys to navigate."
+msgid_plural "%d results found, use up and down arrow keys to navigate."
+msgstr[0] "%d résultat trouvé, vous pouvez naviguer avec les touches haut et bas."
+msgstr[1] "%d résultats trouvés, vous pouvez naviguer avec les touches haut et bas."
+
+#: build/admin/alerts.js:32
+#: build/admin/alerts.js:38
+#: build/admin/settings.js:32
+#: build/admin/settings.js:38
+#: build/admin/sites.js:32
+#: build/admin/sites.js:38
+msgid "No results."
+msgstr "Aucun résultat."
+
+#: build/admin/alerts.js:32
+#: build/admin/settings.js:32
+#: build/admin/sites.js:32
+msgid "Scrollable section"
+msgstr "Section défilante"
+
+#. translators: 1: term name, 2: term position in a set of terms, 3: total term set count.
+#: build/admin/alerts.js:35
+#: build/admin/settings.js:35
+#: build/admin/sites.js:35
+#, js-format
+msgid "%1$s (%2$d of %3$d)"
+msgstr "%1$s (%2$d sur %3$d)"
+
+#: build/admin/alerts.js:35
+#: build/admin/settings.js:35
+#: build/admin/sites.js:35
+msgid "Add item"
+msgstr "Ajouter un élément"
+
+#: build/admin/alerts.js:35
+#: build/admin/settings.js:35
+#: build/admin/sites.js:35
+msgid "Item added."
+msgstr "Élément ajouté."
+
+#: build/admin/alerts.js:35
+#: build/admin/settings.js:35
+#: build/admin/sites.js:35
+msgid "Item removed."
+msgstr "Élément retiré."
+
+#: build/admin/alerts.js:35
+#: build/admin/settings.js:35
+#: build/admin/sites.js:35
+msgid "Remove item"
+msgstr "Retirer l’élément"
+
+#: build/admin/alerts.js:35
+#: build/admin/settings.js:35
+#: build/admin/sites.js:35
+msgid "Invalid item"
+msgstr "Élément non valide"
+
+#: build/admin/alerts.js:35
+#: build/admin/settings.js:35
+#: build/admin/sites.js:35
+msgid "Separate with commas, spaces, or the Enter key."
+msgstr "Séparez avec une virgule, un espace, ou avec la touche entrée."
+
+#: build/admin/alerts.js:35
+#: build/admin/settings.js:35
+#: build/admin/sites.js:35
+msgid "Separate with commas or the Enter key."
+msgstr "Séparez avec une virgule ou avec la touche entrée."
+
+#: build/admin/alerts.js:38
+#: build/admin/settings.js:38
+#: build/admin/sites.js:38
+msgid "Close search"
+msgstr "Fermer la recherche"
+
+#: build/admin/alerts.js:38
+#: build/admin/settings.js:38
+#: build/admin/sites.js:38
+msgid "Reset search"
+msgstr "Réinitialiser la recherche"
+
+#: build/admin/alerts.js:38
+#: build/admin/alerts.js:80
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:38
+#: build/admin/settings.js:80
+#: build/admin/settings.js:191
+#: build/admin/sites.js:38
+#: build/admin/sites.js:80
+#: build/admin/sites.js:191
+msgid "Search"
+msgstr "Rechercher"
+
+#: build/admin/alerts.js:38
+#: build/admin/alerts.js:59
+#: build/admin/settings.js:38
+#: build/admin/settings.js:59
+#: build/admin/sites.js:38
+#: build/admin/sites.js:59
+msgid "(no title)"
+msgstr "(pas de titre)"
+
+#: build/admin/alerts.js:38
+#: build/admin/alerts.js:50
+#: build/admin/alerts.js:65
+#: build/admin/settings.js:38
+#: build/admin/settings.js:50
+#: build/admin/settings.js:65
+#: build/admin/sites.js:38
+#: build/admin/sites.js:50
+#: build/admin/sites.js:65
+msgid "Actions"
+msgstr "Actions"
+
+#. translators: %d: number of items.
+#: build/admin/alerts.js:41
+#: build/admin/settings.js:41
+#: build/admin/sites.js:41
+#, js-format
+msgid "%d Item selected"
+msgid_plural "%d Items selected"
+msgstr[0] "%d élément sélectionné"
+msgstr[1] "%d éléments sélectionnés"
+
+#. translators: %d: number of items.
+#: build/admin/alerts.js:44
+#: build/admin/settings.js:44
+#: build/admin/sites.js:44
+#, js-format
+msgid "%d Item"
+msgid_plural "%d Items"
+msgstr[0] "%d élément"
+msgstr[1] "%d éléments"
+
+#. translators: %1$d: number of items. %2$d: total number of items.
+#: build/admin/alerts.js:47
+#: build/admin/settings.js:47
+#: build/admin/sites.js:47
+#, js-format
+msgid "%1$d of %2$d Item"
+msgid_plural "%1$d of %2$d Items"
+msgstr[0] "%1$d élément sur %2$d"
+msgstr[1] "%1$d éléments sur %2$d"
+
+#: build/admin/alerts.js:47
+#: build/admin/alerts.js:59
+#: build/admin/settings.js:47
+#: build/admin/settings.js:59
+#: build/admin/sites.js:47
+#: build/admin/sites.js:59
+msgid "Deselect all"
+msgstr "Tout désélectionner"
+
+#: build/admin/alerts.js:47
+#: build/admin/alerts.js:59
+#: build/admin/settings.js:47
+#: build/admin/settings.js:59
+#: build/admin/sites.js:47
+#: build/admin/sites.js:59
+msgid "Select all"
+msgstr "Tout sélectionner"
+
+#: build/admin/alerts.js:47
+#: build/admin/settings.js:47
+#: build/admin/settings.js:194
+#: build/admin/sites.js:47
+msgid "Cancel"
+msgstr "Annuler"
+
+#: build/admin/alerts.js:47
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:47
+#: build/admin/settings.js:191
+#: build/admin/sites.js:47
+#: build/admin/sites.js:191
+msgid "Add filter"
+msgstr "Ajouter un filtre"
+
+#: build/admin/alerts.js:47
+#: build/admin/settings.js:47
+#: build/admin/sites.js:47
+msgid "Move left"
+msgstr "Déplacer à gauche"
+
+#: build/admin/alerts.js:47
+#: build/admin/settings.js:47
+#: build/admin/sites.js:47
+msgid "Move right"
+msgstr "Déplacer à droite"
+
+#: build/admin/alerts.js:47
+#: build/admin/settings.js:47
+#: build/admin/sites.js:47
+msgid "Insert left"
+msgstr "Insérer à gauche"
+
+#: build/admin/alerts.js:47
+#: build/admin/settings.js:47
+#: build/admin/sites.js:47
+msgid "Insert right"
+msgstr "Insérer à droite"
+
+#: build/admin/alerts.js:47
+#: build/admin/settings.js:47
+#: build/admin/sites.js:47
+msgid "Hide column"
+msgstr "Masquer la colonne"
+
+#: build/admin/alerts.js:47
+#: build/admin/settings.js:47
+#: build/admin/sites.js:47
+msgid "Properties"
+msgstr "Propriétés"
+
+#: build/admin/alerts.js:47
+#: build/admin/settings.js:47
+#: build/admin/sites.js:47
+msgid "Navigate to item"
+msgstr "Naviguer jusqu’à l’élément"
+
+#. translators: %d: The row number in the grid
+#: build/admin/alerts.js:50
+#: build/admin/settings.js:50
+#: build/admin/sites.js:50
+#, js-format
+msgid "Row %d"
+msgstr "Ligne %d"
+
+#. translators: %s: The label of the field e.g. "Status".
+#: build/admin/alerts.js:53
+#: build/admin/settings.js:53
+#: build/admin/sites.js:53
+#, js-format
+msgid "%s: <groupName />"
+msgstr "%s : <groupName />"
+
+#. translators: 1: current page number. 2: total number of pages.
+#. translators: 1: current page, 2: number of pages.
+#: build/admin/alerts.js:56
+#: build/admin/settings.js:56
+#: build/admin/sites.js:56
+#: build/admin/sites.js:211
+#, js-format
+msgid "Page %1$d of %2$d"
+msgstr "Page %1$d sur %2$d"
+
+#. translators: 1: Current page number, 2: Total number of pages.
+#: build/admin/alerts.js:59
+#: build/admin/settings.js:59
+#: build/admin/sites.js:59
+#, js-format
+msgctxt "paging"
+msgid "<div>Page</div>%1$s<div>of %2$d</div>"
+msgstr "<div>Page</div>%1$s<div>sur %2$d</div>"
+
+#: build/admin/alerts.js:59
+#: build/admin/settings.js:59
+#: build/admin/sites.js:59
+msgid "Current page"
+msgstr "Page actuelle"
+
+#: build/admin/alerts.js:59
+#: build/admin/settings.js:59
+#: build/admin/sites.js:59
+msgid "Previous page"
+msgstr "Page précédente"
+
+#: build/admin/alerts.js:59
+#: build/admin/settings.js:59
+#: build/admin/sites.js:59
+msgid "Next page"
+msgstr "Page suivante"
+
+#. translators: 1: The label of the field e.g. "Date". 2: The value of the field, e.g.: "May 2022".
+#: build/admin/alerts.js:62
+#: build/admin/alerts.js:65
+#: build/admin/alerts.js:68
+#: build/admin/alerts.js:71
+#: build/admin/alerts.js:74
+#: build/admin/alerts.js:77
+#: build/admin/settings.js:62
+#: build/admin/settings.js:65
+#: build/admin/settings.js:68
+#: build/admin/settings.js:71
+#: build/admin/settings.js:74
+#: build/admin/settings.js:77
+#: build/admin/sites.js:62
+#: build/admin/sites.js:65
+#: build/admin/sites.js:68
+#: build/admin/sites.js:71
+#: build/admin/sites.js:74
+#: build/admin/sites.js:77
+#, js-format
+msgid "%1$s: %2$s"
+msgstr "%1$s : %2$s"
+
+#: build/admin/alerts.js:65
+#: build/admin/settings.js:65
+#: build/admin/sites.js:65
+msgid "Density"
+msgstr "Densité"
+
+#: build/admin/alerts.js:65
+#: build/admin/settings.js:65
+#: build/admin/sites.js:65
+msgctxt "Density option for DataView layout"
+msgid "Comfortable"
+msgstr "Confortable"
+
+#: build/admin/alerts.js:65
+#: build/admin/settings.js:65
+#: build/admin/sites.js:65
+msgctxt "Density option for DataView layout"
+msgid "Balanced"
+msgstr "Équilibrée"
+
+#: build/admin/alerts.js:65
+#: build/admin/settings.js:65
+#: build/admin/sites.js:65
+msgctxt "Density option for DataView layout"
+msgid "Compact"
+msgstr "Compacte"
+
+#: build/admin/alerts.js:65
+#: build/admin/settings.js:65
+#: build/admin/sites.js:65
+msgid "Original aspect ratio"
+msgstr "Proportion de taille d’origine"
+
+#: build/admin/alerts.js:65
+#: build/admin/settings.js:65
+#: build/admin/sites.js:65
+msgid "Preview size"
+msgstr "Taille de prévisualisation"
+
+#: build/admin/alerts.js:65
+#: build/admin/alerts.js:74
+#: build/admin/settings.js:65
+#: build/admin/settings.js:74
+#: build/admin/sites.js:65
+#: build/admin/sites.js:74
+msgid "Table"
+msgstr "Tableau"
+
+#: build/admin/alerts.js:68
+#: build/admin/alerts.js:74
+#: build/admin/settings.js:68
+#: build/admin/settings.js:74
+#: build/admin/sites.js:68
+#: build/admin/sites.js:74
+msgid "Grid"
+msgstr "Grille"
+
+#: build/admin/alerts.js:71
+#: build/admin/settings.js:71
+#: build/admin/sites.js:71
+#: build/blocks/sites-list/index.js:1
+msgid "List"
+msgstr "Liste"
+
+#: build/admin/alerts.js:74
+#: build/admin/alerts.js:77
+#: build/admin/settings.js:74
+#: build/admin/settings.js:77
+#: build/admin/sites.js:74
+#: build/admin/sites.js:77
+msgid "Activity"
+msgstr "Activité"
+
+#. translators: List of items for a filter. 1: Filter name. e.g.: "List of: Author".
+#: build/admin/alerts.js:80
+#: build/admin/settings.js:80
+#: build/admin/sites.js:80
+#, js-format
+msgid "List of: %1$s"
+msgstr "Liste de : %1$s"
+
+#: build/admin/alerts.js:80
+#: build/admin/settings.js:80
+#: build/admin/sites.js:80
+msgid "Search items"
+msgstr "Rechercher des éléments"
+
+#: build/admin/alerts.js:80
+#: build/admin/settings.js:80
+#: build/admin/sites.js:80
+msgid "No results found"
+msgstr "Aucun résultat trouvé"
+
+#: build/admin/alerts.js:80
+#: build/admin/settings.js:80
+#: build/admin/sites.js:80
+msgid "No elements found"
+msgstr "Aucun élément trouvé"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:82
+#: build/admin/settings.js:82
+#: build/admin/sites.js:82
+msgid "Is none of"
+msgstr "N’est aucun de"
+
+#. translators: 1: Filter name (e.g. "Author"). 2: Filter value (e.g. "Admin"): "Author is none of: Admin, Editor".
+#: build/admin/alerts.js:85
+#: build/admin/settings.js:85
+#: build/admin/sites.js:85
+#, js-format
+msgid "<Name>%1$s is none of: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s ne fait pas partie de : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:87
+#: build/admin/settings.js:87
+#: build/admin/sites.js:87
+msgid "Includes"
+msgstr "Comprend"
+
+#. translators: 1: Filter name (e.g. "Author"). 2: Filter value (e.g. "Admin"): "Author is any: Admin, Editor".
+#: build/admin/alerts.js:90
+#: build/admin/settings.js:90
+#: build/admin/sites.js:90
+#, js-format
+msgid "<Name>%1$s includes: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s inclut : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:92
+#: build/admin/settings.js:92
+#: build/admin/sites.js:92
+msgid "Includes all"
+msgstr "Inclut tout"
+
+#. translators: 1: Filter name (e.g. "Author"). 2: Filter value (e.g. "Admin"): "Author includes all: Admin, Editor".
+#: build/admin/alerts.js:95
+#: build/admin/settings.js:95
+#: build/admin/sites.js:95
+#, js-format
+msgid "<Name>%1$s includes all: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s comprend tout : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:97
+#: build/admin/settings.js:97
+#: build/admin/sites.js:97
+msgid "Between (inc)"
+msgstr "Entre (inclus)"
+
+#. translators: 1: Filter name (e.g. "Item count"). 2: Filter value min. 3: Filter value max. e.g.: "Item count between (inc): 10 and 180".
+#: build/admin/alerts.js:100
+#: build/admin/settings.js:100
+#: build/admin/sites.js:100
+#, js-format
+msgid "<Name>%1$s between (inc): </Name><Value>%2$s and %3$s</Value>"
+msgstr "<Name>%1$s entre (y compris) : </Name><Value>%2$s et %3$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:102
+#: build/admin/settings.js:102
+#: build/admin/sites.js:102
+msgid "In the past"
+msgstr "Dans le passé"
+
+#. translators: 1: Filter name (e.g. "Date"). 2: Filter value (e.g. "7 days"): "Date is in the past: 7 days".
+#: build/admin/alerts.js:105
+#: build/admin/settings.js:105
+#: build/admin/sites.js:105
+#, js-format
+msgid "<Name>%1$s is in the past: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s était : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:107
+#: build/admin/settings.js:107
+#: build/admin/sites.js:107
+msgid "Over"
+msgstr "Supérieur"
+
+#. translators: 1: Filter name (e.g. "Date"). 2: Filter value (e.g. "7 days"): "Date is over: 7 days".
+#: build/admin/alerts.js:110
+#: build/admin/settings.js:110
+#: build/admin/sites.js:110
+#, js-format
+msgid "<Name>%1$s is over: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s est au delà de : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:112
+#: build/admin/settings.js:112
+#: build/admin/sites.js:112
+msgid "Is"
+msgstr "Est"
+
+#. translators: 1: Filter name (e.g. "Author"). 2: Filter value (e.g. "Admin"): "Author is: Admin".
+#. translators: 1: Filter name (e.g. "Date"). 2: Filter value (e.g. "2024-01-01"): "Date is: 2024-01-01".
+#: build/admin/alerts.js:115
+#: build/admin/alerts.js:180
+#: build/admin/settings.js:115
+#: build/admin/settings.js:180
+#: build/admin/sites.js:115
+#: build/admin/sites.js:180
+#, js-format
+msgid "<Name>%1$s is: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s est : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:117
+#: build/admin/settings.js:117
+#: build/admin/sites.js:117
+msgid "Is not"
+msgstr "N’est pas"
+
+#. translators: 1: Filter name (e.g. "Author"). 2: Filter value (e.g. "Admin"): "Author is not: Admin".
+#. translators: 1: Filter name (e.g. "Date"). 2: Filter value (e.g. "2024-01-01"): "Date is not: 2024-01-01".
+#: build/admin/alerts.js:120
+#: build/admin/alerts.js:185
+#: build/admin/settings.js:120
+#: build/admin/settings.js:185
+#: build/admin/sites.js:120
+#: build/admin/sites.js:185
+#, js-format
+msgid "<Name>%1$s is not: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s n’est pas : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:122
+#: build/admin/settings.js:122
+#: build/admin/sites.js:122
+msgid "Less than"
+msgstr "Inférieur à"
+
+#. translators: 1: Filter name (e.g. "Count"). 2: Filter value (e.g. "10"): "Count is less than: 10".
+#: build/admin/alerts.js:125
+#: build/admin/settings.js:125
+#: build/admin/sites.js:125
+#, js-format
+msgid "<Name>%1$s is less than: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s est inférieur à : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:127
+#: build/admin/settings.js:127
+#: build/admin/sites.js:127
+msgid "Greater than"
+msgstr "Supérieur à"
+
+#. translators: 1: Filter name (e.g. "Count"). 2: Filter value (e.g. "10"): "Count is greater than: 10".
+#: build/admin/alerts.js:130
+#: build/admin/settings.js:130
+#: build/admin/sites.js:130
+#, js-format
+msgid "<Name>%1$s is greater than: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s est supérieur à : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:132
+#: build/admin/settings.js:132
+#: build/admin/sites.js:132
+msgid "Less than or equal"
+msgstr "Inférieur ou égal à"
+
+#. translators: 1: Filter name (e.g. "Count"). 2: Filter value (e.g. "10"): "Count is less than or equal to: 10".
+#: build/admin/alerts.js:135
+#: build/admin/settings.js:135
+#: build/admin/sites.js:135
+#, js-format
+msgid "<Name>%1$s is less than or equal to: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s est inférieur ou égal à : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:137
+#: build/admin/settings.js:137
+#: build/admin/sites.js:137
+msgid "Greater than or equal"
+msgstr "Supérieur ou égal"
+
+#. translators: 1: Filter name (e.g. "Count"). 2: Filter value (e.g. "10"): "Count is greater than or equal to: 10".
+#: build/admin/alerts.js:140
+#: build/admin/settings.js:140
+#: build/admin/sites.js:140
+#, js-format
+msgid "<Name>%1$s is greater than or equal to: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s est supérieur ou égal à : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:142
+#: build/admin/settings.js:142
+#: build/admin/sites.js:142
+msgid "Before"
+msgstr "Avant"
+
+#. translators: 1: Filter name (e.g. "Date"). 2: Filter value (e.g. "2024-01-01"): "Date is before: 2024-01-01".
+#: build/admin/alerts.js:145
+#: build/admin/settings.js:145
+#: build/admin/sites.js:145
+#, js-format
+msgid "<Name>%1$s is before: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s est avant le : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:147
+#: build/admin/settings.js:147
+#: build/admin/sites.js:147
+msgid "After"
+msgstr "Après"
+
+#. translators: 1: Filter name (e.g. "Date"). 2: Filter value (e.g. "2024-01-01"): "Date is after: 2024-01-01".
+#: build/admin/alerts.js:150
+#: build/admin/settings.js:150
+#: build/admin/sites.js:150
+#, js-format
+msgid "<Name>%1$s is after: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s est après le : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:152
+#: build/admin/settings.js:152
+#: build/admin/sites.js:152
+msgid "Before (inc)"
+msgstr "Avant (y compris)"
+
+#. translators: 1: Filter name (e.g. "Date"). 2: Filter value (e.g. "2024-01-01"): "Date is on or before: 2024-01-01".
+#: build/admin/alerts.js:155
+#: build/admin/settings.js:155
+#: build/admin/sites.js:155
+#, js-format
+msgid "<Name>%1$s is on or before: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s est le ou avant le : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:157
+#: build/admin/settings.js:157
+#: build/admin/sites.js:157
+msgid "After (inc)"
+msgstr "Après (y compris)"
+
+#. translators: 1: Filter name (e.g. "Date"). 2: Filter value (e.g. "2024-01-01"): "Date is on or after: 2024-01-01".
+#: build/admin/alerts.js:160
+#: build/admin/settings.js:160
+#: build/admin/sites.js:160
+#, js-format
+msgid "<Name>%1$s is on or after: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s est le ou après le : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:162
+#: build/admin/settings.js:162
+#: build/admin/sites.js:162
+msgid "Contains"
+msgstr "Contient"
+
+#. translators: 1: Filter name (e.g. "Title"). 2: Filter value (e.g. "Hello"): "Title contains: Hello".
+#: build/admin/alerts.js:165
+#: build/admin/settings.js:165
+#: build/admin/sites.js:165
+#, js-format
+msgid "<Name>%1$s contains: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s contient : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:167
+#: build/admin/settings.js:167
+#: build/admin/sites.js:167
+msgid "Doesn't contain"
+msgstr "Ne contient pas"
+
+#. translators: 1: Filter name (e.g. "Title"). 2: Filter value (e.g. "Hello"): "Title doesn't contain: Hello".
+#: build/admin/alerts.js:170
+#: build/admin/settings.js:170
+#: build/admin/sites.js:170
+#, js-format
+msgid "<Name>%1$s doesn't contain: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s ne contient pas : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:172
+#: build/admin/settings.js:172
+#: build/admin/sites.js:172
+msgid "Starts with"
+msgstr "Commence par"
+
+#. translators: 1: Filter name (e.g. "Title"). 2: Filter value (e.g. "Hello"): "Title starts with: Hello".
+#: build/admin/alerts.js:175
+#: build/admin/settings.js:175
+#: build/admin/sites.js:175
+#, js-format
+msgid "<Name>%1$s starts with: </Name><Value>%2$s</Value>"
+msgstr "<Name>%1$s commence par : </Name><Value>%2$s</Value>"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:177
+#: build/admin/settings.js:177
+#: build/admin/sites.js:177
+msgid "On"
+msgstr "Le"
+
+#. translators: DataViews operator name
+#: build/admin/alerts.js:182
+#: build/admin/settings.js:182
+#: build/admin/sites.js:182
+msgid "Not on"
+msgstr "Pas le"
+
+#. translators: 1: Filter name e.g.: "Unknown status for Author".
+#: build/admin/alerts.js:188
+#: build/admin/settings.js:188
+#: build/admin/sites.js:188
+#, js-format
+msgid "Unknown status for %1$s"
+msgstr "État inconnu pour %1$s"
+
+#: build/admin/alerts.js:188
+#: build/admin/settings.js:188
+#: build/admin/sites.js:188
+msgid "Conditions"
+msgstr "Conditions"
+
+#: build/admin/alerts.js:188
+#: build/admin/settings.js:188
+#: build/admin/sites.js:188
+msgid "Remove"
+msgstr "Retirer"
+
+#. translators: 1: Filter name.
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+#, js-format
+msgid "Filter by: %1$s"
+msgstr "Filtrer par : %1$s"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgctxt "verb"
+msgid "Filter"
+msgstr "Filtrer"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "No results"
+msgstr "Aucun résultat"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+#: build/blocks/sites-list/index.js:1
+msgid "Layout"
+msgstr "Mise en page"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Sort by"
+msgstr "Trier par"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+#: build/blocks/sites-list/index.js:1
+msgid "Order"
+msgstr "Ordre"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Items per page"
+msgstr "Éléments par page"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Reset view"
+msgstr "Réinitialiser la vue"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgctxt "View is used as a noun"
+msgid "View options"
+msgstr "Options d’affichage"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Appearance"
+msgstr "Apparence"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Days"
+msgstr "Jours"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Weeks"
+msgstr "Semaines"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Months"
+msgstr "Mois"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Years"
+msgstr "Années"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Days ago"
+msgstr "Quelques jours auparavant"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Weeks ago"
+msgstr "Quelques semaines auparavant"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Months ago"
+msgstr "Il y a des mois"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Years ago"
+msgstr "Il y a des années"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Unit"
+msgstr "Unité"
+
+#: build/admin/alerts.js:191
+#: build/admin/settings.js:191
+#: build/admin/sites.js:191
+msgid "Coordinated Universal Time"
+msgstr "Temps universel coordonné"
+
+#. translators: %s: timezone detail, e.g. "(CEST) Europe/Madrid" or "UTC+3".
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+#, js-format
+msgid "Timezone: %s"
+msgstr "Fuseau horaire : %s"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Date time"
+msgstr "Date et heure"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Today"
+msgstr "Aujourd’hui"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Yesterday"
+msgstr "Hier"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Past week"
+msgstr "La semaine dernière"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Past month"
+msgstr "Le mois dernier"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Last 7 days"
+msgstr "7 derniers jours"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Last 30 days"
+msgstr "30 derniers jours"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Month to date"
+msgstr "Mois à ce jour"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Last year"
+msgstr "L’année dernière"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Year to date"
+msgstr "Année à ce jour"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Custom"
+msgstr "Personnalisée"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Date"
+msgstr "Date"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "From"
+msgstr "Du"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "To"
+msgstr "Au"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "The max. value must be greater than the min. value."
+msgstr "La valeur maximale doit être supérieure à la valeur minimale."
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Min."
+msgstr "Min."
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Max."
+msgstr "Max."
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "The end time must be later than the start time."
+msgstr "L’heure de fin doit être postérieure à l’heure de début."
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Open color picker"
+msgstr "Ouvrir le sélecteur de couleur"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Hide password"
+msgstr "Cacher le mot de passe"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Show password"
+msgstr "Afficher le mot de passe"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Value must be a valid email address."
+msgstr "La valeur doit être une adresse e-mail valide."
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Value must be an integer."
+msgstr "La valeur doit être un nombre entier."
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Value must be a number."
+msgstr "La valeur doit être un nombre."
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Value must be true, false, or undefined"
+msgstr "La valeur doit être vraie, fausse ou non définie"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "True"
+msgstr "Vrai"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "False"
+msgstr "Faux"
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Every value must be a string."
+msgstr "Chaque valeur doit être une chaine."
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Value must be an array."
+msgstr "La valeur doit être un tableau."
+
+#: build/admin/alerts.js:194
+#: build/admin/settings.js:194
+#: build/admin/sites.js:194
+msgid "Value must be a valid color."
+msgstr "La valeur doit être une couleur valide."
+
+#: build/admin/alerts.js:194
+#: build/admin/overview.js:1
+#: build/admin/settings.js:203
+#: build/admin/sites.js:194
+msgid "Retry"
+msgstr "Réessayer"
+
+#: build/admin/alerts.js:194
+#: build/admin/overview.js:2
+#: build/admin/sites.js:194
+msgid "Error"
+msgstr "Erreur"
+
+#: build/admin/alerts.js:194
+#: build/admin/overview.js:2
+#: build/admin/sites.js:194
+msgid "Warning"
+msgstr "Avertissement"
+
+#: build/admin/alerts.js:194
+#: build/admin/overview.js:2
+#: build/admin/sites.js:194
+msgid "Info"
+msgstr "Info"
+
+#: build/admin/alerts.js:194
+#: build/admin/overview.js:2
+#: build/admin/sites.js:194
+msgid "No alert"
+msgstr "Aucune alerte"
+
+#. translators: 1: severity label, 2: number of alerts.
+#: build/admin/alerts.js:195
+#: build/admin/overview.js:3
+#: build/admin/sites.js:195
+#, js-format
+msgid "%1$s · %2$d alert"
+msgid_plural "%1$s · %2$d alerts"
+msgstr[0] "%1$s · %2$d alerte"
+msgstr[1] "%1$s · %2$d alertes"
+
+#: build/admin/alerts.js:195
+#: build/admin/sites.js:213
+msgid "Site"
+msgstr "Site"
+
+#: build/admin/alerts.js:195
+msgid "Rule"
+msgstr "Règle"
+
+#: build/admin/alerts.js:195
+msgid "Severity"
+msgstr "Gravité"
+
+#: build/admin/alerts.js:195
+msgid "Details"
+msgstr "Détails"
+
+#: build/admin/alerts.js:195
+msgid "View the site"
+msgstr "Afficher la fiche du site"
+
+#: build/admin/alerts.js:195
+#: build/admin/sites.js:209
+#: build/admin/sites.js:213
+msgid "Site dashboard"
+msgstr "Tableau de bord du site"
+
+#: build/admin/alerts.js:195
+#: build/admin/sites.js:213
+msgid "Search sites"
+msgstr "Rechercher des sites"
+
+#: build/admin/alerts.js:195
+msgid "No alert matches this view."
+msgstr "Aucune alerte ne correspond à cette vue."
+
+#: build/admin/overview.js:1
+msgid "Analysis progress"
+msgstr "Progression de l’analyse"
+
+#. translators: 1: number of sites analysed, 2: number of sites to analyse.
+#: build/admin/overview.js:2
+#, js-format
+msgid "%1$d of %2$d sites analysed"
+msgstr "Sites analysés : %1$d sur %2$d"
+
+#: build/admin/overview.js:2
+#: build/admin/settings.js:203
+msgid "Analysis"
+msgstr "Analyse"
+
+#: build/admin/overview.js:2
+msgid "Last full analysis"
+msgstr "Dernière analyse complète"
+
+#: build/admin/overview.js:2
+msgid "Never"
+msgstr "Jamais"
+
+#: build/admin/overview.js:2
+msgid "Sites to refresh"
+msgstr "Sites à actualiser"
+
+#: build/admin/overview.js:2
+msgid "Next background run"
+msgstr "Prochaine exécution en arrière-plan"
+
+#: build/admin/overview.js:2
+msgid "Not scheduled"
+msgstr "Non planifiée"
+
+#: build/admin/overview.js:2
+msgid "Analyse all sites"
+msgstr "Analyser tous les sites"
+
+#: build/admin/overview.js:3
+#: build/blocks/sites-list/index.js:1
+#: includes/Admin/Menu.php:35
+msgid "Sites"
+msgstr "Sites"
+
+#. translators: %d: number of sites not analysed yet.
+#: build/admin/overview.js:4
+#, js-format
+msgid "%d awaiting analysis"
+msgid_plural "%d awaiting analysis"
+msgstr[0] "%d en attente d’analyse"
+msgstr[1] "%d en attente d’analyse"
+
+#: build/admin/overview.js:4
+msgid "All analysed"
+msgstr "Tous analysés"
+
+#: build/admin/overview.js:4
+msgid "Sites with errors"
+msgstr "Sites avec erreurs"
+
+#: build/admin/overview.js:4
+msgid "Sites with warnings"
+msgstr "Sites avec avertissements"
+
+#: build/admin/overview.js:4
+msgid "Sites with information"
+msgstr "Sites avec infos"
+
+#: build/admin/overview.js:4
+msgid "To review"
+msgstr "À traiter"
+
+#: build/admin/overview.js:4
+msgid "No alert on the network."
+msgstr "Aucune alerte sur le réseau."
+
+#. translators: %d: number of sites.
+#: build/admin/overview.js:5
+#, js-format
+msgid "%d site"
+msgid_plural "%d sites"
+msgstr[0] "%d site"
+msgstr[1] "%d sites"
+
+#. translators: %d: number of sites in the network.
+#: build/admin/overview.js:6
+#, js-format
+msgid "Multisite Radar has not analysed your %d site yet. The analysis runs in the background; you can also start it now."
+msgid_plural "Multisite Radar has not analysed your %d sites yet. The analysis runs in the background; you can also start it now."
+msgstr[0] "Multisite Radar n’a pas encore analysé votre site. L’analyse s’exécute en arrière-plan ; vous pouvez aussi la lancer maintenant."
+msgstr[1] "Multisite Radar n’a pas encore analysé vos %d sites. L’analyse s’exécute en arrière-plan ; vous pouvez aussi la lancer maintenant."
+
+#: build/admin/overview.js:6
+msgid "Start the analysis"
+msgstr "Lancer l’analyse"
+
+#: build/admin/overview.js:6
+#: build/admin/sites.js:212
+msgid "Analysis started."
+msgstr "Analyse lancée."
+
+#. translators: 1: number of sites analysed, 2: number of sites to analyse.
+#: build/admin/overview.js:7
+#: build/admin/sites.js:213
+#, js-format
+msgid "%1$d of %2$d sites analysed."
+msgstr "Sites analysés : %1$d sur %2$d."
+
+#: build/admin/overview.js:7
+#: build/admin/sites.js:213
+msgid "The analysis continues in the background."
+msgstr "L’analyse se poursuit en arrière-plan."
+
+#: build/admin/overview.js:7
+#: build/admin/sites.js:213
+msgid "Analysis complete."
+msgstr "Analyse terminée."
+
+#: build/admin/overview.js:7
+#: build/admin/sites.js:213
+msgid "The analysis could not be run."
+msgstr "L’analyse n’a pas pu être effectuée."
+
+#: build/admin/settings.js:194
+msgid "Apply"
+msgstr "Appliquer"
+
+#. translators: %s: Field name.
+#: build/admin/settings.js:197
+#, js-format
+msgctxt "field"
+msgid "Edit %s (has errors)"
+msgstr "Modifier %s (contient des erreurs)"
+
+#. translators: %s: Field name.
+#: build/admin/settings.js:200
+#, js-format
+msgctxt "field"
+msgid "Edit %s"
+msgstr "Modifier %s"
+
+#: build/admin/settings.js:200
+msgid "Value does not match the required pattern."
+msgstr "La valeur ne correspond pas à la composition requise."
+
+#: build/admin/settings.js:200
+msgid "Value is below the minimum."
+msgstr "La valeur est inférieure au minimum."
+
+#: build/admin/settings.js:200
+msgid "Value is above the maximum."
+msgstr "La valeur est supérieure au maximum."
+
+#: build/admin/settings.js:200
+msgid "Value is too short."
+msgstr "La valeur est trop courte."
+
+#: build/admin/settings.js:200
+msgid "Value is too long."
+msgstr "La valeur est trop longue."
+
+#: build/admin/settings.js:200
+msgid "Value must be one of the elements."
+msgstr "La valeur doit être l’un des éléments."
+
+#: build/admin/settings.js:200
+msgid "Unknown error when running custom validation."
+msgstr "Erreur inconnue lors de l’exécution de la validation personnalisée."
+
+#: build/admin/settings.js:200
+msgid "Could not validate elements."
+msgstr "Impossible de valider les éléments."
+
+#: build/admin/settings.js:200
+msgid "Unknown error when running elements validation asynchronously."
+msgstr "Erreur inconnue lors de la validation des éléments de manière asynchrone."
+
+#: build/admin/settings.js:200
+msgid "Validating…"
+msgstr "Validation…"
+
+#: build/admin/settings.js:200
+msgid "Validation could not be processed."
+msgstr "La validation n’a pas pu être effectuée."
+
+#: build/admin/settings.js:200
+msgid "Unknown error when running custom validation asynchronously."
+msgstr "Erreur inconnue lors de l’exécution asynchrone de la validation personnalisée."
+
+#. translators: %d: Number of fields that need attention
+#: build/admin/settings.js:203
+#, js-format
+msgid "%d field needs attention"
+msgid_plural "%d fields need attention"
+msgstr[0] "%d champ requiert votre attention"
+msgstr[1] "%d champs requièrent votre attention"
+
+#: build/admin/settings.js:203
+msgid "More details"
+msgstr "Plus de détails"
+
+#: build/admin/settings.js:203
+msgid "Content types that count as activity"
+msgstr "Types de contenu pris en compte pour l’activité"
+
+#: build/admin/settings.js:203
+msgid "Publishing or updating one of these types counts as activity (last activity, inactivity alert). Other keys can be typed in."
+msgstr "La publication ou la mise à jour d’un contenu de ces types compte comme une activité (dernière activité, alerte d’inactivité). Vous pouvez saisir d’autres clés."
+
+#: build/admin/settings.js:203
+msgid "Use content type keys: lowercase letters, digits, \"-\" and \"_\", 20 characters at most."
+msgstr "Utilisez des clés de type de contenu : lettres minuscules, chiffres, « - » et « _ », 20 caractères au maximum."
+
+#: build/admin/settings.js:203
+msgid "Only list the content types of these plugins"
+msgstr "N’afficher que les types de contenu de ces extensions"
+
+#: build/admin/settings.js:203
+msgid "Leave empty to list the content types of every plugin."
+msgstr "Laissez vide pour afficher les types de contenu de toutes les extensions."
+
+#: build/admin/settings.js:203
+msgid "Full analysis every (days)"
+msgstr "Intervalle entre deux analyses complètes (jours)"
+
+#: build/admin/settings.js:203
+msgid "Every site is analysed again at this interval, to catch changes made directly in the database."
+msgstr "Chaque site est analysé de nouveau à cet intervalle, pour rattraper les modifications faites directement dans la base de données."
+
+#: build/admin/settings.js:203
+msgid "Enable the network sites menu (block, shortcode and menu items)"
+msgstr "Activer le menu des sites du réseau (bloc, code court et éléments de menu)"
+
+#: build/admin/settings.js:203
+msgid "Settings saved."
+msgstr "Réglages enregistrés."
+
+#: build/admin/settings.js:203
+msgid "The settings could not be saved."
+msgstr "Les réglages n’ont pas pu être enregistrés."
+
+#: build/admin/settings.js:203
+msgid "Network sites menu"
+msgstr "Menu des sites du réseau"
+
+#: build/admin/settings.js:203
+msgid "Save settings"
+msgstr "Enregistrer les réglages"
+
+#: build/admin/sites.js:195
+msgid "Not verified"
+msgstr "Non vérifié"
+
+#: build/admin/sites.js:195
+msgid "No alert for this site."
+msgstr "Aucune alerte pour ce site."
+
+#. translators: %s: size in bytes.
+#: build/admin/sites.js:196
+#, js-format
+msgid "%s B"
+msgstr "%s o"
+
+#. translators: %s: size in kilobytes.
+#: build/admin/sites.js:197
+#, js-format
+msgid "%s KB"
+msgstr "%s Ko"
+
+#. translators: %s: size in megabytes.
+#: build/admin/sites.js:198
+#, js-format
+msgid "%s MB"
+msgstr "%s Mo"
+
+#. translators: %s: size in gigabytes.
+#: build/admin/sites.js:199
+#, js-format
+msgid "%s GB"
+msgstr "%s Go"
+
+#. translators: %s: size in terabytes.
+#: build/admin/sites.js:200
+#, js-format
+msgid "%s TB"
+msgstr "%s To"
+
+#: build/admin/sites.js:200
+msgid "Public"
+msgstr "Public"
+
+#: build/admin/sites.js:200
+msgid "Private"
+msgstr "Privé"
+
+#: build/admin/sites.js:200
+msgid "Archived"
+msgstr "Archivé"
+
+#: build/admin/sites.js:200
+msgid "Spam"
+msgstr "Indésirable"
+
+#: build/admin/sites.js:200
+msgid "Deleted"
+msgstr "Marqué pour suppression"
+
+#: build/admin/sites.js:200
+msgid "WordPress"
+msgstr "WordPress"
+
+#. translators: %s: plugin folder name.
+#: build/admin/sites.js:202
+#, js-format
+msgid "Plugin: %s"
+msgstr "Extension : %s"
+
+#. translators: %s: must-use plugin name.
+#: build/admin/sites.js:203
+#, js-format
+msgid "Must-use plugin: %s"
+msgstr "Extension indispensable : %s"
+
+#. translators: %s: theme folder name.
+#: build/admin/sites.js:205
+#, js-format
+msgid "Theme: %s"
+msgstr "Thème : %s"
+
+#: build/admin/sites.js:205
+msgid "Unknown"
+msgstr "Inconnue"
+
+#: build/admin/sites.js:205
+#: build/admin/sites.js:210
+#: build/blocks/sites-list/index.js:1
+#: includes/Export/SitesColumns.php:17
+msgid "Name"
+msgstr "Nom"
+
+#: build/admin/sites.js:205
+msgid "Origin"
+msgstr "Origine"
+
+#: build/admin/sites.js:205
+msgid "Total"
+msgstr "Total"
+
+#. translators: %s: "Content types" or "Taxonomies".
+#: build/admin/sites.js:206
+#, js-format
+msgid "%s: none."
+msgstr "%s : aucun élément."
+
+#: build/admin/sites.js:206
+#: build/admin/sites.js:213
+msgid "Content types"
+msgstr "Types de contenu"
+
+#: build/admin/sites.js:206
+msgid "Published"
+msgstr "Publié"
+
+#: build/admin/sites.js:206
+msgid "Taxonomies"
+msgstr "Taxonomies"
+
+#: build/admin/sites.js:206
+msgid "Terms"
+msgstr "Termes"
+
+#: build/admin/sites.js:206
+msgid "Not installed"
+msgstr "Introuvable"
+
+#: build/admin/sites.js:206
+#: build/admin/sites.js:209
+#: build/admin/sites.js:213
+#: includes/Export/SitesColumns.php:21
+msgid "Theme"
+msgstr "Thème"
+
+#. translators: %s: parent theme folder name.
+#: build/admin/sites.js:207
+#, js-format
+msgid "child theme of %s"
+msgstr "thème enfant de %s"
+
+#: build/admin/sites.js:207
+msgid "Plugins active on this site only"
+msgstr "Extensions activées sur ce site uniquement"
+
+#: build/admin/sites.js:207
+msgid "None."
+msgstr "Aucune."
+
+#. translators: %d: number of network-activated plugins.
+#: build/admin/sites.js:208
+#, js-format
+msgid "%d plugin is active on the whole network."
+msgid_plural "%d plugins are active on the whole network."
+msgstr[0] "%d extension est activée sur tout le réseau."
+msgstr[1] "%d extensions sont activées sur tout le réseau."
+
+#. translators: 1: date of the failed analysis, 2: error message.
+#: build/admin/sites.js:209
+#, js-format
+msgid "The last analysis failed on %1$s: %2$s"
+msgstr "La dernière analyse a échoué le %1$s : %2$s"
+
+#: build/admin/sites.js:209
+msgid "The content types of this site have not yet been read in its own context, so their labels and origins are not verified. Run \"wp multisite-radar scan --probe\" to read them now."
+msgstr "Les types de contenu de ce site n’ont pas encore été relevés dans son propre contexte : leurs libellés et leurs origines ne sont donc pas vérifiés. Lancez « wp multisite-radar scan --probe » pour les relever maintenant."
+
+#: build/admin/sites.js:209
+msgid "Address"
+msgstr "Adresse"
+
+#: build/admin/sites.js:209
+msgid "Administration"
+msgstr "Administration"
+
+#: build/admin/sites.js:209
+#: build/admin/sites.js:213
+#: includes/Export/SitesColumns.php:20
+msgid "Status"
+msgstr "État"
+
+#: build/admin/sites.js:209
+#: build/admin/sites.js:212
+#: build/admin/sites.js:213
+#: includes/Export/SitesColumns.php:22
+msgid "Users"
+msgstr "Comptes"
+
+#. translators: 1: number of users, 2: number of administrators.
+#: build/admin/sites.js:210
+#, js-format
+msgid "%1$s, including %2$s administrator"
+msgid_plural "%1$s, including %2$s administrators"
+msgstr[0] "%1$s, dont %2$s administrateur"
+msgstr[1] "%1$s, dont %2$s administrateurs"
+
+#: build/admin/sites.js:210
+#: build/admin/sites.js:213
+#: includes/Export/SitesColumns.php:24
+msgid "Published content"
+msgstr "Contenus publiés"
+
+#: build/admin/sites.js:210
+#: build/admin/sites.js:213
+#: includes/Export/SitesColumns.php:25
+msgid "Media"
+msgstr "Médias"
+
+#: build/admin/sites.js:210
+#: build/admin/sites.js:213
+msgid "Last activity"
+msgstr "Dernière activité"
+
+#: build/admin/sites.js:210
+#: build/admin/sites.js:213
+msgid "Analysed"
+msgstr "Analysé le"
+
+#: build/admin/sites.js:210
+#: build/admin/sites.js:213
+msgid "Pending"
+msgstr "En attente"
+
+#: build/admin/sites.js:210
+#: includes/Alerts/Rules/NoUsersRule.php:49
+msgid "No user is attached to this site."
+msgstr "Aucun compte n’est rattaché à ce site."
+
+#: build/admin/sites.js:210
+msgid "Login"
+msgstr "Identifiant"
+
+#: build/admin/sites.js:210
+msgid "Roles"
+msgstr "Rôles"
+
+#: build/admin/sites.js:210
+msgid "Super admin"
+msgstr "Super-admin"
+
+#: build/admin/sites.js:210
+msgid "Previous"
+msgstr "Précédent"
+
+#: build/admin/sites.js:211
+msgid "Next"
+msgstr "Suivant"
+
+#: build/admin/sites.js:211
+msgid "Loading users…"
+msgstr "Chargement des comptes…"
+
+#. translators: %d: site ID.
+#: build/admin/sites.js:212
+#: includes/Query/SitesQuery.php:168
+#: includes/SitesMenu/Renderer.php:56
+#, js-format,php-format
+msgid "Site #%d"
+msgstr "Site n° %d"
+
+#: build/admin/sites.js:212
+msgid "Previous site"
+msgstr "Site précédent"
+
+#: build/admin/sites.js:212
+msgid "Next site"
+msgstr "Site suivant"
+
+#: build/admin/sites.js:212
+msgid "Loading the site…"
+msgstr "Chargement du site…"
+
+#: build/admin/sites.js:212
+msgid "Summary"
+msgstr "Récapitulatif"
+
+#: build/admin/sites.js:212
+msgid "Content"
+msgstr "Contenu"
+
+#: build/admin/sites.js:212
+msgid "Extensions"
+msgstr "Extensions et thème"
+
+#: build/admin/sites.js:212
+#: build/admin/sites.js:213
+#: includes/Admin/Menu.php:36
+#: includes/Export/SitesColumns.php:31
+msgid "Alerts"
+msgstr "Alertes"
+
+#: build/admin/sites.js:212
+msgid "Export"
+msgstr "Exporter"
+
+#: build/admin/sites.js:212
+#: build/admin/sites.js:213
+msgid "Export as CSV"
+msgstr "Exporter comme CSV"
+
+#: build/admin/sites.js:212
+msgid "Export as JSON"
+msgstr "Exporter comme JSON"
+
+#: build/admin/sites.js:213
+msgid "Verified"
+msgstr "Vérifié"
+
+#: build/admin/sites.js:213
+msgid "Outdated"
+msgstr "Obsolète"
+
+#: build/admin/sites.js:213
+msgid "Never read"
+msgstr "Jamais relevé"
+
+#: build/admin/sites.js:213
+msgid "Disk"
+msgstr "Disque"
+
+#: build/admin/sites.js:213
+msgid "Database"
+msgstr "Base de données"
+
+#: build/admin/sites.js:213
+msgid "Alert rule"
+msgstr "Règle d’alerte"
+
+#: build/admin/sites.js:213
+msgid "View details"
+msgstr "Afficher les détails"
+
+#: build/admin/sites.js:213
+msgid "Visit site"
+msgstr "Aller sur le site"
+
+#: build/admin/sites.js:213
+msgid "Analyse again"
+msgstr "Réanalyser"
+
+#: build/admin/sites.js:213
+msgid "No site matches this view."
+msgstr "Aucun site ne correspond à cette vue."
+
+#. translators: 1: number of sites analysed, 2: number of sites to analyse.
+#: build/admin/sites.js:214
+#, js-format
+msgid "Analysing: %1$d of %2$d sites…"
+msgstr "Analyse en cours : %1$d sur %2$d sites…"
+
+#: build/blocks/sites-list/index.js:1
+msgid "Only these sites"
+msgstr "Uniquement ces sites"
+
+#: build/blocks/sites-list/index.js:1
+msgid "Hide these sites"
+msgstr "Masquer ces sites"
+
+#: build/blocks/sites-list/index.js:1
+msgid "Display"
+msgstr "Affichage"
+
+#: build/blocks/sites-list/index.js:1
+msgid "Order by"
+msgstr "Trier par"
+
+#: build/blocks/sites-list/index.js:1
+msgid "Site ID"
+msgstr "Identifiant du site"
+
+#: build/blocks/sites-list/index.js:1
+msgid "Creation date"
+msgstr "Date de création"
+
+#: build/blocks/sites-list/index.js:1
+msgid "Ascending"
+msgstr "Croissant"
+
+#: build/blocks/sites-list/index.js:1
+msgid "Descending"
+msgstr "Décroissant"
+
+#: build/blocks/sites-list/index.js:1
+msgid "Inline"
+msgstr "Sur une ligne"
+
+#: includes/Admin/Assets.php:97
+msgid "Multisite Radar: the interface files are missing. Run \"npm install && npm run build\" in the plugin folder, or install a release package."
+msgstr "Multisite Radar : les fichiers de l’interface sont absents. Lancez « npm install && npm run build » dans le dossier de l’extension, ou installez l’archive d’une version publiée."
+
+#. translators: %s: ADJUVANS, linked to its website.
+#: includes/Admin/Footer.php:43
+#, php-format
+msgid "Multisite Radar by %s"
+msgstr "Multisite Radar par %s"
+
+#. translators: %s: name of the license, linked to its text.
+#: includes/Admin/Footer.php:49
+#, php-format
+msgid "License: %s"
+msgstr "Licence : %s"
+
+#: includes/Admin/Footer.php:50
+msgid "GPL-3.0 or later"
+msgstr "GPL-3.0 ou ultérieure"
+
+#: includes/Admin/Footer.php:54
+msgid "Third-party licenses"
+msgstr "Licences tierces"
+
+#: includes/Admin/Menu.php:34
+msgid "Overview"
+msgstr "Vue d’ensemble"
+
+#: includes/Admin/Menu.php:37
+msgid "Settings"
+msgstr "Réglages"
+
+#: includes/Admin/Menu.php:74
+msgid "Multisite Radar needs JavaScript to display this page."
+msgstr "Multisite Radar a besoin de JavaScript pour afficher cette page."
+
+#: includes/Admin/Menu.php:87
+msgid "Pre-release version"
+msgstr "Version préliminaire"
+
+#: includes/Admin/Privacy.php:22
+msgid "Multisite Radar is an audit tool for network administrators. It collects no data from visitors and makes no external requests. To build its inventory of the network, it keeps in the network database a copy of data that WordPress already holds: for each site, the user IDs and logins of up to 50 administrators and editors, and the number of users per role. This copy is refreshed in the background and deleted when the plugin is uninstalled. When a user account is deleted, the sites it belonged to are analysed again."
+msgstr "Multisite Radar est un outil d’audit destiné aux administrateurs du réseau. Il ne collecte aucune donnée sur les visiteurs et n’effectue aucune requête externe. Pour dresser l’inventaire du réseau, il conserve dans la base de données du réseau une copie de données que WordPress détient déjà : pour chaque site, les ID et les identifiants de connexion de 50 administrateurs et éditeurs au plus, ainsi que le nombre de comptes par rôle. Cette copie est actualisée en arrière-plan et supprimée lors de la désinstallation de l’extension. Lorsqu’un compte est supprimé, les sites auxquels il appartenait sont analysés de nouveau."
+
+#. translators: %s: alert rule identifier.
+#: includes/Alerts/RuleRegistry.php:54
+#, php-format
+msgid "The alert rule \"%s\" was ignored: identifiers may only contain lowercase letters, digits and underscores (40 characters at most)."
+msgstr "La règle d’alerte « %s » a été ignorée : les identifiants ne peuvent contenir que des lettres minuscules, des chiffres et des tirets bas (40 caractères au maximum)."
+
+#: includes/Alerts/Rules/HighMediaRule.php:18
+msgid "Many media files"
+msgstr "Beaucoup de médias"
+
+#: includes/Alerts/Rules/HighMediaRule.php:22
+msgid "The media library has reached the threshold number of files."
+msgstr "Le nombre de fichiers de la médiathèque atteint le seuil."
+
+#: includes/Alerts/Rules/HighMediaRule.php:38
+msgid "Number of media files that raises the alert."
+msgstr "Nombre de fichiers médias à partir duquel l’alerte est déclenchée."
+
+#. translators: 1: number of media files, 2: alert threshold.
+#: includes/Alerts/Rules/HighMediaRule.php:67
+#, php-format
+msgid "%1$s media file (threshold: %2$s)"
+msgid_plural "%1$s media files (threshold: %2$s)"
+msgstr[0] "%1$s fichier média (seuil : %2$s)"
+msgstr[1] "%1$s fichiers médias (seuil : %2$s)"
+
+#: includes/Alerts/Rules/InactiveRule.php:18
+msgid "Inactive site"
+msgstr "Site inactif"
+
+#: includes/Alerts/Rules/InactiveRule.php:22
+msgid "No content of the tracked types has been published or updated for a while."
+msgstr "Aucun contenu des types suivis n’a été publié ni mis à jour depuis un certain temps."
+
+#: includes/Alerts/Rules/InactiveRule.php:38
+msgid "Months without activity before the alert is raised."
+msgstr "Nombre de mois sans activité avant le déclenchement de l’alerte."
+
+#. translators: %d: number of months without activity.
+#: includes/Alerts/Rules/InactiveRule.php:66
+#, php-format
+msgid "Inactive for %d month"
+msgid_plural "Inactive for %d months"
+msgstr[0] "Inactif depuis %d mois"
+msgstr[1] "Inactif depuis %d mois"
+
+#: includes/Alerts/Rules/NoUsersRule.php:18
+msgid "Site without users"
+msgstr "Site sans compte"
+
+#: includes/Alerts/Rules/NoUsersRule.php:22
+msgid "No user account is attached to the site."
+msgstr "Aucun compte n’est rattaché au site."
+
+#: includes/Export/ExportHandler.php:36
+msgid "Sorry, you are not allowed to export this data."
+msgstr "Désolé, vous n’avez pas l’autorisation d’exporter ces données."
+
+#: includes/Export/ExportHandler.php:48
+msgid "The export could not be read from the database."
+msgstr "Les données de l’export n’ont pas pu être lues dans la base de données."
+
+#: includes/Export/ExportHandler.php:59
+msgid "The export could not be started."
+msgstr "L’export n’a pas pu démarrer."
+
+#: includes/Export/ExportHandler.php:91
+msgid "This data cannot be exported."
+msgstr "Ces données ne peuvent pas être exportées."
+
+#: includes/Export/ExportHandler.php:95
+msgid "Unknown export format."
+msgstr "Format d’export inconnu."
+
+#: includes/Export/SitesColumns.php:16
+msgid "ID"
+msgstr "ID"
+
+#: includes/Export/SitesColumns.php:18
+msgid "URL"
+msgstr "URL"
+
+#: includes/Export/SitesColumns.php:19
+msgid "Admin URL"
+msgstr "URL d’administration"
+
+#: includes/Export/SitesColumns.php:23
+msgid "Administrators"
+msgstr "Administrateurs"
+
+#: includes/Export/SitesColumns.php:26
+msgid "Disk usage (bytes)"
+msgstr "Espace disque utilisé (octets)"
+
+#: includes/Export/SitesColumns.php:27
+msgid "Database size (bytes)"
+msgstr "Taille de la base de données (octets)"
+
+#: includes/Export/SitesColumns.php:28
+msgid "Autoloaded options (bytes)"
+msgstr "Options chargées automatiquement (octets)"
+
+#: includes/Export/SitesColumns.php:29
+msgid "Last activity (UTC)"
+msgstr "Dernière activité (UTC)"
+
+#: includes/Export/SitesColumns.php:30
+msgid "Alert level"
+msgstr "Niveau d’alerte"
+
+#: includes/Export/SitesColumns.php:32
+msgid "Alert rules"
+msgstr "Règles d’alerte"
+
+#: includes/Export/SitesColumns.php:33
+msgid "Content types status"
+msgstr "État des types de contenu"
+
+#: includes/Export/SitesColumns.php:34
+msgid "Analysed (UTC)"
+msgstr "Analysé le (UTC)"
+
+#: includes/Install/LegacyMigration.php:237
+msgid "Network Plugin Utilities 1.x is still loaded. Remove it: Multisite Radar replaces it and has taken over its settings."
+msgstr "Network Plugin Utilities 1.x est toujours chargée. Supprimez-la : Multisite Radar la remplace et a repris ses réglages."
+
+#: includes/Plugin.php:157
+msgid "Multisite Radar requires a WordPress Multisite network. It does nothing on a single site."
+msgstr "Multisite Radar nécessite un réseau WordPress Multisite et n’a aucun effet sur un site unique."
+
+#: includes/Rest/Controller.php:41
+msgid "Multisite Radar could not read its data. Try again in a moment."
+msgstr "Multisite Radar n’a pas pu lire ses données. Réessayez dans un instant."
+
+#: includes/Rest/PreferencesController.php:68
+#: includes/Rest/SettingsController.php:68
+msgid "Expected a JSON object."
+msgstr "Un objet JSON est attendu."
+
+#: includes/Rest/ScanController.php:164
+msgid "None of the requested sites belongs to this network."
+msgstr "Aucun des sites demandés n’appartient à ce réseau."
+
+#. translators: %s: alert rule identifier.
+#: includes/Rest/SettingsController.php:78
+#, php-format
+msgid "Unknown alert rule: %s"
+msgstr "Règle d’alerte inconnue : %s"
+
+#: includes/Rest/SitesController.php:167
+msgid "Sites analysed, with an activity date, and no activity since this date."
+msgstr "Sites analysés, ayant une date d’activité, et sans activité depuis cette date."
+
+#: includes/Rest/SitesController.php:236
+#: includes/Rest/SitesController.php:263
+msgid "Site not found."
+msgstr "Site introuvable."
+
+#: includes/Scan/Queue.php:70
+msgid "Every five minutes (Multisite Radar)"
+msgstr "Toutes les cinq minutes (Multisite Radar)"
+
+#: includes/Settings/Settings.php:176
+msgid "Invalid settings."
+msgstr "Réglages non valides."
+
+#: includes/SitesMenu/NavMenu.php:40
+msgid "Network sites"
+msgstr "Sites du réseau"
+
+#: includes/SitesMenu/NavMenu.php:51
+msgid "No public site in this network."
+msgstr "Aucun site public dans ce réseau."
+
+#: includes/SitesMenu/NavMenu.php:78
+msgid "Add to Menu"
+msgstr "Ajouter au menu"
+
+#: includes/SitesMenu/NavMenu.php:91
+msgid "Network site"
+msgstr "Site du réseau"
+
+#: includes/SitesMenu/NavMenu.php:114
+msgid "This network site is no longer public: the item is hidden from visitors."
+msgstr "Ce site du réseau n’est plus public : l’élément est masqué aux visiteurs."
+
+#: includes/SitesMenu/NavMenu.php:115
+msgid "Links to a network site: the address follows the site and cannot be edited; the label can."
+msgstr "Lien vers un site du réseau : l’adresse suit le site et n’est pas modifiable ; le libellé, lui, l’est."
+
+#: build/blocks/sites-list/block.json
+msgctxt "block title"
+msgid "Network sites"
+msgstr "Sites du réseau"
+
+#: build/blocks/sites-list/block.json
+msgctxt "block description"
+msgid "The public sites of the network, as a list of links."
+msgstr "Les sites publics du réseau, sous forme de liste de liens."
+
+#: build/blocks/sites-list/block.json
+msgctxt "block keyword"
+msgid "multisite"
+msgstr "multisite"
+
+#: build/blocks/sites-list/block.json
+msgctxt "block keyword"
+msgid "network"
+msgstr "réseau"
+
+#: build/blocks/sites-list/block.json
+msgctxt "block keyword"
+msgid "sites"
+msgstr "sites"
