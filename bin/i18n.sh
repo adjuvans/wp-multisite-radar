@@ -22,12 +22,20 @@ wp_cli() { php -d memory_limit=4G "$WP_BIN" "$@"; }
 POT=languages/multisite-radar.pot
 mkdir -p languages
 JS_POT="$(mktemp)"
-trap 'rm -f "$JS_POT"' EXIT
+PREVIOUS_POT="$(mktemp)"
+trap 'rm -f "$JS_POT" "$PREVIOUS_POT"' EXIT
+[ ! -f "$POT" ] || cp "$POT" "$PREVIOUS_POT"
 
 # Textes du JS compilé, quel que soit leur domaine, puis PHP et block.json du plugin, fusionnés.
 wp_cli i18n make-pot . "$JS_POT" --include=build --exclude=dist,node_modules --ignore-domain --skip-php --skip-block-json --skip-theme-json --skip-audit --quiet
 wp_cli i18n make-pot . "$POT" --slug=multisite-radar --domain=multisite-radar --skip-js --merge="$JS_POT" \
 	--exclude=src,node_modules,vendor,tests,dist,docs,bin,artifacts,languages --skip-audit --quiet
+
+# Seule la date de création a changé : l'ancien catalogue est gardé, pour qu'un build ne modifie pas l'arbre.
+without_date() { grep -v '^"POT-Creation-Date: ' "$1" || true; }
+if [ -s "$PREVIOUS_POT" ] && [ "$(without_date "$PREVIOUS_POT")" = "$(without_date "$POT")" ]; then
+	cp "$PREVIOUS_POT" "$POT"
+fi
 
 wp_cli i18n update-po "$POT" languages/ --quiet
 
