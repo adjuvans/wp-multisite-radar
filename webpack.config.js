@@ -14,6 +14,7 @@ const VIEWS = [
 	'sites',
 	'plugins',
 	'themes',
+	'users',
 	'alerts',
 	'settings',
 ];
