@@ -15,12 +15,14 @@ use MultisiteRadar\Export\ExportHandler;
 use MultisiteRadar\Install\Installer;
 use MultisiteRadar\Install\LegacyMigration;
 use MultisiteRadar\Query\AlertsQuery;
+use MultisiteRadar\Query\InventoryQuery;
 use MultisiteRadar\Query\PluginsQuery;
 use MultisiteRadar\Query\SiteUsersQuery;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Query\ThemesQuery;
 use MultisiteRadar\Query\UsersQuery;
 use MultisiteRadar\Rest\AlertsController;
+use MultisiteRadar\Rest\InventoryController;
 use MultisiteRadar\Rest\PluginsController;
 use MultisiteRadar\Rest\PreferencesController;
 use MultisiteRadar\Rest\ScanController;
@@ -84,6 +86,8 @@ final class Plugin {
 	private ?PluginsQuery $plugins_query = null;
 
 	private ?ThemesQuery $themes_query = null;
+
+	private ?InventoryQuery $inventory_query = null;
 
 	private ?UsersRepository $users_repository = null;
 
@@ -156,6 +160,7 @@ final class Plugin {
 			new PluginsController( $this->plugins_query(), $this->sites_query() ),
 			new ThemesController( $this->themes_query(), $this->sites_query() ),
 			new UsersController( $this->users_query() ),
+			new InventoryController( $this->inventory_query() ),
 			new ScanController( $this->sites(), $this->runner(), $this->queue(), $this->lock() ),
 			new SettingsController( $this->settings(), $this->rules() ),
 			new AlertsController( $this->alerts_query() ),
@@ -269,6 +274,10 @@ final class Plugin {
 
 	public function themes_query(): ThemesQuery {
 		return $this->themes_query ??= new ThemesQuery( $this->sites() );
+	}
+
+	public function inventory_query(): InventoryQuery {
+		return $this->inventory_query ??= new InventoryQuery( $this->plugins_query(), $this->themes_query(), $this->sites() );
 	}
 
 	public function users_repository(): UsersRepository {
