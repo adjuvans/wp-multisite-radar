@@ -33,8 +33,8 @@ final class SchemaTest extends TestCase {
 
 		$this->assertTrue( Schema::install() );
 
-		$this->assertSame( 2, Schema::VERSION );
-		$this->assertSame( 2, (int) get_site_option( Schema::OPTION ) );
+		$this->assertSame( 3, Schema::VERSION );
+		$this->assertSame( 3, (int) get_site_option( Schema::OPTION ) );
 		$this->assertNotNull( $wpdb->get_var( $wpdb->prepare( 'SHOW COLUMNS FROM %i LIKE %s', Schema::sites_table(), 'siteurl' ) ) );
 	}
 }

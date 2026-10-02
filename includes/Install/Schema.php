@@ -9,9 +9,11 @@ defined( 'ABSPATH' ) || exit;
 final class Schema {
 
 	/**
-	 * 1 : tables de M1 ; 2 : colonne siteurl (M2). Les tables events/snapshots de M6 prendront la version 3.
+	 * 1 : tables de M1 ; 2 : colonne siteurl (M2) ; 3 : aucune colonne nouvelle, mais la mise à niveau relance une
+	 * analyse complète qui remplit les mesures disque, base, autoload et tâches planifiées (M4, écart E8).
+	 * Les tables events/snapshots de M6 prendront la version 4.
 	 */
-	public const VERSION = 2;
+	public const VERSION = 3;
 	public const OPTION  = 'msradar_db_version';
 
 	public static function sites_table(): string {

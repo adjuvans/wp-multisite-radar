@@ -258,7 +258,7 @@ final class Queue {
 
 	/**
 	 * Après une mise à niveau du schéma, les nouvelles colonnes ne se remplissent qu'à l'analyse :
-	 * tout le réseau courant est marqué (la version 2 ajoute siteurl).
+	 * tout le réseau courant est marqué (la version 2 ajoute siteurl, la version 3 remplit les mesures de M4).
 	 *
 	 * @param mixed $version Version de schéma installée.
 	 */
@@ -269,7 +269,8 @@ final class Queue {
 
 	/**
 	 * Les nouveaux réglages s'appliquent à tout le réseau : le recalcul repart du premier site.
-	 * La date de dernière activité dépend des types d'activité : s'ils changent, tous les sites sont réanalysés.
+	 * La date de dernière activité dépend des types d'activité, et les mesures du réglage « mesurer le disque » :
+	 * si l'un d'eux change, tous les sites sont réanalysés.
 	 *
 	 * @param mixed $new_settings Réglages complets après la mise à jour.
 	 * @param mixed $old_settings Réglages complets avant la mise à jour.
@@ -279,7 +280,8 @@ final class Queue {
 		delete_site_option( self::RECOMPUTE_CURSOR );
 		MainSite::schedule_once( self::HOOK_RECOMPUTE );
 
-		if ( self::activity_types( $new_settings ) !== self::activity_types( $old_settings ) ) {
+		if ( self::activity_types( $new_settings ) !== self::activity_types( $old_settings )
+			|| self::measures_disk( $new_settings ) !== self::measures_disk( $old_settings ) ) {
 			$this->sites->mark_all_dirty( get_current_network_id() );
 			$this->continue_soon();
 		}
@@ -294,6 +296,13 @@ final class Queue {
 		$types = array_values( array_unique( array_map( 'strval', $types ) ) );
 		sort( $types );
 		return $types;
+	}
+
+	/**
+	 * @param mixed $settings Réglages complets.
+	 */
+	private static function measures_disk( $settings ): bool {
+		return is_array( $settings ) ? (bool) ( $settings['scan']['measure_disk'] ?? true ) : true;
 	}
 
 	public static function next_run(): ?int {

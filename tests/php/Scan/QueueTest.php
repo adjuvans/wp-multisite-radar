@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Tests\Scan;
 
+use MultisiteRadar\Install\Installer;
 use MultisiteRadar\Install\Schema;
 use MultisiteRadar\Scan\Lock;
 use MultisiteRadar\Scan\Queue;
@@ -427,5 +428,35 @@ final class QueueTest extends TestCase {
 		$this->assertSame( $errors + 1, did_action( 'msradar_error' ) );
 		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_RECOMPUTE ), 'Retried later rather than reported as done.' );
 		$this->assertFalse( $this->plugin()->lock()->is_locked() );
+	}
+
+	public function test_an_install_from_beta_3_is_analysed_again_to_fill_the_measures(): void {
+		$network = get_current_network_id();
+		$this->plugin()->sites()->seed_from_blogs( $network );
+		$this->mark_all_clean();
+		wp_clear_scheduled_hook( Queue::HOOK_CONTINUE );
+		update_site_option( Schema::OPTION, 2 );
+
+		Installer::maybe_upgrade();
+
+		$this->assertTrue( Schema::is_current() );
+		$this->assertSame( $this->plugin()->sites()->count_all( $network ), $this->plugin()->sites()->count_dirty( $network ) );
+		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_CONTINUE ) );
+	}
+
+	public function test_switching_the_disk_measure_marks_every_site_for_analysis(): void {
+		$network = get_current_network_id();
+		$this->plugin()->sites()->seed_from_blogs( $network );
+		$this->mark_all_clean();
+		wp_clear_scheduled_hook( Queue::HOOK_CONTINUE );
+
+		$this->plugin()->settings()->update( [ 'scan' => [ 'measure_disk' => false ] ] );
+
+		$this->assertSame( $this->plugin()->sites()->count_all( $network ), $this->plugin()->sites()->count_dirty( $network ) );
+		$this->assertNotFalse( wp_next_scheduled( Queue::HOOK_CONTINUE ) );
+
+		$this->mark_all_clean();
+		$this->plugin()->settings()->update( [ 'scan' => [ 'measure_disk' => false ] ] );
+		$this->assertSame( 0, $this->plugin()->sites()->count_dirty( $network ), 'Saving the same value again is not a change.' );
 	}
 }
