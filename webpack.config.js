@@ -9,7 +9,14 @@ const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 const { LicenseWebpackPlugin } = require( 'license-webpack-plugin' );
 
-const VIEWS = [ 'overview', 'sites', 'plugins', 'themes', 'alerts', 'settings' ];
+const VIEWS = [
+	'overview',
+	'sites',
+	'plugins',
+	'themes',
+	'alerts',
+	'settings',
+];
 
 // Vues sans DataViews : elles ne dépendent pas du chunk partagé (même liste que Admin\Assets::LIGHT_VIEWS).
 const LIGHT_VIEWS = [ 'overview' ];
