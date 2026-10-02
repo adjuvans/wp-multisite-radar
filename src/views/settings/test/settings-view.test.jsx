@@ -10,7 +10,7 @@ import { createRegistry, RegistryProvider } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import apiFetch from '@wordpress/api-fetch';
 import { createCoreStore, STORE_NAME } from '../../../store';
-import { mergeDeep, toPayload } from '../fields';
+import { changes, mergeDeep } from '../fields';
 import SettingsView from '..';
 
 vi.mock( '@wordpress/api-fetch', () => ( { default: vi.fn() } ) );
@@ -71,21 +71,29 @@ beforeEach( () => {
 	apiFetch.mockReset();
 } );
 
-test( 'helpers merge nested edits and send only the sections of this screen', () => {
-	const merged = mergeDeep( SETTINGS, {
+test( 'only the values that differ from the saved settings are sent', () => {
+	const current = mergeDeep( SETTINGS, {
 		scan: { full_rescan_days: 14 },
 		sites_menu: { enabled: true },
 	} );
 
-	expect( merged.scan ).toEqual( { ...SETTINGS.scan, full_rescan_days: 14 } );
-	expect( toPayload( merged ) ).toEqual( {
-		scan: {
-			activity_post_types: [ 'post', 'page' ],
-			analysis_plugins: [],
-			full_rescan_days: 14,
-		},
+	expect( current.scan ).toEqual( {
+		...SETTINGS.scan,
+		full_rescan_days: 14,
+	} );
+	expect( changes( SETTINGS, current ) ).toEqual( {
+		scan: { full_rescan_days: 14 },
 		sites_menu: { enabled: true },
 	} );
+	expect(
+		changes(
+			SETTINGS,
+			mergeDeep( current, {
+				scan: { full_rescan_days: 7 },
+				sites_menu: { enabled: false },
+			} )
+		)
+	).toEqual( {} );
 } );
 
 test( 'shows the preloaded settings and saves a change', async () => {
@@ -112,11 +120,6 @@ test( 'shows the preloaded settings and saves a change', async () => {
 		path: '/multisite-radar/v1/settings',
 		method: 'POST',
 		data: {
-			scan: {
-				activity_post_types: [ 'post', 'page' ],
-				analysis_plugins: [],
-				full_rescan_days: 7,
-			},
 			sites_menu: { enabled: true },
 		},
 	} );
@@ -176,9 +179,9 @@ test( 'a stored plugin slug that is no longer installed does not block saving', 
 		fireEvent.click( save );
 	} );
 
-	expect( apiFetch.mock.calls[ 0 ][ 0 ].data.scan.analysis_plugins ).toEqual(
-		[ 'gone' ]
-	);
+	expect( apiFetch.mock.calls[ 0 ][ 0 ].data ).toEqual( {
+		sites_menu: { enabled: true },
+	} );
 } );
 
 test( 'an out-of-range number of days disables saving', async () => {
@@ -196,4 +199,41 @@ test( 'an out-of-range number of days disables saving', async () => {
 	);
 
 	await waitFor( () => expect( save ).toBeDisabled() );
+} );
+
+test( 'undoing a change leaves nothing to save', async () => {
+	setup();
+	const save = screen.getByRole( 'button', { name: 'Save settings' } );
+	const toggle = screen.getByRole( 'checkbox', {
+		name: /network sites menu/,
+	} );
+
+	fireEvent.click( toggle );
+	await waitFor( () => expect( save ).toBeEnabled() );
+	fireEvent.click( toggle );
+
+	await waitFor( () => expect( save ).toBeDisabled() );
+} );
+
+test( 'the disk measure can be switched off', async () => {
+	apiFetch.mockResolvedValue( {
+		...SETTINGS,
+		scan: { ...SETTINGS.scan, measure_disk: false },
+	} );
+	setup();
+	const toggle = screen.getByRole( 'checkbox', {
+		name: /Measure the disk space used by each site/,
+	} );
+	expect( toggle ).toBeChecked();
+
+	fireEvent.click( toggle );
+	await act( async () => {
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Save settings' } )
+		);
+	} );
+
+	expect( apiFetch.mock.calls[ 0 ][ 0 ].data ).toEqual( {
+		scan: { measure_disk: false },
+	} );
 } );

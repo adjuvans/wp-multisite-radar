@@ -2,6 +2,13 @@ import { __ } from '@wordpress/i18n';
 
 const POST_TYPE_KEY = /^[a-z0-9_-]{1,20}$/;
 
+const SCAN_KEYS = [
+	'activity_post_types',
+	'analysis_plugins',
+	'measure_disk',
+	'full_rescan_days',
+];
+
 /**
  * Champs DataForm des réglages, adressés par chemin pointé dans l'objet des réglages (msradar_settings).
  *
@@ -53,6 +60,19 @@ export function getSettingsFields( { postTypes = [], plugins = [] } ) {
 			isValid: { elements: false },
 		},
 		{
+			id: 'scan.measure_disk',
+			type: 'boolean',
+			label: __(
+				'Measure the disk space used by each site',
+				'multisite-radar'
+			),
+			description: __(
+				'Size of the uploads folder of each site. A measure that takes more than two seconds stops there and is shown as a minimum.',
+				'multisite-radar'
+			),
+			Edit: 'toggle',
+		},
+		{
 			id: 'scan.full_rescan_days',
 			type: 'integer',
 			label: __( 'Full analysis every (days)', 'multisite-radar' ),
@@ -79,6 +99,7 @@ export const SCAN_FORM = {
 	fields: [
 		'scan.activity_post_types',
 		'scan.analysis_plugins',
+		'scan.measure_disk',
 		'scan.full_rescan_days',
 	],
 };
@@ -116,18 +137,28 @@ export function mergeDeep( base, patch ) {
 	return out;
 }
 
+function same( a, b ) {
+	return JSON.stringify( a ) === JSON.stringify( b );
+}
+
 /**
- * Seules les sections de cet écran sont envoyées : les autres restent telles qu'enregistrées.
+ * Corps de POST /settings : seules les valeurs différentes des réglages enregistrés (écart E14 du plan M4).
+ * Revenir à la valeur de départ n'est donc plus une modification, et deux administrateurs qui changent des réglages
+ * différents ne s'écrasent pas.
  *
- * @param {Object} settings Réglages complets modifiés.
+ * @param {Object} saved   Réglages enregistrés.
+ * @param {Object} current Réglages affichés, modifications comprises.
+ * @return {Object} Modifications ; un objet vide s'il n'y a rien à enregistrer.
  */
-export function toPayload( settings ) {
-	return {
-		scan: {
-			activity_post_types: settings.scan.activity_post_types,
-			analysis_plugins: settings.scan.analysis_plugins,
-			full_rescan_days: settings.scan.full_rescan_days,
-		},
-		sites_menu: { enabled: !! settings.sites_menu.enabled },
-	};
+export function changes( saved, current ) {
+	const patch = {};
+	SCAN_KEYS.forEach( ( key ) => {
+		if ( ! same( saved.scan?.[ key ], current.scan?.[ key ] ) ) {
+			patch.scan = { ...patch.scan, [ key ]: current.scan?.[ key ] };
+		}
+	} );
+	if ( !! saved.sites_menu?.enabled !== !! current.sites_menu?.enabled ) {
+		patch.sites_menu = { enabled: !! current.sites_menu?.enabled };
+	}
+	return patch;
 }

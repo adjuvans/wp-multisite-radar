@@ -12,11 +12,11 @@ import { STORE_NAME, toResponse } from '../../store';
 import { buildPath } from '../../store/paths';
 import {
 	ALL_FORM,
+	changes,
 	getSettingsFields,
 	MENU_FORM,
 	mergeDeep,
 	SCAN_FORM,
-	toPayload,
 } from './fields';
 
 const SETTINGS_PATH = buildPath( '/settings' );
@@ -34,7 +34,11 @@ export default function SettingsView() {
 		[ settings.data, edits ]
 	);
 	const { validity, isValid } = useFormValidity( data, fields, ALL_FORM );
-	const dirty = Object.keys( edits ).length > 0;
+	const changed = useMemo(
+		() => changes( settings.data || {}, data ),
+		[ settings.data, data ]
+	);
+	const dirty = Object.keys( changed ).length > 0;
 
 	const onChange = ( patch ) =>
 		setEdits( ( current ) => mergeDeep( current, patch ) );
@@ -45,7 +49,7 @@ export default function SettingsView() {
 			const saved = await apiFetch( {
 				path: SETTINGS_PATH,
 				method: 'POST',
-				data: toPayload( data ),
+				data: changed,
 			} );
 			receiveResponse( SETTINGS_PATH, toResponse( saved ) );
 			setEdits( {} );
