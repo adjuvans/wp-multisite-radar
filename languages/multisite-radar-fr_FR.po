@@ -16,8 +16,8 @@ msgstr ""
 
 #. Plugin Name of the plugin
 #: multisite-radar.php
-#: includes/Admin/Menu.php:43
-#: includes/Admin/Menu.php:68
+#: includes/Admin/Menu.php:49
+#: includes/Admin/Menu.php:74
 msgid "Multisite Radar"
 msgstr "Multisite Radar"
 
@@ -43,15 +43,21 @@ msgstr "https://adjuvans.fr"
 
 #: build/admin/alerts.js:1
 #: build/admin/overview.js:1
+#: build/admin/plugins.js:1
 #: build/admin/settings.js:1
 #: build/admin/sites.js:1
+#: build/admin/themes.js:1
+#: build/admin/users.js:1
 msgid "The request failed. Check your connection and try again."
 msgstr "La requête a échoué. Vérifiez votre connexion et réessayez."
 
 #: build/admin/alerts.js:1
 #: build/admin/overview.js:1
+#: build/admin/plugins.js:1
 #: build/admin/settings.js:1
 #: build/admin/sites.js:1
+#: build/admin/themes.js:1
+#: build/admin/users.js:1
 msgid "This page could not be displayed. Reload it; if the problem persists, check the browser console."
 msgstr "Cette page n’a pas pu être affichée. Rechargez-la ; si le problème persiste, consultez la console du navigateur."
 
@@ -172,7 +178,9 @@ msgstr "Décrémenter"
 #: build/admin/dataviews.js:29
 #: build/admin/dataviews.js:32
 #: build/admin/dataviews.js:200
-#: build/admin/sites.js:19
+#: build/admin/plugins.js:2
+#: build/admin/sites.js:1
+#: build/admin/themes.js:2
 msgid "Close"
 msgstr "Fermer"
 
@@ -371,7 +379,9 @@ msgstr "%s : <groupName />"
 #. translators: 1: current page number. 2: total number of pages.
 #. translators: 1: current page, 2: number of pages.
 #: build/admin/dataviews.js:56
+#: build/admin/plugins.js:2
 #: build/admin/sites.js:18
+#: build/admin/themes.js:2
 #, js-format
 msgid "Page %1$d of %2$d"
 msgstr "Page %1$d sur %2$d"
@@ -922,8 +932,11 @@ msgstr "La valeur doit être une couleur valide."
 
 #: build/admin/alerts.js:1
 #: build/admin/overview.js:1
+#: build/admin/plugins.js:1
 #: build/admin/settings.js:1
 #: build/admin/sites.js:1
+#: build/admin/themes.js:1
+#: build/admin/users.js:1
 msgid "Retry"
 msgstr "Réessayer"
 
@@ -1037,8 +1050,13 @@ msgid "Analyse all sites"
 msgstr "Analyser tous les sites"
 
 #: build/admin/overview.js:3
+#: build/admin/plugins.js:4
+#: build/admin/themes.js:4
+#: build/admin/users.js:1
 #: build/blocks/sites-list/index.js:1
-#: includes/Admin/Menu.php:35
+#: includes/Admin/Menu.php:38
+#: includes/Export/PluginsExport.php:23
+#: includes/Export/ThemesExport.php:26
 msgid "Sites"
 msgstr "Sites"
 
@@ -1066,16 +1084,16 @@ msgstr "Sites avec avertissements"
 msgid "Sites with information"
 msgstr "Sites avec infos"
 
-#: build/admin/overview.js:4
+#: build/admin/overview.js:5
 msgid "To review"
 msgstr "À traiter"
 
-#: build/admin/overview.js:4
+#: build/admin/overview.js:5
 msgid "No alert on the network."
 msgstr "Aucune alerte sur le réseau."
 
 #. translators: %d: number of sites.
-#: build/admin/overview.js:5
+#: build/admin/overview.js:6
 #, js-format
 msgid "%d site"
 msgid_plural "%d sites"
@@ -1083,40 +1101,40 @@ msgstr[0] "%d site"
 msgstr[1] "%d sites"
 
 #. translators: %d: number of sites in the network.
-#: build/admin/overview.js:6
+#: build/admin/overview.js:7
 #, js-format
 msgid "Multisite Radar has not analysed your %d site yet. The analysis runs in the background; you can also start it now."
 msgid_plural "Multisite Radar has not analysed your %d sites yet. The analysis runs in the background; you can also start it now."
 msgstr[0] "Multisite Radar n’a pas encore analysé votre site. L’analyse s’exécute en arrière-plan ; vous pouvez aussi la lancer maintenant."
 msgstr[1] "Multisite Radar n’a pas encore analysé vos %d sites. L’analyse s’exécute en arrière-plan ; vous pouvez aussi la lancer maintenant."
 
-#: build/admin/overview.js:6
+#: build/admin/overview.js:7
 msgid "Start the analysis"
 msgstr "Lancer l’analyse"
 
-#: build/admin/overview.js:6
+#: build/admin/overview.js:7
 #: build/admin/sites.js:19
 msgid "Analysis started."
 msgstr "Analyse lancée."
 
 #. translators: 1: number of sites analysed, 2: number of sites to analyse.
-#: build/admin/overview.js:7
+#: build/admin/overview.js:8
 #: build/admin/sites.js:20
 #, js-format
 msgid "%1$d of %2$d sites analysed."
 msgstr "Sites analysés : %1$d sur %2$d."
 
-#: build/admin/overview.js:7
+#: build/admin/overview.js:8
 #: build/admin/sites.js:20
 msgid "The analysis continues in the background."
 msgstr "L’analyse se poursuit en arrière-plan."
 
-#: build/admin/overview.js:7
+#: build/admin/overview.js:8
 #: build/admin/sites.js:20
 msgid "Analysis complete."
 msgstr "Analyse terminée."
 
-#: build/admin/overview.js:7
+#: build/admin/overview.js:8
 #: build/admin/sites.js:20
 msgid "The analysis could not be run."
 msgstr "L’analyse n’a pas pu être effectuée."
@@ -1332,9 +1350,12 @@ msgid "Unknown"
 msgstr "Inconnue"
 
 #: build/admin/sites.js:12
-#: build/admin/sites.js:17
+#: build/admin/sites.js:18
+#: build/admin/users.js:1
 #: build/blocks/sites-list/index.js:1
+#: includes/Export/PluginsExport.php:18
 #: includes/Export/SitesColumns.php:17
+#: includes/Export/ThemesExport.php:18
 msgid "Name"
 msgstr "Nom"
 
@@ -1369,13 +1390,16 @@ msgstr "Taxonomies"
 msgid "Terms"
 msgstr "Termes"
 
+#: build/admin/plugins.js:4
 #: build/admin/sites.js:13
+#: build/admin/themes.js:5
 msgid "Not installed"
 msgstr "Introuvable"
 
 #: build/admin/sites.js:13
 #: build/admin/sites.js:16
 #: build/admin/sites.js:20
+#: build/admin/themes.js:5
 #: includes/Export/SitesColumns.php:21
 msgid "Theme"
 msgstr "Thème"
@@ -1420,15 +1444,20 @@ msgstr "Adresse"
 msgid "Administration"
 msgstr "Administration"
 
+#: build/admin/plugins.js:4
 #: build/admin/sites.js:16
 #: build/admin/sites.js:20
+#: build/admin/themes.js:5
+#: includes/Export/PluginsExport.php:21
 #: includes/Export/SitesColumns.php:20
+#: includes/Export/ThemesExport.php:23
 msgid "Status"
 msgstr "État"
 
 #: build/admin/sites.js:16
 #: build/admin/sites.js:19
 #: build/admin/sites.js:20
+#: includes/Admin/Menu.php:41
 #: includes/Export/SitesColumns.php:22
 msgid "Users"
 msgstr "Comptes"
@@ -1468,32 +1497,39 @@ msgstr "Analysé le"
 msgid "Pending"
 msgstr "En attente"
 
-#: build/admin/sites.js:17
+#: build/admin/sites.js:18
 #: includes/Alerts/Rules/NoUsersRule.php:49
 msgid "No user is attached to this site."
 msgstr "Aucun compte n’est rattaché à ce site."
 
-#: build/admin/sites.js:17
+#: build/admin/sites.js:18
+#: build/admin/users.js:1
 msgid "Login"
 msgstr "Identifiant"
 
-#: build/admin/sites.js:17
+#: build/admin/sites.js:18
 msgid "Roles"
 msgstr "Rôles"
 
-#: build/admin/sites.js:17
+#: build/admin/sites.js:18
+#: build/admin/users.js:1
 msgid "Super admin"
 msgstr "Super-admin"
 
+#: build/admin/plugins.js:1
 #: build/admin/sites.js:17
+#: build/admin/themes.js:1
 msgid "Previous"
 msgstr "Précédent"
 
+#: build/admin/plugins.js:2
 #: build/admin/sites.js:18
+#: build/admin/themes.js:2
 msgid "Next"
 msgstr "Suivant"
 
 #: build/admin/sites.js:18
+#: build/admin/users.js:1
 msgid "Loading users…"
 msgstr "Chargement des comptes…"
 
@@ -1531,21 +1567,27 @@ msgstr "Extensions et thème"
 
 #: build/admin/sites.js:19
 #: build/admin/sites.js:20
-#: includes/Admin/Menu.php:36
+#: includes/Admin/Menu.php:42
 #: includes/Export/SitesColumns.php:31
 msgid "Alerts"
 msgstr "Alertes"
 
-#: build/admin/sites.js:19
+#: build/admin/plugins.js:1
+#: build/admin/sites.js:1
+#: build/admin/themes.js:1
 msgid "Export"
 msgstr "Exporter"
 
-#: build/admin/sites.js:19
+#: build/admin/plugins.js:1
+#: build/admin/sites.js:1
 #: build/admin/sites.js:20
+#: build/admin/themes.js:1
 msgid "Export as CSV"
 msgstr "Exporter comme CSV"
 
-#: build/admin/sites.js:19
+#: build/admin/plugins.js:1
+#: build/admin/sites.js:1
+#: build/admin/themes.js:1
 msgid "Export as JSON"
 msgstr "Exporter comme JSON"
 
@@ -1655,19 +1697,19 @@ msgstr "GPL-3.0 ou ultérieure"
 msgid "Third-party licenses"
 msgstr "Licences tierces"
 
-#: includes/Admin/Menu.php:34
+#: includes/Admin/Menu.php:37
 msgid "Overview"
 msgstr "Vue d’ensemble"
 
-#: includes/Admin/Menu.php:37
+#: includes/Admin/Menu.php:43
 msgid "Settings"
 msgstr "Réglages"
 
-#: includes/Admin/Menu.php:74
+#: includes/Admin/Menu.php:80
 msgid "Multisite Radar needs JavaScript to display this page."
 msgstr "Multisite Radar a besoin de JavaScript pour afficher cette page."
 
-#: includes/Admin/Menu.php:87
+#: includes/Admin/Menu.php:93
 msgid "Pre-release version"
 msgstr "Version préliminaire"
 
@@ -1729,23 +1771,23 @@ msgstr "Site sans compte"
 msgid "No user account is attached to the site."
 msgstr "Aucun compte n’est rattaché au site."
 
-#: includes/Export/ExportHandler.php:36
+#: includes/Export/ExportHandler.php:38
 msgid "Sorry, you are not allowed to export this data."
 msgstr "Désolé, vous n’avez pas l’autorisation d’exporter ces données."
 
-#: includes/Export/ExportHandler.php:48
+#: includes/Export/ExportHandler.php:50
 msgid "The export could not be read from the database."
 msgstr "Les données de l’export n’ont pas pu être lues dans la base de données."
 
-#: includes/Export/ExportHandler.php:59
+#: includes/Export/ExportHandler.php:61
 msgid "The export could not be started."
 msgstr "L’export n’a pas pu démarrer."
 
-#: includes/Export/ExportHandler.php:91
+#: includes/Export/ExportHandler.php:93
 msgid "This data cannot be exported."
 msgstr "Ces données ne peuvent pas être exportées."
 
-#: includes/Export/ExportHandler.php:95
+#: includes/Export/ExportHandler.php:97
 msgid "Unknown export format."
 msgstr "Format d’export inconnu."
 
@@ -1801,11 +1843,11 @@ msgstr "Analysé le (UTC)"
 msgid "Network Plugin Utilities 1.x is still loaded. Remove it: Multisite Radar replaces it and has taken over its settings."
 msgstr "Network Plugin Utilities 1.x est toujours chargée. Supprimez-la : Multisite Radar la remplace et a repris ses réglages."
 
-#: includes/Plugin.php:157
+#: includes/Plugin.php:183
 msgid "Multisite Radar requires a WordPress Multisite network. It does nothing on a single site."
 msgstr "Multisite Radar nécessite un réseau WordPress Multisite et n’a aucun effet sur un site unique."
 
-#: includes/Rest/Controller.php:41
+#: includes/Rest/Controller.php:44
 msgid "Multisite Radar could not read its data. Try again in a moment."
 msgstr "Multisite Radar n’a pas pu lire ses données. Réessayez dans un instant."
 
@@ -1889,3 +1931,248 @@ msgstr "réseau"
 msgctxt "block keyword"
 msgid "sites"
 msgstr "sites"
+
+#: build/admin/alerts.js:1
+#: build/admin/overview.js:1
+#: build/admin/plugins.js:2
+#: build/admin/sites.js:1
+#: build/admin/themes.js:2
+#: build/admin/users.js:1
+msgid "Loading…"
+msgstr "Chargement…"
+
+#: build/admin/alerts.js:2
+msgid "Loading alerts…"
+msgstr "Chargement des alertes…"
+
+#: build/admin/overview.js:4
+msgid "Unused plugins"
+msgstr "Extensions inutilisées"
+
+#: build/admin/overview.js:4
+msgid "Unused themes"
+msgstr "Thèmes inutilisés"
+
+#: build/admin/overview.js:4
+msgid "Updates available"
+msgstr "Mises à jour disponibles"
+
+#. translators: 1: number of plugins with an update, 2: number of themes with an update.
+#: build/admin/overview.js:5
+#, js-format
+msgid "Plugins: %1$d · Themes: %2$d"
+msgstr "Extensions : %1$d · Thèmes : %2$d"
+
+#: build/admin/overview.js:8
+msgid "Loading the overview…"
+msgstr "Chargement de la vue d’ensemble…"
+
+#: build/admin/plugins.js:2
+#: build/admin/sites.js:20
+#: build/admin/themes.js:2
+msgid "Loading sites…"
+msgstr "Chargement des sites…"
+
+#: build/admin/plugins.js:2
+#: build/admin/themes.js:2
+msgid "No analysed site uses it."
+msgstr "Aucun site analysé ne l’utilise."
+
+#. translators: %s: number of sites.
+#: build/admin/plugins.js:3
+#: build/admin/themes.js:3
+#, js-format
+msgid "%s site"
+msgid_plural "%s sites"
+msgstr[0] "%s site"
+msgstr[1] "%s sites"
+
+#: build/admin/plugins.js:3
+#: build/admin/themes.js:3
+msgid "Show the sites"
+msgstr "Afficher les sites"
+
+#. translators: %d: number of sites not analysed yet.
+#: build/admin/plugins.js:4
+#: build/admin/themes.js:4
+#, js-format
+msgid "%d site has not been analysed yet: what it uses is not counted below."
+msgid_plural "%d sites have not been analysed yet: what they use is not counted below."
+msgstr[0] "%d site n’a pas encore été analysé : ce qu’il utilise n’est pas compté ci-dessous."
+msgstr[1] "%d sites n’ont pas encore été analysés : ce qu’ils utilisent n’est pas compté ci-dessous."
+
+#: build/admin/plugins.js:4
+msgid "Network activated: every site of the network loads this plugin."
+msgstr "Activée sur le réseau : tous les sites du réseau chargent cette extension."
+
+#: build/admin/plugins.js:4
+msgid "Plugin"
+msgstr "Extension"
+
+#: build/admin/plugins.js:4
+#: build/admin/themes.js:5
+#: includes/Export/PluginsExport.php:20
+#: includes/Export/ThemesExport.php:20
+msgid "Version"
+msgstr "Version"
+
+#: build/admin/plugins.js:4
+#: includes/Export/PluginsExport.php:22
+msgid "Network activated"
+msgstr "Activée sur le réseau"
+
+#: build/admin/plugins.js:4
+msgid "Active on some sites"
+msgstr "Active sur certains sites"
+
+#: build/admin/plugins.js:4
+msgctxt "plugin status"
+msgid "Unused"
+msgstr "Inutilisée"
+
+#: build/admin/plugins.js:4
+#: build/admin/themes.js:6
+msgid "Update"
+msgstr "Mise à jour"
+
+#: build/admin/plugins.js:4
+#: build/admin/themes.js:6
+#: includes/Export/PluginsExport.php:24
+#: includes/Export/ThemesExport.php:27
+msgid "Update available"
+msgstr "Mise à jour disponible"
+
+#. translators: %s: version number.
+#: build/admin/plugins.js:5
+#: build/admin/themes.js:7
+#, js-format
+msgid "Version %s available"
+msgstr "Version %s disponible"
+
+#: build/admin/plugins.js:5
+msgid "Search plugins"
+msgstr "Rechercher des extensions"
+
+#: build/admin/plugins.js:5
+msgid "No plugin matches this view."
+msgstr "Aucune extension ne correspond à cette vue."
+
+#: build/admin/plugins.js:5
+msgid "Loading plugins…"
+msgstr "Chargement des extensions…"
+
+#. translators: %s: folder of the active child theme.
+#: build/admin/themes.js:5
+#, js-format
+msgid "Parent of the active theme %s"
+msgstr "Parent du thème actif %s"
+
+#: build/admin/themes.js:5
+#: includes/Export/ThemesExport.php:21
+msgid "Parent theme"
+msgstr "Thème parent"
+
+#: build/admin/themes.js:5
+#: includes/Export/ThemesExport.php:22
+msgid "Network enabled"
+msgstr "Activé sur le réseau"
+
+#: build/admin/themes.js:5
+msgid "Yes"
+msgstr "Oui"
+
+#: build/admin/themes.js:5
+msgid "No"
+msgstr "Non"
+
+#: build/admin/themes.js:5
+msgctxt "theme status"
+msgid "Used"
+msgstr "Utilisé"
+
+#: build/admin/themes.js:5
+msgctxt "theme status"
+msgid "Unused"
+msgstr "Inutilisé"
+
+#. translators: 1: number of sites, 2: number of those sites where the theme is the parent of the active theme.
+#: build/admin/themes.js:6
+#, js-format
+msgid "%1$s (%2$s as parent)"
+msgstr "%1$s (dont %2$s comme parent)"
+
+#: build/admin/themes.js:7
+msgid "Search themes"
+msgstr "Rechercher des thèmes"
+
+#: build/admin/themes.js:7
+msgid "No theme matches this view."
+msgstr "Aucun thème ne correspond à cette vue."
+
+#: build/admin/themes.js:7
+msgid "Loading themes…"
+msgstr "Chargement des thèmes…"
+
+#: build/admin/users.js:1
+msgid "No site"
+msgstr "Aucun site"
+
+#: build/admin/users.js:1
+msgid "Several sites"
+msgstr "Plusieurs sites"
+
+#: build/admin/users.js:1
+msgid "Super admins only"
+msgstr "Super-admins uniquement"
+
+#: build/admin/users.js:1
+msgid "Registered"
+msgstr "Inscription"
+
+#: build/admin/users.js:1
+msgid "Edit the account"
+msgstr "Modifier le compte"
+
+#: build/admin/users.js:1
+msgid "Search users"
+msgstr "Rechercher des comptes"
+
+#: build/admin/users.js:1
+msgid "No user matches this view."
+msgstr "Aucun compte ne correspond à cette vue."
+
+#: includes/Admin/Menu.php:39
+msgid "Plugins"
+msgstr "Extensions"
+
+#: includes/Admin/Menu.php:40
+msgid "Themes"
+msgstr "Thèmes"
+
+#: includes/Export/ExportHandler.php:185
+msgid "Export incomplete: the data could not be read to the end. Run the export again."
+msgstr "Export incomplet : les données n’ont pas pu être lues jusqu’au bout. Relancez l’export."
+
+#: includes/Export/PluginsExport.php:19
+msgid "Plugin file"
+msgstr "Fichier de l’extension"
+
+#: includes/Export/ThemesExport.php:19
+msgid "Theme folder"
+msgstr "Dossier du thème"
+
+#: includes/Export/ThemesExport.php:24
+msgid "Active theme of (sites)"
+msgstr "Thème actif de (sites)"
+
+#: includes/Export/ThemesExport.php:25
+msgid "Parent of the active theme of (sites)"
+msgstr "Parent du thème actif de (sites)"
+
+#: includes/Rest/PluginsController.php:83
+msgid "This plugin is neither installed nor active on any site."
+msgstr "Cette extension n’est ni installée ni active sur aucun site."
+
+#: includes/Rest/ThemesController.php:84
+msgid "This theme is neither installed nor used by any site."
+msgstr "Ce thème n’est ni installé ni utilisé par aucun site."

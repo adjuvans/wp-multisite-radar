@@ -2,6 +2,8 @@
 
 Audit réseau pour WordPress Multisite (successeur de Network Plugin Utilities 1.x).
 
+Pages du menu réseau « Multisite Radar » : Vue d'ensemble, Sites, Plugins, Thèmes, Utilisateurs, Alertes, Réglages.
+
 - Spec : `docs/superpowers/specs/2026-10-01-multisite-radar-v2-design.md`
 - Plans : `docs/superpowers/plans/`
 
@@ -18,7 +20,7 @@ make e2e WP_ENV_PORT=8890   # bout en bout ; make e2e-stop pour arrêter wp-env
 make version VERSION=2.0.0  # en-tête, constante, readme.txt, package.json et lock
 ```
 
-Le zip de `make dist` contient le même arbre que celui validé par Plugin Check en CI. Ce n'est pas le cas de `npm run plugin-zip`, qui ajoute `package.json` et `README.md`.
+Le zip de `make dist` contient le même arbre que celui validé par Plugin Check en CI. `npm run plugin-zip` appelle `make dist`.
 
 Traductions : les textes source sont en anglais ; `languages/multisite-radar-fr_FR.po` fournit le français. `make i18n` régénère `languages/multisite-radar.pot` à partir du PHP et du JS compilé, y compris les textes de DataViews, fusionne les `.po`, puis compile les fichiers chargés par WordPress (`.mo`, `.l10n.php`, `.json`, non versionnés). Il échoue tant qu'une chaîne n'est pas traduite : la compléter dans le `.po` et relancer. `make dist` passe par la même étape.
 

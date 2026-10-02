@@ -1,5 +1,19 @@
 # Changelog — Multisite Radar
 
+## [2.0.0-beta.3] - 2026-10-02
+
+### Jalon M3 — Inventaire croisé
+- Pages Plugins, Thèmes et Utilisateurs, avec leurs routes REST (`GET /plugins`, `GET /plugins/{plugin}/sites`, `GET /themes`, `GET /themes/{stylesheet}/sites`, `GET /users`, `GET /inventory/summary`).
+- Plugins : statut (activé sur le réseau, actif sur certains sites, inutilisé, introuvable), nombre de sites, mise à jour disponible ; un clic ouvre la liste des sites qui l'utilisent. MU-plugins et drop-ins exclus.
+- Thèmes : thème parent, autorisation sur le réseau, sites où il est actif ou parent du thème actif ; un thème parent d'un thème actif n'est pas « inutilisé ».
+- Utilisateurs : nombre de sites de chaque compte (tous réseaux), super-admins, filtres « aucun site » et « plusieurs sites » ; aucune adresse e-mail lue ni affichée. Résultats en cache objet 10 minutes.
+- Vue d'ensemble : tuiles « Extensions inutilisées », « Thèmes inutilisés » et « Mises à jour disponibles ». Tant que des sites restent à analyser, les pages d'inventaire le signalent.
+- Exports CSV et JSON des plugins et des thèmes. Un export interrompu en cours de flux se termine par un marqueur visible (dernière ligne CSV, clés `incomplete` et `error` en JSON).
+- Fiche site : noms de rôles traduits dans l'onglet Utilisateurs, ordre stable d'une page à l'autre.
+- Squelettes de chargement à la place des spinners.
+- DataViews n'est plus embarqué dans chaque vue : un fichier partagé (`build/admin/dataviews.js`), gardé en cache par le navigateur d'une page à l'autre.
+- `npm run plugin-zip` appelle `make dist`.
+
 ## [2.0.0-beta.2] - 2026-10-02
 
 - Interface en français : traduction fr_FR livrée dans `languages/`, y compris les textes de DataViews (filtres, pagination, colonnes), repris de la traduction officielle de WordPress quand elle existe.

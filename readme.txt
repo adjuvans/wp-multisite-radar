@@ -3,7 +3,7 @@ Tags: multisite, network, audit, inventory, admin
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.0-beta.2
+Stable tag: 2.0.0-beta.3
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -18,6 +18,12 @@ Data is collected in the background with lightweight SQL queries, so the network
 Source code: https://github.com/adjuvans/wp-network-plugin-utilities
 
 == Changelog ==
+
+= 2.0.0-beta.3 =
+* New Plugins, Themes and Users pages: what each site uses, unused plugins and themes, available updates, accounts attached to no site.
+* The overview shows unused plugins and themes and available updates.
+* Plugins and themes can be exported as CSV or JSON.
+* Faster pages: the table library is downloaded once for all pages.
 
 = 2.0.0-beta.2 =
 * The interface is available in French, including the table controls.

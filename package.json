@@ -1,6 +1,6 @@
 {
 	"name": "multisite-radar",
-	"version": "2.0.0-beta.2",
+	"version": "2.0.0-beta.3",
 	"private": true,
 	"description": "Network-wide audit for WordPress Multisite.",
 	"license": "GPL-3.0-or-later",
@@ -28,7 +28,7 @@
 		"test:unit": "wp-scripts test-unit-js",
 		"version:check": "node bin/version.mjs check",
 		"version:set": "node bin/version.mjs set",
-		"plugin-zip": "wp-scripts plugin-zip"
+		"plugin-zip": "make dist"
 	},
 	"dependencies": {
 		"@wordpress/a11y": "4.56.0",
