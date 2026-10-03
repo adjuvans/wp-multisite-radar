@@ -1,6 +1,9 @@
 <?php
 namespace MultisiteRadar;
 
+use MultisiteRadar\Abilities\ListSitesAbility;
+use MultisiteRadar\Abilities\NetworkSummaryAbility;
+use MultisiteRadar\Abilities\Registrar;
 use MultisiteRadar\Admin\Assets;
 use MultisiteRadar\Admin\Footer;
 use MultisiteRadar\Admin\Menu;
@@ -58,6 +61,8 @@ defined( 'ABSPATH' ) || exit;
 final class Plugin {
 
 	private static ?Plugin $instance = null;
+
+	private ?Registrar $abilities = null;
 
 	private ?Settings $settings = null;
 
@@ -146,6 +151,8 @@ final class Plugin {
 		$this->state_watcher()->register();
 		$this->sites_menu()->register();
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
+		add_action( 'wp_abilities_api_categories_init', [ $this, 'register_ability_category' ] );
+		add_action( 'wp_abilities_api_init', [ $this, 'register_abilities' ] );
 		$this->legacy()->register();
 
 		if ( is_admin() ) {
@@ -186,6 +193,14 @@ final class Plugin {
 		foreach ( $controllers as $controller ) {
 			$controller->register_routes();
 		}
+	}
+
+	public function register_ability_category(): void {
+		$this->abilities()->register_category();
+	}
+
+	public function register_abilities(): void {
+		$this->abilities()->register_abilities();
 	}
 
 	public function render_multisite_notice(): void {
@@ -298,6 +313,19 @@ final class Plugin {
 
 	public function scan_status_query(): ScanStatusQuery {
 		return $this->scan_status_query ??= new ScanStatusQuery( $this->sites(), $this->lock() );
+	}
+
+	/**
+	 * Construit pendant wp_abilities_api_init, après init : jamais au démarrage du plugin.
+	 */
+	public function abilities(): Registrar {
+		return $this->abilities ??= new Registrar(
+			$this->settings(),
+			[
+				new NetworkSummaryAbility( $this->scan_status_query(), $this->alerts_query(), $this->inventory_query() ),
+				new ListSitesAbility( $this->sites_query() ),
+			]
+		);
 	}
 
 	public function alerts_query(): AlertsQuery {

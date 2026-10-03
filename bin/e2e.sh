@@ -185,4 +185,6 @@ expect "a refused change leaves the setting as it was" "$(wpe multisite-radar se
 wpe multisite-radar settings set alerts.rules.search_hidden '{"enabled":false}' >/dev/null
 expect "a rule switched off from the command line lists no alert" "$(wpe multisite-radar alerts --rule=search_hidden --format=count)" "0"
 
+SUMMARY="$(wpe --user=admin eval '$response = rest_do_request( new WP_REST_Request( "GET", "/wp-abilities/v1/abilities/multisite-radar/network-summary/run" ) ); echo wp_json_encode( [ "status" => $response->get_status(), "data" => $response->get_data() ] );')"
+expect "the network-summary ability runs over REST" "$(jq -r '"\(.status) \(.data.scan.total)"' <<<"$SUMMARY")" "200 3"
 echo "E2E OK"
