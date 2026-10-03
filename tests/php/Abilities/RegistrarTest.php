@@ -10,6 +10,9 @@ final class RegistrarTest extends RestTestCase {
 	private const NAMES = [
 		'multisite-radar/network-summary',
 		'multisite-radar/list-sites',
+		'multisite-radar/get-site',
+		'multisite-radar/find-extension-usage',
+		'multisite-radar/list-alerts',
 	];
 
 	public function test_the_abilities_are_registered_read_only_in_their_category(): void {

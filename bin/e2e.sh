@@ -187,4 +187,7 @@ expect "a rule switched off from the command line lists no alert" "$(wpe multisi
 
 SUMMARY="$(wpe --user=admin eval '$response = rest_do_request( new WP_REST_Request( "GET", "/wp-abilities/v1/abilities/multisite-radar/network-summary/run" ) ); echo wp_json_encode( [ "status" => $response->get_status(), "data" => $response->get_data() ] );')"
 expect "the network-summary ability runs over REST" "$(jq -r '"\(.status) \(.data.scan.total)"' <<<"$SUMMARY")" "200 3"
+SITE="$(MSRADAR_E2E_SITE="$HIDDEN_ID" wpe --user=admin eval '$request = new WP_REST_Request( "GET", "/wp-abilities/v1/abilities/multisite-radar/get-site/run" ); $request->set_query_params( [ "input" => [ "id" => getenv( "MSRADAR_E2E_SITE" ) ] ] ); $response = rest_do_request( $request ); echo wp_json_encode( [ "status" => $response->get_status(), "data" => $response->get_data() ] );')"
+expect "the get-site ability reads a site whose ID arrives as text" "$(jq -r '"\(.status) \(.data.name)"' <<<"$SITE")" "200 Discret"
+
 echo "E2E OK"

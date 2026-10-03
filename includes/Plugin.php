@@ -1,6 +1,9 @@
 <?php
 namespace MultisiteRadar;
 
+use MultisiteRadar\Abilities\FindExtensionUsageAbility;
+use MultisiteRadar\Abilities\GetSiteAbility;
+use MultisiteRadar\Abilities\ListAlertsAbility;
 use MultisiteRadar\Abilities\ListSitesAbility;
 use MultisiteRadar\Abilities\NetworkSummaryAbility;
 use MultisiteRadar\Abilities\Registrar;
@@ -324,6 +327,9 @@ final class Plugin {
 			[
 				new NetworkSummaryAbility( $this->scan_status_query(), $this->alerts_query(), $this->inventory_query() ),
 				new ListSitesAbility( $this->sites_query() ),
+				new GetSiteAbility( $this->sites_query() ),
+				new FindExtensionUsageAbility( $this->plugins_query(), $this->themes_query(), $this->sites_query() ),
+				new ListAlertsAbility( $this->alerts_query(), $this->rules() ),
 			]
 		);
 	}
