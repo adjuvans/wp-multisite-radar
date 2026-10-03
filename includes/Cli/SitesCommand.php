@@ -1,7 +1,6 @@
 <?php
 namespace MultisiteRadar\Cli;
 
-use MultisiteRadar\Plugin;
 use function WP_CLI\Utils\format_items;
 
 defined( 'ABSPATH' ) || exit;
@@ -9,15 +8,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Lists the sites of the network as last scanned.
  */
-final class SitesCommand {
+final class SitesCommand extends Command {
 
 	private const DEFAULT_FIELDS = 'id,name,url,theme,users_count,content_count,media_count,last_activity_gmt,alert_level,alerts_count';
-
-	private Plugin $plugin;
-
-	public function __construct( Plugin $plugin ) {
-		$this->plugin = $plugin;
-	}
 
 	/**
 	 * Lists the sites of the network as last scanned.
@@ -71,41 +64,33 @@ final class SitesCommand {
 	 * @param array<string, mixed> $assoc_args Options.
 	 */
 	public function list_( array $args, array $assoc_args ): void {
-		$query = $this->plugin->sites_query();
-		$items = [];
-		$page  = 1;
-		do {
-			try {
-				$result = $query->list(
-					[
-						'page'        => $page,
-						'per_page'    => 100,
-						'orderby'     => 'id',
-						'search'      => (string) ( $assoc_args['search'] ?? '' ),
-						'alert_level' => isset( $assoc_args['alert'] ) ? [ (string) $assoc_args['alert'] ] : [],
-						'theme'       => (string) ( $assoc_args['theme'] ?? '' ),
-						'plugin'      => (string) ( $assoc_args['plugin'] ?? '' ),
-					]
-				);
-			} catch ( \RuntimeException $error ) {
-				do_action( 'msradar_error', __METHOD__, $error );
-				\WP_CLI::error( 'Multisite Radar could not read its data. Try again in a moment.' );
-				return;
-			}
-			foreach ( $result['items'] as $item ) {
-				$items[] = self::flatten( $item );
-			}
-			++$page;
-			$fetched = count( $items );
-		} while ( [] !== $result['items'] && $fetched < $result['total'] );
+		$query  = $this->plugin->sites_query();
+		$filter = [
+			'orderby'     => 'id',
+			'search'      => (string) ( $assoc_args['search'] ?? '' ),
+			'alert_level' => isset( $assoc_args['alert'] ) ? [ (string) $assoc_args['alert'] ] : [],
+			'theme'       => (string) ( $assoc_args['theme'] ?? '' ),
+			'plugin'      => (string) ( $assoc_args['plugin'] ?? '' ),
+		];
+		try {
+			$items = Pages::collect(
+				static function ( int $page, int $per_page ) use ( $query, $filter ): array {
+					return $query->list(
+						array_merge(
+							$filter,
+							[
+								'page'     => $page,
+								'per_page' => $per_page,
+							]
+						)
+					);
+				}
+			);
+		} catch ( \RuntimeException $error ) {
+			self::read_failed( __METHOD__, $error );
+			return;
+		}
 
-		format_items( (string) ( $assoc_args['format'] ?? 'table' ), $items, (string) ( $assoc_args['fields'] ?? self::DEFAULT_FIELDS ) );
-	}
-
-	private static function flatten( array $item ): array {
-		$item['theme']       = $item['theme']['stylesheet'];
-		$item['status']      = implode( ',', array_keys( array_filter( $item['status'] ) ) );
-		$item['alert_rules'] = implode( ',', $item['alert_rules'] );
-		return $item;
+		format_items( (string) ( $assoc_args['format'] ?? 'table' ), array_map( [ Rows::class, 'site' ], $items ), (string) ( $assoc_args['fields'] ?? self::DEFAULT_FIELDS ) );
 	}
 }

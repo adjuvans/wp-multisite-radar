@@ -29,6 +29,7 @@ final class RadarCommand {
 	public static function register( Plugin $plugin ): void {
 		WP_CLI::add_command( 'multisite-radar', new self( $plugin ) );
 		WP_CLI::add_command( 'multisite-radar sites', new SitesCommand( $plugin ) );
+		WP_CLI::add_command( 'multisite-radar alerts', new AlertsCommand( $plugin ) );
 	}
 
 	/**

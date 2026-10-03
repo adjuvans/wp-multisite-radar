@@ -2,8 +2,9 @@
 # Test d'acceptation de la spec §1.4 n° 1, sur un multisite neuf installé avec WP-CLI :
 # un CPT enregistré par un plugin actif uniquement sur /rh/ apparaît sur /rh/ avec son libellé
 # et son origine plugin, et n'apparaît pas sur le site principal.
+# Puis les commandes WP-CLI de Multisite Radar, sur ce même réseau.
 #
-# Requis : E2E_DB_NAME, E2E_DB_USER, E2E_DB_PASSWORD, E2E_DB_HOST (base existante, sans tables « msre2e_* »).
+# Requis : E2E_DB_NAME, E2E_DB_USER, E2E_DB_PASSWORD, E2E_DB_HOST (base existante, sans tables « msre2e_* ») ; jq.
 # Facultatifs : WP_CLI (commande WP-CLI, « wp » par défaut), E2E_WP_VERSION (« latest » par défaut).
 # shellcheck disable=SC2016 # Le code PHP est entre apostrophes : aucune expansion shell n'y est voulue.
 set -euo pipefail
@@ -28,6 +29,16 @@ fail() {
 	echo "E2E FAILED: $*" >&2
 	exit 1
 }
+
+# expect <description> <valeur obtenue> <valeur attendue>
+expect() {
+	if [ "$2" != "$3" ]; then
+		fail "$1: got '$2', expected '$3'."
+	fi
+	echo "ok - $1"
+}
+
+command -v jq >/dev/null 2>&1 || fail "jq is required."
 
 cleanup() {
 	if [ "$OWNS_TABLES" = 1 ]; then
@@ -108,4 +119,21 @@ echo "/rh/: " . json_encode( $rh ) . "\n";
 echo "main site: no demo_event\n";
 ' -- "$RH_JSON" "$MAIN_JSON"
 
-echo "E2E OK: the demo CPT is reported on /rh/ only, with its label and plugin origin."
+echo "ok - the demo CPT is reported on /rh/ only, with its label and plugin origin."
+
+echo "==> WP-CLI commands"
+# Un site masqué aux moteurs de recherche : il déclenche l'alerte « search_hidden ».
+HIDDEN_ID="$(wpe site create --slug=discret --title=Discret --porcelain)"
+wpe option update blog_public 0 --url="$URL/discret/" >/dev/null
+wpe multisite-radar scan --all >/dev/null
+
+expect "sites list counts every site" "$(wpe multisite-radar sites list --format=count)" "3"
+expect "alerts --rule=search_hidden lists the hidden site" \
+	"$(wpe multisite-radar alerts --rule=search_hidden --format=json | jq -r 'map(.site_id | tostring) | join(",")')" "$HIDDEN_ID"
+expect "alerts --severity=info includes the hidden site" \
+	"$(wpe multisite-radar alerts --severity=info --format=json | jq -r --arg id "$HIDDEN_ID" 'map(select((.site_id | tostring) == $id and .rule == "search_hidden")) | length')" "1"
+if wpe multisite-radar alerts --rule=acme_missing >/dev/null 2>&1; then
+	fail "alerts --rule=<unknown rule> should fail."
+fi
+
+echo "E2E OK"
