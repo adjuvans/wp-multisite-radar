@@ -17,7 +17,7 @@ Data is collected in the background with lightweight SQL queries, so the network
 
 Health alerts flag sites without users or administrators, inactive sites, large media libraries, missing themes, pending updates, http addresses on an https network, nearly full upload quotas, heavy autoloaded options, sites hidden from search engines and overdue scheduled tasks. Each rule can be switched off, given another severity and tuned in the settings.
 
-Everything is also available from the command line: `wp multisite-radar` lists sites, alerts, plugins and themes, exports them as CSV or JSON, and reads or changes the settings. Five read-only abilities of the WordPress Abilities API describe the network, its sites, the use of each plugin and theme, and its alerts; a setting, off by default, offers them to AI assistants through the MCP Adapter plugin.
+The audit is also available from the command line: `wp multisite-radar` lists sites, alerts, plugins and themes, exports them as CSV or JSON, and reads or changes the settings. Five read-only abilities of the WordPress Abilities API describe the network, its sites, the use of each plugin and theme, and its alerts; a setting, off by default, offers them to AI assistants through the MCP Adapter plugin.
 
 Source code: https://github.com/adjuvans/wp-multisite-radar
 

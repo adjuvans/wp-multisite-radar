@@ -13,8 +13,9 @@ final class ExportCommand extends Command {
 	/**
 	 * Exports the sites, plugins or themes of the network, like the export buttons of the admin pages.
 	 *
-	 * Any filter of the matching REST route can be given as an option, e.g. --alert_level=error,warning or
-	 * --search=blog for sites, --status=unused for plugins and themes. Lists are comma-separated.
+	 * The filters of the export on the matching admin page can be given as options (listed below), e.g.
+	 * --alert_level=error,warning or --search=blog for sites, --status=unused for plugins and themes. Lists are
+	 * comma-separated.
 	 * Without --output, the file is written to the standard output and nothing else is printed.
 	 *
 	 * ## OPTIONS
