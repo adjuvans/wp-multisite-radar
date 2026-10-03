@@ -2,6 +2,7 @@
 namespace MultisiteRadar\Rest;
 
 use MultisiteRadar\Query\PluginsQuery;
+use MultisiteRadar\Query\Schemas;
 use MultisiteRadar\Query\SitesQuery;
 use WP_Error;
 use WP_REST_Request;
@@ -39,6 +40,7 @@ final class PluginsController extends Controller {
 					'permission_callback' => [ $this, 'can_view' ],
 					'args'                => $this->get_collection_params(),
 				],
+				'schema' => [ $this, 'get_public_item_schema' ],
 			]
 		);
 		register_rest_route(
@@ -85,5 +87,9 @@ final class PluginsController extends Controller {
 				return $this->sites_page( $this->sites, [ 'plugin' => $plugin['file'] ], $request );
 			}
 		);
+	}
+
+	public function get_item_schema(): array {
+		return Schemas::for_rest( 'msradar-plugin', Schemas::plugin() );
 	}
 }

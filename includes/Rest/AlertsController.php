@@ -3,6 +3,7 @@ namespace MultisiteRadar\Rest;
 
 use MultisiteRadar\Alerts\RuleRegistry;
 use MultisiteRadar\Query\AlertsQuery;
+use MultisiteRadar\Query\Schemas;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -34,6 +35,7 @@ final class AlertsController extends Controller {
 					'permission_callback' => [ $this, 'can_view' ],
 					'args'                => $this->get_collection_params(),
 				],
+				'schema' => [ $this, 'get_public_item_schema' ],
 			]
 		);
 		register_rest_route(
@@ -45,6 +47,7 @@ final class AlertsController extends Controller {
 					'callback'            => [ $this, 'get_summary' ],
 					'permission_callback' => [ $this, 'can_view' ],
 				],
+				'schema' => [ $this, 'get_summary_schema' ],
 			]
 		);
 	}
@@ -128,5 +131,13 @@ final class AlertsController extends Controller {
 				return $this->paginated( $result['items'], $result['total'], $per_page );
 			}
 		);
+	}
+
+	public function get_item_schema(): array {
+		return Schemas::for_rest( 'msradar-alert', Schemas::alert() );
+	}
+
+	public function get_summary_schema(): array {
+		return Schemas::for_rest( 'msradar-alerts-summary', Schemas::alerts_summary() );
 	}
 }

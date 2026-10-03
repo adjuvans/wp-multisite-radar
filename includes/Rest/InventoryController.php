@@ -2,6 +2,7 @@
 namespace MultisiteRadar\Rest;
 
 use MultisiteRadar\Query\InventoryQuery;
+use MultisiteRadar\Query\Schemas;
 use WP_Error;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -34,6 +35,7 @@ final class InventoryController extends Controller {
 					'callback'            => [ $this, 'get_summary' ],
 					'permission_callback' => [ $this, 'can_view' ],
 				],
+				'schema' => [ $this, 'get_public_item_schema' ],
 			]
 		);
 	}
@@ -47,5 +49,9 @@ final class InventoryController extends Controller {
 				return new WP_REST_Response( $this->inventory->summary() );
 			}
 		);
+	}
+
+	public function get_item_schema(): array {
+		return Schemas::for_rest( 'msradar-inventory-summary', Schemas::inventory_summary() );
 	}
 }

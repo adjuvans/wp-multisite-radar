@@ -1,9 +1,10 @@
 <?php
 namespace MultisiteRadar\Rest;
 
+use MultisiteRadar\Query\ScanStatusQuery;
+use MultisiteRadar\Query\Schemas;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Scan\BatchRunner;
-use MultisiteRadar\Scan\Lock;
 use MultisiteRadar\Scan\Queue;
 use MultisiteRadar\Storage\SitesRepository;
 use WP_Error;
@@ -25,13 +26,13 @@ final class ScanController extends Controller {
 	private SitesRepository $sites;
 	private BatchRunner $runner;
 	private Queue $queue;
-	private Lock $lock;
+	private ScanStatusQuery $status;
 
-	public function __construct( SitesRepository $sites, BatchRunner $runner, Queue $queue, Lock $lock ) {
+	public function __construct( SitesRepository $sites, BatchRunner $runner, Queue $queue, ScanStatusQuery $status ) {
 		$this->sites  = $sites;
 		$this->runner = $runner;
 		$this->queue  = $queue;
-		$this->lock   = $lock;
+		$this->status = $status;
 	}
 
 	public function register_routes(): void {
@@ -92,6 +93,7 @@ final class ScanController extends Controller {
 					'callback'            => [ $this, 'get_status' ],
 					'permission_callback' => [ $this, 'can_view' ],
 				],
+				'schema' => [ $this, 'get_status_schema' ],
 			]
 		);
 	}
@@ -165,16 +167,10 @@ final class ScanController extends Controller {
 	}
 
 	private function status(): array {
-		$network_id = get_current_network_id();
-		$last       = (int) get_site_option( Queue::LAST_FULL_SCAN, 0 );
-		$next       = Queue::next_run();
-		return [
-			'total'              => $this->sites->count_all( $network_id ),
-			'remaining'          => $this->sites->count_dirty( $network_id ),
-			'pending'            => $this->sites->count_pending( $network_id ),
-			'locked'             => $this->lock->is_locked(),
-			'last_full_scan_gmt' => $last > 0 ? gmdate( 'Y-m-d\TH:i:s', $last ) : null,
-			'next_run_gmt'       => null !== $next ? gmdate( 'Y-m-d\TH:i:s', $next ) : null,
-		];
+		return $this->status->status();
+	}
+
+	public function get_status_schema(): array {
+		return Schemas::for_rest( 'msradar-scan-status', Schemas::scan_status() );
 	}
 }

@@ -2,6 +2,7 @@
 namespace MultisiteRadar\Rest;
 
 use MultisiteRadar\Alerts\Severity;
+use MultisiteRadar\Query\Schemas;
 use MultisiteRadar\Query\SiteUsersQuery;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Storage\SitesRepository;
@@ -266,70 +267,9 @@ final class SitesController extends Controller {
 	}
 
 	public function get_item_schema(): array {
-		if ( $this->schema ) {
-			return $this->add_additional_fields_schema( $this->schema );
+		if ( ! $this->schema ) {
+			$this->schema = Schemas::for_rest( 'msradar-site', Schemas::site() );
 		}
-		$int          = [
-			'type'     => 'integer',
-			'readonly' => true,
-		];
-		$nullable_int = [
-			'type'     => [ 'integer', 'null' ],
-			'readonly' => true,
-		];
-		$date         = [
-			'type'     => [ 'string', 'null' ],
-			'format'   => 'date-time',
-			'readonly' => true,
-		];
-
-		$this->schema = [
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'msradar-site',
-			'type'       => 'object',
-			'properties' => [
-				'id'                => $int,
-				'name'              => [ 'type' => 'string' ],
-				'url'               => [
-					'type'   => 'string',
-					'format' => 'uri',
-				],
-				'admin_url'         => [
-					'type'   => 'string',
-					'format' => 'uri',
-				],
-				'status'            => [ 'type' => 'object' ],
-				'theme'             => [ 'type' => 'object' ],
-				'users_count'       => $int,
-				'admins_count'      => $int,
-				'content_count'     => $int,
-				'media_count'       => $int,
-				'disk_bytes'        => $nullable_int,
-				'disk_is_estimate'  => [
-					'type'     => 'boolean',
-					'readonly' => true,
-				],
-				'db_bytes'          => $nullable_int,
-				'autoload_bytes'    => $nullable_int,
-				'last_activity_gmt' => $date,
-				'alert_level'       => [
-					'type' => 'string',
-					'enum' => Severity::names(),
-				],
-				'alerts_count'      => $int,
-				'alert_rules'       => [
-					'type'  => 'array',
-					'items' => [ 'type' => 'string' ],
-				],
-				'registry_status'   => [
-					'type' => 'string',
-					'enum' => SitesQuery::REGISTRY_STATUSES,
-				],
-				'pending'           => [ 'type' => 'boolean' ],
-				'dirty'             => [ 'type' => 'boolean' ],
-				'scanned_at_gmt'    => $date,
-			],
-		];
 		return $this->add_additional_fields_schema( $this->schema );
 	}
 }

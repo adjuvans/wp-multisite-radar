@@ -21,6 +21,7 @@ use MultisiteRadar\Install\LegacyMigration;
 use MultisiteRadar\Query\AlertsQuery;
 use MultisiteRadar\Query\InventoryQuery;
 use MultisiteRadar\Query\PluginsQuery;
+use MultisiteRadar\Query\ScanStatusQuery;
 use MultisiteRadar\Query\SiteUsersQuery;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Query\ThemesQuery;
@@ -87,6 +88,8 @@ final class Plugin {
 	private ?NetworkStateWatcher $state_watcher = null;
 
 	private ?SitesQuery $sites_query = null;
+
+	private ?ScanStatusQuery $scan_status_query = null;
 
 	private ?SiteUsersQuery $site_users_query = null;
 
@@ -171,7 +174,7 @@ final class Plugin {
 			new ThemesController( $this->themes_query(), $this->sites_query() ),
 			new UsersController( $this->users_query() ),
 			new InventoryController( $this->inventory_query() ),
-			new ScanController( $this->sites(), $this->runner(), $this->queue(), $this->lock() ),
+			new ScanController( $this->sites(), $this->runner(), $this->queue(), $this->scan_status_query() ),
 			new SettingsController( $this->settings(), $this->rules() ),
 			new AlertsController( $this->alerts_query() ),
 			new AlertRulesController( $this->rules() ),
@@ -284,6 +287,10 @@ final class Plugin {
 
 	public function sites_query(): SitesQuery {
 		return $this->sites_query ??= new SitesQuery( $this->sites(), $this->extensions(), $this->formatter(), $this->settings() );
+	}
+
+	public function scan_status_query(): ScanStatusQuery {
+		return $this->scan_status_query ??= new ScanStatusQuery( $this->sites(), $this->lock() );
 	}
 
 	public function alerts_query(): AlertsQuery {

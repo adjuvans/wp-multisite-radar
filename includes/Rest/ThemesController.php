@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Rest;
 
+use MultisiteRadar\Query\Schemas;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Query\ThemesQuery;
 use WP_Error;
@@ -39,6 +40,7 @@ final class ThemesController extends Controller {
 					'permission_callback' => [ $this, 'can_view' ],
 					'args'                => $this->get_collection_params(),
 				],
+				'schema' => [ $this, 'get_public_item_schema' ],
 			]
 		);
 		// Même motif que la route wp/v2/themes du cœur : un dossier, éventuellement dans un sous-dossier.
@@ -86,5 +88,9 @@ final class ThemesController extends Controller {
 				return $this->sites_page( $this->sites, [ 'theme' => $theme['stylesheet'] ], $request );
 			}
 		);
+	}
+
+	public function get_item_schema(): array {
+		return Schemas::for_rest( 'msradar-theme', Schemas::theme() );
 	}
 }

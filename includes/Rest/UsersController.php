@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Rest;
 
+use MultisiteRadar\Query\Schemas;
 use MultisiteRadar\Query\UsersQuery;
 use WP_Error;
 use WP_REST_Request;
@@ -36,6 +37,7 @@ final class UsersController extends Controller {
 					'permission_callback' => [ $this, 'can_view' ],
 					'args'                => $this->get_collection_params(),
 				],
+				'schema' => [ $this, 'get_public_item_schema' ],
 			]
 		);
 	}
@@ -89,5 +91,9 @@ final class UsersController extends Controller {
 				return $this->paginated( $result['items'], $result['total'], $per_page );
 			}
 		);
+	}
+
+	public function get_item_schema(): array {
+		return Schemas::for_rest( 'msradar-user', Schemas::user() );
 	}
 }
