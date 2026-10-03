@@ -97,7 +97,9 @@ Points mineurs relevés pendant l'exécution du plan M4 (`2026-10-02-multisite-r
 - `DiskMeter` : un lien symbolique saute le compteur `++$seen`, donc un dossier qui n'en contient que n'atteint jamais le contrôle du budget en cours de dossier. `scandir()` charge un dossier d'un coup : un seul dossier énorme peut dépasser le budget (le noter dans le docblock, ou passer à `DirectoryIterator`). Un sous-dossier illisible est ignoré et le résultat reste « complet ».
 - Taille des tables : `is_main_site()` vaut aussi pour le site principal d'un réseau secondaire (préfixe numéroté) ; sans conséquence, mais `$prefix === $wpdb->base_prefix` serait exact.
 - `disk_quota` : un quota de 0 Mo propre au site ne déclenche jamais l'alerte (WordPress le lit comme « aucun envoi autorisé ») ; ni testé, ni documenté.
-- `NetworkStateWatcher::check()` n'a ni `try/catch` ni `msradar_error` (rien ne lève aujourd'hui dans `signature()`). Un lot de recalcul en cours peut réécrire son curseur après que `check()` l'a supprimé : les sites avant le curseur gardent leurs alertes jusqu'au recalcul quotidien.
+- `NetworkStateWatcher::check()` n'a ni `try/catch` ni `msradar_error` (rien ne lève aujourd'hui dans `signature()`).
+- Pas de budget de temps sur la requête `information_schema` (parade du §14 de la spec) : l'indication diffère entre MySQL (`MAX_EXECUTION_TIME`) et MariaDB (`max_statement_time`) ; la requête est déjà limitée à une liste explicite de tables.
+- Une liste de mises à jour absente (en cours de reconstruction) compte comme vide : si le recalcul quotidien tombe dans cet intervalle, les alertes « mises à jour en attente » disparaissent jusqu'au recalcul suivant.
 
 **JS.**
 - Fiche d'un site : avec `overdue_count` > 0 et `oldest_overdue_gmt` nul, `cronSummary` affiche « échue depuis — ».
@@ -108,4 +110,4 @@ Points mineurs relevés pendant l'exécution du plan M4 (`2026-10-02-multisite-r
 - Non couverts côté PHP : le contrôle de budget en cours de dossier (les tests n'utilisent que 0.0), le repli quand `information_schema` renvoie `NULL` (sans privilège), `scanned_at` nul pour `search_hidden`, `heavy_autoload` et `cron_overdue` (seule `no_admin` l'est), `deleted_theme`, `upgrader_process_complete` et le transient `update_themes` (même chemin de code), `_fields` sur `/alert-rules` et l'encodage `{}` sur la réponse envoyée ou préchargée (testé seulement sur `get_data()`).
 - `SchemaTest::test_version_2_adds_the_siteurl_column` vérifie maintenant la version 3 : son nom est trompeur. `RulesTest` (thème manquant) suppose `twentytwentyfive` installé (commenté).
 - Non couverts côté JS : la branche nulle de `cron` (tiret) ; un test de la fiche s'intitule « dashes » mais passe `overdue_count` à 0 ; pas de test de `changes()` pour un réglage de type tableau (`analysis_plugins`).
-- E2E des réglages : `months=6` est rétabli hors d'un `finally`/`afterEach` ; un échec en cours de test laisse 9. `.first()` sur les textes d'alerte tolère les doublons, et le champ numérique est cherché tantôt dans l'application, tantôt dans la page.
+- E2E des réglages : `.first() sur les textes d'alerte tolère les doublons, et le champ numérique est cherché tantôt dans l'application, tantôt dans la page.

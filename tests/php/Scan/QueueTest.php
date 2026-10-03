@@ -327,12 +327,13 @@ final class QueueTest extends TestCase {
 	public function test_a_cursor_written_under_another_network_state_restarts_from_the_first_site(): void {
 		$this->make_record( 3601, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
 		$this->make_record( 3602, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		$full = $this->queue->recompute_alerts();
 		$this->queue->recompute_alerts( null, 0.0 );
 		$this->assertIsArray( get_site_option( self::CURSOR ), 'A paused pass leaves a cursor.' );
 
 		update_site_option( NetworkStateWatcher::OPTION, 'another-network-state' );
 
-		$this->assertGreaterThanOrEqual( 2, $this->queue->recompute_alerts(), 'Both sites are evaluated again, not only those after the cursor.' );
+		$this->assertSame( $full, $this->queue->recompute_alerts(), 'Every site is evaluated again, not only those after the cursor.' );
 	}
 
 	public function test_an_integer_cursor_from_2_0_0_alpha_1_restarts_from_the_first_site(): void {
