@@ -44,7 +44,7 @@ final class ExportHandler {
 
 		// Premier accès aux données avant tout en-tête et tout octet : un échec donne encore un vrai 500.
 		try {
-			$this->sources[ $params['resource'] ]->check( $params['filters'] );
+			$this->check( $params );
 		} catch ( \RuntimeException $error ) {
 			do_action( 'msradar_error', __METHOD__, $error );
 			wp_die( esc_html__( 'The export could not be read from the database.', 'multisite-radar' ), '', [ 'response' => 500 ] );
@@ -123,6 +123,16 @@ final class ExportHandler {
 			'fields'   => [] === $fields ? $known : $fields,
 			'filters'  => $filters,
 		];
+	}
+
+	/**
+	 * Première lecture de la ressource, avant toute écriture : une base illisible donne encore une vraie erreur.
+	 *
+	 * @param array $params Résultat de params().
+	 * @throws \RuntimeException Si la lecture échoue.
+	 */
+	public function check( array $params ): void {
+		$this->sources[ $params['resource'] ]->check( (array) $params['filters'] );
 	}
 
 	/**

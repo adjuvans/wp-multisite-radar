@@ -294,4 +294,29 @@ final class ExportHandlerTest extends TestCase {
 		}
 		wp_set_current_user( $user );
 	}
+
+	public function test_check_reads_the_resource_once_and_passes_a_failure_on(): void {
+		global $wpdb;
+		$params = $this->handler->params(
+			[
+				'resource' => 'sites',
+				'format'   => 'json',
+			]
+		);
+		$this->assertIsArray( $params );
+		$this->handler->check( $params );
+
+		$guard    = $this->break_sites_reads();
+		$previous = $wpdb->suppress_errors( true );
+		add_filter( 'query', $guard );
+		try {
+			$this->handler->check( $params );
+			$this->fail( 'A failed read was expected.' );
+		} catch ( \RuntimeException $error ) {
+			$this->assertNotSame( '', $error->getMessage() );
+		} finally {
+			remove_filter( 'query', $guard );
+			$wpdb->suppress_errors( $previous );
+		}
+	}
 }

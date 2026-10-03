@@ -150,4 +150,17 @@ expect "themes list: the active theme is used by every site" \
 expect "themes list --unused never lists the active theme" \
 	"$(wpe multisite-radar themes list --unused --format=json | jq -r --arg theme "$ACTIVE_THEME" 'all(.[]; .status == "unused") and (map(.stylesheet) | index($theme) == null)')" "true"
 
+EXPORT="$WORK/sites.json"
+wpe multisite-radar export --resource=sites --format=json --output="$EXPORT" >/dev/null
+expect "export --output writes the sites as JSON" "$(jq -r '"\(.meta.resource) \(.items | length)"' "$EXPORT")" "sites 3"
+expect "export applies the filters of the REST route" \
+	"$(wpe multisite-radar export --resource=sites --format=json --alert_level=info | jq -r '.items | map(.id | tostring) | join(",")')" "$HIDDEN_ID"
+CSV="$(wpe multisite-radar export --resource=plugins --fields=file,status)"
+expect "export without --output writes CSV on the standard output" \
+	"$(grep -c '^msradar-demo-cpt/msradar-demo-cpt.php,local' <<<"$CSV")" "1"
+if wpe multisite-radar export --resource=sites --output="$WORK/missing/sites.csv" >/dev/null 2>&1; then
+	fail "export to a missing folder should fail."
+fi
+[ ! -e "$WORK/missing" ] || fail "export to a missing folder created it."
+
 echo "E2E OK"
