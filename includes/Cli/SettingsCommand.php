@@ -14,6 +14,9 @@ final class SettingsCommand extends Command {
 	/**
 	 * Prints the settings, or one setting by its dotted path.
 	 *
+	 * Only modified settings are stored, but alerts.rules.<rule> shows the effective configuration of the rule (enabled,
+	 * severity, params), defaults included.
+	 *
 	 * ## OPTIONS
 	 *
 	 * [<key>]
@@ -43,7 +46,15 @@ final class SettingsCommand extends Command {
 		$value    = $settings->all();
 		if ( isset( $args[0] ) ) {
 			$missing = new \stdClass();
-			$value   = $settings->get( (string) $args[0], $missing );
+			$keys    = explode( '.', (string) $args[0] );
+			$source  = $settings->all();
+			$rule    = 'alerts' === $keys[0] && 'rules' === ( $keys[1] ?? '' ) ? $this->plugin->rules()->get( (string) ( $keys[2] ?? '' ) ) : null;
+			if ( null !== $rule ) {
+				// Les réglages ne gardent que ce qui a été modifié : la règle se lit dans sa configuration effective.
+				$source = $this->plugin->evaluator()->config( $rule );
+				$keys   = array_slice( $keys, 3 );
+			}
+			$value = self::dig( $source, $keys, $missing );
 			if ( $missing === $value ) {
 				WP_CLI::error( sprintf( 'Unknown setting: %s', (string) $args[0] ) );
 				return;
@@ -100,5 +111,22 @@ final class SettingsCommand extends Command {
 			return;
 		}
 		WP_CLI::success( sprintf( 'Updated %s.', $key ) );
+	}
+
+	/**
+	 * @param array<string, mixed> $source  Arbre de valeurs.
+	 * @param string[]             $keys    Chemin à parcourir (vide : tout l'arbre).
+	 * @param object               $missing Valeur renvoyée si le chemin n'existe pas.
+	 * @return mixed
+	 */
+	private static function dig( array $source, array $keys, $missing ) {
+		$value = $source;
+		foreach ( $keys as $key ) {
+			if ( ! is_array( $value ) || ! array_key_exists( $key, $value ) ) {
+				return $missing;
+			}
+			$value = $value[ $key ];
+		}
+		return $value;
 	}
 }
