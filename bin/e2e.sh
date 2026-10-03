@@ -182,12 +182,25 @@ if wpe multisite-radar settings get scan.unknown_key >/dev/null 2>&1; then
 	fail "settings get accepted an unknown key."
 fi
 expect "a refused change leaves the setting as it was" "$(wpe multisite-radar settings get scan.full_rescan_days)" "14"
+# Une règle jamais modifiée se lit dans sa configuration effective (valeurs par défaut comprises).
+expect "settings get reads the default parameter of an untouched rule" "$(wpe multisite-radar settings get alerts.rules.inactive.params.months)" "6"
+expect "settings get shows the effective configuration of a rule" "$(wpe multisite-radar settings get alerts.rules.inactive | jq -c '{enabled, severity}')" '{"enabled":true,"severity":"warning"}'
+if wpe multisite-radar settings get alerts.rules.acme_missing >/dev/null 2>&1; then
+	fail "settings get accepted an unknown rule."
+fi
+echo "ok - settings get refuses an unknown rule"
 wpe multisite-radar settings set alerts.rules.search_hidden '{"enabled":false}' >/dev/null
 expect "a rule switched off from the command line lists no alert" "$(wpe multisite-radar alerts --rule=search_hidden --format=count)" "0"
 
 SUMMARY="$(wpe --user=admin eval '$response = rest_do_request( new WP_REST_Request( "GET", "/wp-abilities/v1/abilities/multisite-radar/network-summary/run" ) ); echo wp_json_encode( [ "status" => $response->get_status(), "data" => $response->get_data() ] );')"
 expect "the network-summary ability runs over REST" "$(jq -r '"\(.status) \(.data.scan.total)"' <<<"$SUMMARY")" "200 3"
 SITE="$(MSRADAR_E2E_SITE="$HIDDEN_ID" wpe --user=admin eval '$request = new WP_REST_Request( "GET", "/wp-abilities/v1/abilities/multisite-radar/get-site/run" ); $request->set_query_params( [ "input" => [ "id" => getenv( "MSRADAR_E2E_SITE" ) ] ] ); $response = rest_do_request( $request ); echo wp_json_encode( [ "status" => $response->get_status(), "data" => $response->get_data() ] );')"
-expect "the get-site ability reads a site whose ID arrives as text" "$(jq -r '"\(.status) \(.data.name)"' <<<"$SITE")" "200 Discret"
+expect "the get-site ability reads a site through the REST run route" "$(jq -r '"\(.status) \(.data.name)"' <<<"$SITE")" "200 Discret"
+
+# Le réglage atteint l'ability enregistrée dans un nouveau processus.
+wpe multisite-radar settings set integrations.mcp_public true >/dev/null
+expect "the MCP switch reaches the registered ability" "$(wpe eval 'echo wp_json_encode( wp_get_ability( "multisite-radar/list-sites" )->get_meta_item( "mcp" ) );' | jq -r '.public')" "true"
+wpe multisite-radar settings set integrations.mcp_public false >/dev/null
+expect "the MCP switch off reaches the registered ability" "$(wpe eval 'echo wp_json_encode( wp_get_ability( "multisite-radar/list-sites" )->get_meta_item( "mcp" ) );' | jq -r '.public')" "false"
 
 echo "E2E OK"
