@@ -66,18 +66,22 @@ test.describe( 'Advanced health (milestone M4)', () => {
 			} );
 		};
 
-		let months = await open();
-		await expect( months ).toHaveValue( '6' );
-		await months.fill( '9' );
-		await app.getByRole( 'button', { name: 'Save settings' } ).click();
-		await expect( saved ).toBeVisible();
+		let months;
+		try {
+			months = await open();
+			await expect( months ).toHaveValue( '6' );
+			await months.fill( '9' );
+			await app.getByRole( 'button', { name: 'Save settings' } ).click();
+			await expect( saved ).toBeVisible();
 
-		months = await open();
-		await expect( months ).toHaveValue( '9' );
-
-		// Remet la valeur par défaut : le test reste rejouable.
-		await months.fill( '6' );
-		await app.getByRole( 'button', { name: 'Save settings' } ).click();
-		await expect( saved ).toBeVisible();
+			months = await open();
+			await expect( months ).toHaveValue( '9' );
+		} finally {
+			// Remet la valeur par défaut, même si une assertion a échoué : le test reste rejouable.
+			months = await open();
+			await months.fill( '6' );
+			await app.getByRole( 'button', { name: 'Save settings' } ).click();
+			await expect( saved ).toBeVisible();
+		}
 	} );
 } );
