@@ -54,6 +54,7 @@ final class ThemesController extends Controller {
 					'permission_callback' => [ $this, 'can_view' ],
 					'args'                => self::sites_page_params(),
 				],
+				'schema' => [ $this, 'get_sites_schema' ],
 			]
 		);
 	}
@@ -88,6 +89,13 @@ final class ThemesController extends Controller {
 				return $this->sites_page( $this->sites, [ 'theme' => $theme['stylesheet'] ], $request );
 			}
 		);
+	}
+
+	/**
+	 * Schéma des sites d'une extension (même élément que /sites).
+	 */
+	public function get_sites_schema(): array {
+		return Schemas::for_rest( 'msradar-site', Schemas::site() );
 	}
 
 	public function get_item_schema(): array {

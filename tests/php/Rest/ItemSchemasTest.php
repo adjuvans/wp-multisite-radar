@@ -57,6 +57,39 @@ final class ItemSchemasTest extends RestTestCase {
 		$this->assertEqualsCanonicalizing( array_keys( $item ), array_keys( $options['schema']['properties'] ), $route );
 	}
 
+	/**
+	 * Les routes qui demandent des données en plus (membre d'un site, extension utilisée) : même comparaison.
+	 */
+	public function test_the_schema_of_the_detail_and_sub_routes_describes_what_they_return(): void {
+		$site_id = self::factory()->blog->create();
+		add_user_to_blog( $site_id, 1, 'administrator' );
+		$this->make_record( 963, [ 'name' => 'Uses things', 'theme_stylesheet' => 'msradar-parent', 'theme_template' => 'msradar-parent' ] );
+		wp_cache_set(
+			'plugins',
+			[ '' => [ 'alpha/alpha.php' => [ 'Name' => 'Alpha', 'Version' => '1.0' ] ] ],
+			'plugins'
+		);
+		$this->plugin()->extensions()->replace_for_site( 963, [ 'alpha/alpha.php' ], '', '' );
+
+		$cases = [
+			'/sites/961'                 => false,
+			"/sites/{$site_id}/users"    => true,
+			'/plugins/alpha/alpha/sites' => true,
+			'/themes/msradar-parent/sites' => true,
+		];
+		foreach ( $cases as $route => $is_list ) {
+			$response = $this->request( 'GET', $route );
+			$this->assertSame( 200, $response->get_status(), $route );
+			$data = $response->get_data();
+			$item = $is_list ? ( $data[0] ?? null ) : $data;
+			$this->assertIsArray( $item, "$route returned nothing to compare." );
+
+			$options = $this->server->dispatch( new WP_REST_Request( 'OPTIONS', '/multisite-radar/v1' . $route ) )->get_data();
+			$this->assertArrayHasKey( 'schema', $options, "$route publishes no schema." );
+			$this->assertEqualsCanonicalizing( array_keys( $item ), array_keys( $options['schema']['properties'] ), $route );
+		}
+	}
+
 	public function test_the_site_schema_accepts_a_site_that_was_never_analysed(): void {
 		$this->make_record( 962, [ 'name' => 'Never analysed' ] );
 		$site = $this->plugin()->sites_query()->get( 962 );

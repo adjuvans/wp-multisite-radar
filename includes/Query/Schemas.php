@@ -84,6 +84,23 @@ final class Schemas {
 	}
 
 	/**
+	 * Un compte d'un site (SiteUsersQuery::list()). Jamais d'adresse e-mail.
+	 */
+	public static function site_user(): array {
+		return self::object(
+			[
+				'id'             => self::type( 'integer' ),
+				'login'          => self::type( 'string' ),
+				'display_name'   => self::type( 'string' ),
+				'roles'          => self::list_of( self::type( 'string' ) ),
+				'role_names'     => self::list_of( self::type( 'string' ) ),
+				'super_admin'    => self::type( 'boolean' ),
+				'registered_gmt' => self::date(),
+			]
+		);
+	}
+
+	/**
 	 * Un plugin de l'inventaire (PluginsQuery::all()).
 	 */
 	public static function plugin(): array {

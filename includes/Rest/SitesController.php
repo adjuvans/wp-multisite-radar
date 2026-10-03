@@ -58,7 +58,7 @@ final class SitesController extends Controller {
 						],
 					],
 				],
-				'schema' => [ $this, 'get_public_item_schema' ],
+				'schema' => [ $this, 'get_detail_schema' ],
 			]
 		);
 		register_rest_route(
@@ -106,6 +106,7 @@ final class SitesController extends Controller {
 						],
 					],
 				],
+				'schema' => [ $this, 'get_site_user_schema' ],
 			]
 		);
 	}
@@ -264,6 +265,17 @@ final class SitesController extends Controller {
 			return new WP_Error( 'msradar_site_not_found', __( 'Site not found.', 'multisite-radar' ), [ 'status' => 404 ] );
 		}
 		return $this->paginated( $result['items'], $result['total'], $per_page );
+	}
+
+	/**
+	 * Schéma de la fiche d'un site (/sites/{id}), plus riche que celui d'un élément de liste.
+	 */
+	public function get_detail_schema(): array {
+		return Schemas::for_rest( 'msradar-site-detail', Schemas::site_detail() );
+	}
+
+	public function get_site_user_schema(): array {
+		return Schemas::for_rest( 'msradar-site-user', Schemas::site_user() );
 	}
 
 	public function get_item_schema(): array {
