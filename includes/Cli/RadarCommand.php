@@ -30,6 +30,8 @@ final class RadarCommand {
 		WP_CLI::add_command( 'multisite-radar', new self( $plugin ) );
 		WP_CLI::add_command( 'multisite-radar sites', new SitesCommand( $plugin ) );
 		WP_CLI::add_command( 'multisite-radar alerts', new AlertsCommand( $plugin ) );
+		WP_CLI::add_command( 'multisite-radar plugins', new PluginsCommand( $plugin ) );
+		WP_CLI::add_command( 'multisite-radar themes', new ThemesCommand( $plugin ) );
 	}
 
 	/**

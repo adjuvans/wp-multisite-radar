@@ -136,4 +136,18 @@ if wpe multisite-radar alerts --rule=acme_missing >/dev/null 2>&1; then
 	fail "alerts --rule=<unknown rule> should fail."
 fi
 
+PLUGINS="$(wpe multisite-radar plugins list --format=json)"
+expect "plugins list: the demo plugin is used by one site" \
+	"$(jq -r '.[] | select(.file == "msradar-demo-cpt/msradar-demo-cpt.php") | "\(.status) \(.sites_count)"' <<<"$PLUGINS")" "local 1"
+expect "plugins list: Multisite Radar is network-activated" \
+	"$(jq -r '.[] | select(.file == "multisite-radar/multisite-radar.php") | .status' <<<"$PLUGINS")" "network"
+expect "plugins list --unused lists only unused plugins" \
+	"$(wpe multisite-radar plugins list --unused --format=json | jq -r 'all(.[]; .status == "unused") and (map(.file) | index("msradar-demo-cpt/msradar-demo-cpt.php") == null)')" "true"
+ACTIVE_THEME="$(wpe option get stylesheet)"
+THEMES="$(wpe multisite-radar themes list --format=json)"
+expect "themes list: the active theme is used by every site" \
+	"$(jq -r --arg theme "$ACTIVE_THEME" '.[] | select(.stylesheet == $theme) | "\(.status) \(.active_count)"' <<<"$THEMES")" "used 3"
+expect "themes list --unused never lists the active theme" \
+	"$(wpe multisite-radar themes list --unused --format=json | jq -r --arg theme "$ACTIVE_THEME" 'all(.[]; .status == "unused") and (map(.stylesheet) | index($theme) == null)')" "true"
+
 echo "E2E OK"
