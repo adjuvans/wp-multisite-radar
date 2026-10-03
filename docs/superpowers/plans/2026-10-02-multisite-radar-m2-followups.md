@@ -122,11 +122,12 @@ Points mineurs relevés pendant l'exécution du plan M5 (`2026-10-03-multisite-r
 - Schémas : les indicateurs `readonly` sont absents du schéma de la fiche d'un site. `ScanController::status()` reste un simple relais d'une ligne.
 - `SettingsUpdater::apply()` n'a pas de `@param` dans son docblock. `Values::parse` transforme un texte numérique en nombre : le docblock de `settings set` pourrait citer la forme `'"123"'` pour garder du texte.
 - `plugins list` et `themes list` ont des corps presque identiques. La liste explicite des filtres d'`ExportCommand` recopie `SitesExport::filters()` et `InventoryExport::filters()` : elle dérivera si un filtre est ajouté. L'aide de `export` présente `--search` et `--order` comme propres aux sites, alors que les plugins et les thèmes les acceptent.
+- `settings set` annonce un succès même si `update_site_option` échoue en silence (comportement hérité, partagé avec la route REST des réglages). `export --output=-` n'est pas traité comme la sortie standard : il écrit dans un fichier nommé « - ».
 - `export` : `fopen` sur un dossier ou un fichier non inscriptible émet un avertissement PHP avant l'erreur, et un fichier partiel reste en place après un échec en cours de lecture (il se termine par le marqueur d'interruption).
 - Abilities : le plafond de 100 résultats par page est écrit à trois endroits (schéma, `page_size()` de `Ability`, REST). `Ability::page()` divise par `per_page` sans garde propre (les appelants le bornent). `GetSiteAbility` lit `options` et `users` sans `?? []` (`SitesQuery::get` les renseigne toujours).
 
 **JS.**
-- Aucun point reporté côté composants : la carte « Intégrations » n'a rien laissé en attente.
+- La carte « Intégrations » s'affiche même quand le plugin MCP Adapter n'est pas installé : l'interrupteur n'a alors aucun effet visible (il pourrait le dire, ou la carte pourrait se masquer).
 
 **Tests et outillage.**
 - `ItemSchemasTest` ne compare que les clés de premier niveau du premier élément : les clés imbriquées et les types ne sont pas validés contre de vraies réponses (les tests des abilities valident la sortie par le noyau).
