@@ -450,3 +450,40 @@ test( 'a third-party numeric parameter without a default does not block saving',
 
 	await waitFor( () => expect( save ).toBeEnabled() );
 } );
+
+test( 'switching the MCP exposure is a change, and switching it back is not', () => {
+	const on = mergeDeep( SETTINGS, { integrations: { mcp_public: true } } );
+
+	expect( changes( SETTINGS, on, RULES ) ).toEqual( {
+		integrations: { mcp_public: true },
+	} );
+	expect( changes( on, SETTINGS, RULES ) ).toEqual( {
+		integrations: { mcp_public: false },
+	} );
+	expect( changes( SETTINGS, mergeDeep( on, SETTINGS ), RULES ) ).toEqual(
+		{}
+	);
+} );
+
+test( 'MCP exposure is off by default and can be switched on', async () => {
+	apiFetch.mockResolvedValue( {
+		...SETTINGS,
+		integrations: { mcp_public: true },
+	} );
+	setup();
+	const toggle = screen.getByRole( 'checkbox', {
+		name: /Let AI assistants read the audit through MCP/,
+	} );
+	expect( toggle ).not.toBeChecked();
+
+	fireEvent.click( toggle );
+	await act( async () => {
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Save settings' } )
+		);
+	} );
+
+	expect( apiFetch.mock.calls[ 0 ][ 0 ].data ).toEqual( {
+		integrations: { mcp_public: true },
+	} );
+} );

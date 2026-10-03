@@ -14,6 +14,7 @@ import {
 	allForm,
 	changes,
 	getSettingsFields,
+	INTEGRATIONS_FORM,
 	MENU_FORM,
 	mergeDeep,
 	SCAN_FORM,
@@ -129,6 +130,20 @@ export default function SettingsView() {
 								data={ data }
 								fields={ fields }
 								form={ MENU_FORM }
+								validity={ validity }
+								onChange={ onChange }
+							/>
+						</CardBody>
+					</Card>
+					<Card>
+						<CardHeader>
+							<h2>{ __( 'Integrations', 'multisite-radar' ) }</h2>
+						</CardHeader>
+						<CardBody>
+							<DataForm
+								data={ data }
+								fields={ fields }
+								form={ INTEGRATIONS_FORM }
 								validity={ validity }
 								onChange={ onChange }
 							/>

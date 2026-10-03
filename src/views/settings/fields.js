@@ -92,6 +92,19 @@ export function getSettingsFields( { postTypes = [], plugins = [] } ) {
 			),
 			Edit: 'toggle',
 		},
+		{
+			id: 'integrations.mcp_public',
+			type: 'boolean',
+			label: __(
+				'Let AI assistants read the audit through MCP',
+				'multisite-radar'
+			),
+			description: __(
+				'Offers the read-only abilities of Multisite Radar (network summary, sites, plugin and theme usage, alerts) to AI assistants connected with the MCP Adapter plugin. They act as the connected user, who needs the same rights as for these pages.',
+				'multisite-radar'
+			),
+			Edit: 'toggle',
+		},
 	];
 }
 
@@ -110,6 +123,11 @@ export const MENU_FORM = {
 	fields: [ 'sites_menu.enabled' ],
 };
 
+export const INTEGRATIONS_FORM = {
+	layout: { type: 'regular' },
+	fields: [ 'integrations.mcp_public' ],
+};
+
 /**
  * Formulaire complet, pour la validation : analyse, menu des sites, puis les champs de chaque règle.
  *
@@ -121,6 +139,7 @@ export function allForm( rules = [] ) {
 		fields: [
 			...SCAN_FORM.fields,
 			...MENU_FORM.fields,
+			...INTEGRATIONS_FORM.fields,
 			...rules.flatMap( ( rule ) => ruleForm( rule ).fields ),
 		],
 	};
@@ -172,6 +191,14 @@ export function changes( saved, current, rules = [] ) {
 	} );
 	if ( !! saved.sites_menu?.enabled !== !! current.sites_menu?.enabled ) {
 		patch.sites_menu = { enabled: !! current.sites_menu?.enabled };
+	}
+	if (
+		!! saved.integrations?.mcp_public !==
+		!! current.integrations?.mcp_public
+	) {
+		patch.integrations = {
+			mcp_public: !! current.integrations?.mcp_public,
+		};
 	}
 	rules.forEach( ( rule ) => {
 		const after = ruleConfig( current, rule );
