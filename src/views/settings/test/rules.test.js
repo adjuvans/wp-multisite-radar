@@ -154,3 +154,66 @@ test( 'a changed rule is sent whole; an unchanged one is not sent', () => {
 		},
 	} );
 } );
+
+const LIMITED = {
+	id: 'acme_limit',
+	label: 'Acme limit',
+	description: 'A rule added by another plugin.',
+	default_severity: 'info',
+	default_params: {},
+	params_schema: {
+		type: 'object',
+		properties: { limit: { type: 'integer', minimum: 1 } },
+	},
+};
+
+test( 'a numeric parameter is required only when the schema or a default value asks for it', () => {
+	const required = ( rule, key ) =>
+		getRuleFields( rule ).find( ( { id } ) => id.endsWith( `.${ key }` ) )
+			.isValid.required;
+
+	expect( required( LIMITED, 'limit' ) ).toBe( false );
+	expect( required( INACTIVE, 'months' ) ).toBe( true );
+	expect(
+		required(
+			{
+				...LIMITED,
+				params_schema: {
+					...LIMITED.params_schema,
+					required: [ 'limit' ],
+				},
+			},
+			'limit'
+		)
+	).toBe( true );
+	expect( getRuleFields( LIMITED )[ 2 ].isValid.min ).toBe( 1 );
+} );
+
+test( 'a cleared optional parameter is not sent', () => {
+	const cleared = {
+		alerts: { rules: { acme_limit: { params: { limit: undefined } } } },
+	};
+	const patch = changes( {}, cleared, [ LIMITED ] );
+	expect( JSON.parse( JSON.stringify( patch ) ) ).toEqual( {} );
+} );
+
+test( 'a stored parameter that a closed schema no longer declares is dropped', () => {
+	const settings = {
+		alerts: {
+			rules: { inactive: { params: { months: 9, old_key: 1 } } },
+		},
+	};
+	const closed = {
+		...INACTIVE,
+		params_schema: {
+			...INACTIVE.params_schema,
+			additionalProperties: false,
+		},
+	};
+
+	expect( ruleConfig( settings, closed ).params ).toEqual( { months: 9 } );
+	expect( ruleConfig( settings, INACTIVE ).params ).toEqual( {
+		months: 9,
+		old_key: 1,
+	} );
+} );

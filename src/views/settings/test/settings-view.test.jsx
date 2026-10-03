@@ -65,6 +65,17 @@ const RULES = [
 		},
 	},
 	{
+		id: 'acme_limit',
+		label: 'Acme limit',
+		description: 'A rule with an optional number.',
+		default_severity: 'info',
+		default_params: {},
+		params_schema: {
+			type: 'object',
+			properties: { limit: { type: 'integer', minimum: 1 } },
+		},
+	},
+	{
 		id: 'acme_rule',
 		label: 'Acme rule',
 		description: 'A rule added by another plugin.',
@@ -375,7 +386,9 @@ test( 'a third-party rule keeps the parameters the form cannot edit', async () =
 
 	fireEvent.change(
 		within( panel ).getByRole( 'combobox', { name: 'Severity' } ),
-		{ target: { value: 'error' } }
+		{
+			target: { value: 'error' },
+		}
 	);
 	await act( async () => {
 		fireEvent.click(
@@ -424,4 +437,16 @@ test( 'rules that are not loaded yet show a skeleton; the rest of the form works
 			screen.getByRole( 'button', { name: 'Save settings' } )
 		).toBeEnabled()
 	);
+} );
+
+test( 'a third-party numeric parameter without a default does not block saving', async () => {
+	apiFetch.mockResolvedValue( SETTINGS );
+	setup();
+	const save = screen.getByRole( 'button', { name: 'Save settings' } );
+
+	fireEvent.click(
+		screen.getByRole( 'checkbox', { name: /network sites menu/ } )
+	);
+
+	await waitFor( () => expect( save ).toBeEnabled() );
 } );

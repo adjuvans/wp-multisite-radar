@@ -20,12 +20,24 @@ function isObject( value ) {
 export function ruleConfig( settings, rule ) {
 	const stored = settings?.alerts?.rules?.[ rule.id ];
 	const config = isObject( stored ) ? stored : {};
+	let storedParams = isObject( config.params ) ? config.params : {};
+	// Un schéma fermé refuse (400) un paramètre qu'il ne déclare plus, par exemple renommé : on ne le renvoie pas.
+	if ( rule.params_schema?.additionalProperties === false ) {
+		const declared = isObject( rule.params_schema.properties )
+			? rule.params_schema.properties
+			: {};
+		storedParams = Object.fromEntries(
+			Object.entries( storedParams ).filter(
+				( [ key ] ) => key in declared
+			)
+		);
+	}
 	return {
 		enabled: config.enabled ?? true,
 		severity: config.severity ?? null,
 		params: {
 			...( isObject( rule.default_params ) ? rule.default_params : {} ),
-			...( isObject( config.params ) ? config.params : {} ),
+			...storedParams,
 		},
 	};
 }
@@ -52,7 +64,18 @@ function paramField( rule, key, schema ) {
 			change( rule, { params: { [ key ]: value } } ),
 	};
 	if ( schema.type === 'integer' || schema.type === 'number' ) {
-		const isValid = { required: true };
+		// Obligatoire seulement si le schéma l'exige ou si la règle fournit une valeur : un paramètre tiers sans valeur
+		// par défaut ne doit pas bloquer l'enregistrement (le serveur l'accepte absent).
+		const requiredList = rule.params_schema?.required;
+		const hasDefault =
+			isObject( rule.default_params ) && key in rule.default_params;
+		const isValid = {
+			required:
+				schema.required === true ||
+				( Array.isArray( requiredList ) &&
+					requiredList.includes( key ) ) ||
+				hasDefault,
+		};
 		if ( typeof schema.minimum === 'number' ) {
 			isValid.min = schema.minimum;
 		}
