@@ -38,6 +38,10 @@ final class Invalidation {
 		foreach ( [ 'blogname', 'blog_public', 'siteurl', 'home' ] as $option ) {
 			add_action( 'update_option_' . $option, [ $this, 'mark_current_site' ] );
 		}
+		// Quota d'envoi propre au site, lu à l'analyse (alerte disk_quota).
+		foreach ( [ 'add_option_', 'update_option_', 'delete_option_' ] as $prefix ) {
+			add_action( $prefix . 'blog_upload_space', [ $this, 'mark_current_site' ] );
+		}
 		foreach ( [ 'make_spam_blog', 'make_ham_blog', 'archive_blog', 'unarchive_blog', 'make_delete_blog', 'make_undelete_blog' ] as $hook ) {
 			add_action( $hook, [ $this, 'mark_site' ] );
 		}

@@ -14,6 +14,12 @@ defined( 'ABSPATH' ) || exit;
  */
 final class RadarCommand {
 
+	/**
+	 * Nombre de sites entre deux vidages du cache d'objets pendant une analyse complète : changer de site charge ses
+	 * options dans un cache non persistant qui, sans cela, grossirait à chaque site.
+	 */
+	private const CACHE_FLUSH_EVERY = 50;
+
 	private Plugin $plugin;
 
 	public function __construct( Plugin $plugin ) {
@@ -87,11 +93,16 @@ final class RadarCommand {
 
 		$progress = make_progress_bar( 'Scanning sites', $total );
 		$failed   = 0;
+		$done     = 0;
 		$result   = $this->plugin->runner()->run(
 			(float) PHP_INT_MAX,
-			static function ( int $site_id, bool $ok ) use ( $progress, &$failed ): void {
+			static function ( int $site_id, bool $ok ) use ( $progress, &$failed, &$done ): void {
 				if ( ! $ok ) {
 					++$failed;
+				}
+				++$done;
+				if ( 0 === $done % self::CACHE_FLUSH_EVERY ) {
+					\WP_CLI\Utils\wp_clear_object_cache();
 				}
 				$progress->tick();
 			}
@@ -103,6 +114,9 @@ final class RadarCommand {
 		}
 		if ( $failed > 0 ) {
 			WP_CLI::warning( sprintf( '%d site(s) failed or no longer exist.', $failed ) );
+		}
+		if ( $result['remaining'] > 0 ) {
+			WP_CLI::warning( sprintf( '%d site(s) still to analyse: run the command again, or let the cron finish.', $result['remaining'] ) );
 		}
 		WP_CLI::success( sprintf( '%d site(s) scanned.', $result['processed'] ) );
 	}

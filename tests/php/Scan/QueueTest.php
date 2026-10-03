@@ -4,6 +4,7 @@ namespace MultisiteRadar\Tests\Scan;
 use MultisiteRadar\Install\Installer;
 use MultisiteRadar\Install\Schema;
 use MultisiteRadar\Scan\Lock;
+use MultisiteRadar\Scan\NetworkStateWatcher;
 use MultisiteRadar\Scan\Queue;
 use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Support\MainSite;
@@ -321,6 +322,17 @@ final class QueueTest extends TestCase {
 
 		$this->assertSame( 2, $this->queue->recompute_alerts() );
 		$this->assertSame( 3, $this->plugin()->sites()->find( 3601 )->alert_level, 'Sites before the old cursor are evaluated again.' );
+	}
+
+	public function test_a_cursor_written_under_another_network_state_restarts_from_the_first_site(): void {
+		$this->make_record( 3601, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		$this->make_record( 3602, [ 'users_count' => 0, 'scanned_at' => '2026-09-01 00:00:00' ] );
+		$this->queue->recompute_alerts( null, 0.0 );
+		$this->assertIsArray( get_site_option( self::CURSOR ), 'A paused pass leaves a cursor.' );
+
+		update_site_option( NetworkStateWatcher::OPTION, 'another-network-state' );
+
+		$this->assertGreaterThanOrEqual( 2, $this->queue->recompute_alerts(), 'Both sites are evaluated again, not only those after the cursor.' );
 	}
 
 	public function test_an_integer_cursor_from_2_0_0_alpha_1_restarts_from_the_first_site(): void {

@@ -203,10 +203,12 @@ final class Queue {
 	}
 
 	/**
-	 * Empreinte des réglages d'alertes avec lesquels un parcours a été calculé.
+	 * Empreinte des réglages d'alertes et de l'état du réseau avec lesquels un parcours a été calculé : un curseur
+	 * écrit sous un autre état (par exemple pendant que NetworkStateWatcher::check() le supprimait) repart du
+	 * premier site.
 	 */
 	private function alerts_config_hash(): string {
-		return md5( (string) wp_json_encode( $this->settings->get( 'alerts', [] ) ) );
+		return md5( (string) wp_json_encode( [ $this->settings->get( 'alerts', [] ), get_site_option( NetworkStateWatcher::OPTION, '' ) ] ) );
 	}
 
 	private function pause_recompute( int $after, string $config ): void {

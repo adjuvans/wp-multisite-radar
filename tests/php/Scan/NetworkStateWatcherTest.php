@@ -59,13 +59,22 @@ final class NetworkStateWatcherTest extends TestCase {
 		$this->assertFalse( $this->recompute_scheduled() );
 	}
 
-	public function test_an_update_installed_restarts_the_recompute(): void {
+	public function test_deleting_the_update_list_is_not_a_change_but_its_rebuild_is(): void {
 		set_site_transient( 'update_plugins', self::updates( '9.0', 1 ) );
 		$this->settle();
 
-		// WordPress efface la liste après une mise à jour (wp_clean_plugins_cache()), puis la reconstruit.
+		// WordPress efface la liste après une mise à jour (wp_clean_plugins_cache()) : ce n'est pas « aucune mise à jour ».
 		delete_site_transient( 'update_plugins' );
+		$this->assertFalse( $this->recompute_scheduled() );
 
+		// La reconstruction, sans le plugin mis à jour, relance le recalcul.
+		set_site_transient(
+			'update_plugins',
+			(object) [
+				'last_checked' => 2,
+				'response'     => [],
+			]
+		);
 		$this->assertTrue( $this->recompute_scheduled() );
 	}
 

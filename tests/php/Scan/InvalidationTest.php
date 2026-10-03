@@ -99,6 +99,12 @@ final class InvalidationTest extends TestCase {
 		$this->assertTrue( $this->dirty( $this->site_id ) );
 	}
 
+	public function test_changing_the_upload_quota_of_a_site_marks_it(): void {
+		update_blog_option( $this->site_id, 'blog_upload_space', 500 );
+
+		$this->assertTrue( $this->dirty( $this->site_id ) );
+	}
+
 	public function test_publishing_updates_last_activity_without_marking(): void {
 		switch_to_blog( $this->site_id );
 		self::factory()->post->create( [ 'post_status' => 'publish' ] );

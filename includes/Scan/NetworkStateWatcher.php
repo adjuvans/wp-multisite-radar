@@ -12,6 +12,9 @@ defined( 'ABSPATH' ) || exit;
  * jour disponibles, thèmes installés, quotas d'envoi, adresse du site principal. Sans lui, l'alerte « mises à jour
  * en attente » survivrait jusqu'au lendemain à la mise à jour de l'extension.
  *
+ * La suppression d'un transient de mises à jour n'est pas un changement : WordPress le reconstruit juste après, et
+ * c'est cette reconstruction qui déclenche la comparaison, avec la vraie liste.
+ *
  * Chaque gestionnaire coûte la lecture de l'état (transients et options du réseau, liste des thèmes en cache) ; le
  * recalcul lui-même tourne en cron, par lots bornés.
  */
@@ -35,7 +38,6 @@ final class NetworkStateWatcher {
 		foreach ( self::UPDATE_TRANSIENTS as $transient ) {
 			add_action( 'set_site_transient_' . $transient, [ $this, 'check' ] );
 		}
-		add_action( 'deleted_site_transient', [ $this, 'on_deleted_transient' ] );
 		add_action( 'deleted_theme', [ $this, 'check' ] );
 		add_action( 'upgrader_process_complete', [ $this, 'check' ] );
 		foreach ( self::QUOTA_OPTIONS as $option ) {
@@ -44,15 +46,6 @@ final class NetworkStateWatcher {
 			add_action( 'delete_site_option_' . $option, [ $this, 'check' ] );
 		}
 		add_action( 'update_option_home', [ $this, 'on_home_changed' ] );
-	}
-
-	/**
-	 * @param string $transient Nom du transient réseau supprimé.
-	 */
-	public function on_deleted_transient( $transient ): void {
-		if ( in_array( $transient, self::UPDATE_TRANSIENTS, true ) ) {
-			$this->check();
-		}
 	}
 
 	/**
