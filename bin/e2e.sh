@@ -158,6 +158,8 @@ expect "export applies the filters of the REST route" \
 CSV="$(wpe multisite-radar export --resource=plugins --fields=file,status)"
 expect "export without --output writes CSV on the standard output" \
 	"$(grep -c '^msradar-demo-cpt/msradar-demo-cpt.php,local' <<<"$CSV")" "1"
+expect "export accepts any filter of the REST route" \
+	"$(wpe multisite-radar export --resource=sites --format=json --theme="$ACTIVE_THEME" | jq '.items | length')" "3"
 if wpe multisite-radar export --resource=sites --output="$WORK/missing/sites.csv" >/dev/null 2>&1; then
 	fail "export to a missing folder should fail."
 fi

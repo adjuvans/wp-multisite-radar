@@ -43,20 +43,38 @@ final class ExportCommand extends Command {
 	 * [--output=<file>]
 	 * : Write to this file instead of the standard output. An existing file is replaced.
 	 *
-	 * [--alert_level=<levels>]
-	 * : For sites: filter by alert level (error, warning, info).
-	 *
 	 * [--search=<term>]
-	 * : For sites: filter by search term.
+	 * : Filter by search term (sites).
 	 *
-	 * [--include=<ids>]
-	 * : For sites: filter by site IDs.
-	 *
-	 * [--status=<status>]
-	 * : For plugins and themes: filter by status.
+	 * [--orderby=<orderby>]
+	 * : Sort by column (sites, plugins, themes).
 	 *
 	 * [--order=<order>]
-	 * : For sites: sort order (asc or desc).
+	 * : Sort order: asc or desc (sites).
+	 *
+	 * [--alert_level=<level>]
+	 * : Filter by alert level (error, warning, info) (sites).
+	 *
+	 * [--status=<status>]
+	 * : Filter by status (sites, plugins, themes).
+	 *
+	 * [--registry_status=<status>]
+	 * : Filter by registry status (sites).
+	 *
+	 * [--rule=<rule>]
+	 * : Filter by alert rule (sites).
+	 *
+	 * [--theme=<theme>]
+	 * : Filter by theme (sites).
+	 *
+	 * [--plugin=<plugin>]
+	 * : Filter by plugin (sites).
+	 *
+	 * [--include=<ids>]
+	 * : Filter by site IDs (sites).
+	 *
+	 * [--has_update=<bool>]
+	 * : Filter by update availability (plugins, themes).
 	 *
 	 * ## EXAMPLES
 	 *
