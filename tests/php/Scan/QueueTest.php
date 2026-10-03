@@ -303,7 +303,7 @@ final class QueueTest extends TestCase {
 		$this->assertSame(
 			[
 				'after'  => 3601,
-				'config' => md5( (string) wp_json_encode( $this->plugin()->settings()->get( 'alerts' ) ) ),
+				'config' => md5( (string) wp_json_encode( [ $this->plugin()->settings()->get( 'alerts' ), get_site_option( NetworkStateWatcher::OPTION, '' ) ] ) ),
 			],
 			get_site_option( self::CURSOR )
 		);
