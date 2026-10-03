@@ -165,4 +165,24 @@ if wpe multisite-radar export --resource=sites --output="$WORK/missing/sites.csv
 fi
 [ ! -e "$WORK/missing" ] || fail "export to a missing folder created it."
 
+expect "settings get reads a default" "$(wpe multisite-radar settings get scan.full_rescan_days)" "7"
+expect "settings get prints JSON" "$(wpe multisite-radar settings get scan.activity_post_types | jq -c .)" '["post","page"]'
+wpe multisite-radar settings set scan.full_rescan_days 14 >/dev/null
+expect "settings set changes a setting" "$(wpe multisite-radar settings get scan.full_rescan_days)" "14"
+if wpe multisite-radar settings set scan.full_rescan_days 0 >/dev/null 2>&1; then
+	fail "settings set accepted 0 days."
+fi
+if wpe multisite-radar settings set scan.unknown_key 1 >/dev/null 2>&1; then
+	fail "settings set accepted an unknown key."
+fi
+if wpe multisite-radar settings set alerts.rules.acme_missing '{"enabled":false}' >/dev/null 2>&1; then
+	fail "settings set accepted an unknown alert rule."
+fi
+if wpe multisite-radar settings get scan.unknown_key >/dev/null 2>&1; then
+	fail "settings get accepted an unknown key."
+fi
+expect "a refused change leaves the setting as it was" "$(wpe multisite-radar settings get scan.full_rescan_days)" "14"
+wpe multisite-radar settings set alerts.rules.search_hidden '{"enabled":false}' >/dev/null
+expect "a rule switched off from the command line lists no alert" "$(wpe multisite-radar alerts --rule=search_hidden --format=count)" "0"
+
 echo "E2E OK"
