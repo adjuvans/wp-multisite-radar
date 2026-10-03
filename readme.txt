@@ -3,7 +3,7 @@ Tags: multisite, network, audit, inventory, admin
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.0-beta.4
+Stable tag: 2.0.0-beta.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -17,9 +17,15 @@ Data is collected in the background with lightweight SQL queries, so the network
 
 Health alerts flag sites without users or administrators, inactive sites, large media libraries, missing themes, pending updates, http addresses on an https network, nearly full upload quotas, heavy autoloaded options, sites hidden from search engines and overdue scheduled tasks. Each rule can be switched off, given another severity and tuned in the settings.
 
+Everything is also available from the command line: `wp multisite-radar` lists sites, alerts, plugins and themes, exports them as CSV or JSON, and reads or changes the settings. Five read-only abilities of the WordPress Abilities API describe the network, its sites, the use of each plugin and theme, and its alerts; a setting, off by default, offers them to AI assistants through the MCP Adapter plugin.
+
 Source code: https://github.com/adjuvans/wp-multisite-radar
 
 == Changelog ==
+
+= 2.0.0-beta.5 =
+* WP-CLI: alerts, plugins and themes lists, exports and settings from the command line.
+* Five read-only abilities for the WordPress Abilities API, optionally offered to AI assistants through MCP.
 
 = 2.0.0-beta.4 =
 * Advanced health: disk, database and autoload sizes of each site, overdue scheduled tasks.

@@ -16,7 +16,8 @@ Points relevés pendant l'exécution du plan M2 (`2026-10-01-multisite-radar-m2-
 - commentaire de l'exclusion axe précisé (2.0.0-beta.3, plan M3) ;
 - Réglages : l'état « modifié » redevient faux au retour à la valeur initiale, et l'enregistrement n'envoie que les valeurs modifiées (2.0.0-beta.4, plan M4) ;
 - `Plugin.php` : le `use` de `ThemesController` est dans l'ordre alphabétique (2.0.0-beta.4, plan M4) ;
-- commentaire de l'audit d'accessibilité : l'exclusion vaut pour toutes les pages auditées (2.0.0-beta.4, plan M4).
+- commentaire de l'audit d'accessibilité : l'exclusion vaut pour toutes les pages auditées (2.0.0-beta.4, plan M4) ;
+- schémas d'élément des routes `/plugins`, `/themes`, `/users`, `/alerts`, `/alerts/summary`, `/inventory/summary` et `/scan/status` (2.0.0-beta.5, plan M5).
 
 ## 1. À traiter avant la 2.0 finale
 
@@ -70,7 +71,6 @@ Points relevés pendant l'exécution du plan M3 (`2026-10-02-multisite-radar-m3-
 - Inventaire des plugins : le nombre de sites d'un plugin activé sur le réseau compte tous les sites, y compris ceux qui attendent leur première analyse, alors que l'écart E8 et le docblock disent que seuls les sites analysés comptent. C'est cohérent avec `GET /plugins/{id}/sites`, mais ce n'est écrit nulle part. Le tri des noms par `strnatcasecmp` compare des octets (un nom accentué passe après l'ASCII), et `all()` est recalculé à chaque appel de `find()` et de `summary()`.
 - `/users` : un compteur de cache propre au plugin (`last_changed` du plugin, incrémenté sur `add_user_to_blog`, `remove_user_from_blog`, la création et la suppression d'un compte, `profile_update`, `granted_super_admin` et `revoked_super_admin`, la création et la suppression d'un site). WordPress 6.3 et suivants incrémente `last_changed('users')` à chaque écriture de métadonnée d'un compte, connexions comprises, si bien que le cache de dix minutes sert rarement. Les filtres d'appartenance et le tri par nombre de sites agrègent encore toutes les appartenances.
 - Installations à plusieurs réseaux : compter « inutilisé » sur toute l'installation (`active_sitewide_plugins` des autres réseaux et lignes analysées) au lieu de seulement avertir, comme le fait aujourd'hui l'avis des pages Plugins et Thèmes.
-- Schémas d'élément (`get_item_schema()`) pour `/plugins`, `/themes`, `/users` et `/inventory/summary`, ainsi que pour `AlertsController` (M2), avant M5 (Abilities).
 - Mémoïsation par requête de `PluginsQuery::all()` et de `ThemesQuery::all()` : la synthèse de l'inventaire et la liste les recalculent pendant le même chargement de page.
 - L'avis « sites pas encore analysés » dit que rien n'est compté pour ces sites, alors qu'un plugin activé sur le réseau les compte.
 - Comptage des comptes : les sites archivés, indésirables ou supprimés comptent comme des rattachements alors que le docblock cite `get_blogs_of_user()`, qui les exclut. Le drapeau super-admin est comparé avec `in_array` sensible à la casse, alors que le `IN` de SQL ignore la casse.
@@ -111,3 +111,26 @@ Points mineurs relevés pendant l'exécution du plan M4 (`2026-10-02-multisite-r
 - `SchemaTest::test_version_2_adds_the_siteurl_column` vérifie maintenant la version 3 : son nom est trompeur. `RulesTest` (thème manquant) suppose `twentytwentyfive` installé (commenté).
 - Non couverts côté JS : la branche nulle de `cron` (tiret) ; un test de la fiche s'intitule « dashes » mais passe `overdue_count` à 0 ; pas de test de `changes()` pour un réglage de type tableau (`analysis_plugins`).
 - E2E des réglages : `.first() sur les textes d'alerte tolère les doublons, et le champ numérique est cherché tantôt dans l'application, tantôt dans la page.
+
+## 5. Reportés par le plan M5
+
+Points mineurs relevés pendant l'exécution du plan M5 (`2026-10-03-multisite-radar-m5-integrations.md`), par les revues de tâche et la revue finale, et laissés pour plus tard.
+
+**Ability différée.** `multisite-radar/recent-changes` (changements récents du réseau) attend le journal d'activité de M6 : écart E1 du plan M5.
+
+**PHP.**
+- Schémas : les indicateurs `readonly` sont absents du schéma de la fiche d'un site. `ScanController::status()` reste un simple relais d'une ligne.
+- `SettingsUpdater::apply()` n'a pas de `@param` dans son docblock. `Values::parse` transforme un texte numérique en nombre : le docblock de `settings set` pourrait citer la forme `'"123"'` pour garder du texte.
+- `plugins list` et `themes list` ont des corps presque identiques. La liste explicite des filtres d'`ExportCommand` recopie `SitesExport::filters()` et `InventoryExport::filters()` : elle dérivera si un filtre est ajouté. L'aide de `export` présente `--search` et `--order` comme propres aux sites, alors que les plugins et les thèmes les acceptent.
+- `export` : `fopen` sur un dossier ou un fichier non inscriptible émet un avertissement PHP avant l'erreur, et un fichier partiel reste en place après un échec en cours de lecture (il se termine par le marqueur d'interruption).
+- Abilities : le plafond de 100 résultats par page est écrit à trois endroits (schéma, `page_size()` de `Ability`, REST). `Ability::page()` divise par `per_page` sans garde propre (les appelants le bornent). `GetSiteAbility` lit `options` et `users` sans `?? []` (`SitesQuery::get` les renseigne toujours).
+
+**JS.**
+- Aucun point reporté côté composants : la carte « Intégrations » n'a rien laissé en attente.
+
+**Tests et outillage.**
+- `ItemSchemasTest` ne compare que les clés de premier niveau du premier élément : les clés imbriquées et les types ne sont pas validés contre de vraies réponses (les tests des abilities valident la sortie par le noyau).
+- `SettingsUpdaterTest` : le contrôle « rien n'est enregistré » rend la main avant `Settings::update`, le test du schéma des paramètres ne vérifie pas que le stockage reste inchangé, et `activity_post_types` est comparé à sa valeur par défaut écrite en dur.
+- `RegistrarTest` vérifie `mcp.public` sur `definitions()`, non sur les métadonnées de l'ability enregistrée. La branche 404 des thèmes de `find-extension-usage` n'est pas testée.
+- WP-CLI : pas de test unitaire de l'erreur de règle inconnue d'`AlertsCommand` (e2e seulement, qui ne vérifie que le code de sortie non nul, comme pour le dossier manquant de `export`) ; les alertes e2e comptent sur `search_hidden` actif à la gravité « info » par défaut, sans commentaire ; pas de test e2e de `--fields` ni d'un format autre que JSON pour `plugins list` et `themes list` ; les chemins de lecture interrompue et de fichier non inscriptible de `export` ne sont pas testés ; la branche `settings get --format=yaml` non plus.
+- `tests/e2e/integrations.spec.js` : le nettoyage du bloc `finally` n'est pas protégé, si bien qu'un appel REST en échec masquerait l'erreur de l'assertion.

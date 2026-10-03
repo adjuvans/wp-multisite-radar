@@ -6,6 +6,19 @@ Pages du menu réseau « Multisite Radar » : Vue d'ensemble, Sites, Plugins, Th
 
 Règles d'alertes livrées : site sans utilisateurs, site sans administrateur, site inactif, beaucoup de médias, thème actif manquant, mises à jour en attente, adresse en http sur un réseau en https, quota d'envoi presque atteint, autoload trop lourd, masqué aux moteurs de recherche, tâches planifiées en retard. D'autres extensions peuvent en ajouter avec le filtre `msradar_alert_rules`.
 
+Ligne de commande (`wp help multisite-radar` pour le détail) :
+
+| Commande | Rôle |
+|---|---|
+| `wp multisite-radar scan --all\|--dirty\|--site=<id> [--probe]` | Analyse |
+| `wp multisite-radar sites list` | Sites, filtrables par alerte, thème, plugin |
+| `wp multisite-radar alerts [--severity] [--rule]` | Alertes, une ligne par site et par règle |
+| `wp multisite-radar plugins list [--unused]`, `themes list [--unused]` | Inventaire |
+| `wp multisite-radar export --resource=sites\|plugins\|themes [--format=csv\|json] [--output=<fichier>]` | Export, avec les filtres de la route REST |
+| `wp multisite-radar settings get [<clé>]`, `settings set <clé> <valeur>` | Réglages (clé en chemin pointé, valeur JSON) |
+
+Abilities (Abilities API de WordPress, lecture seule, droit `msradar_view`) : `multisite-radar/network-summary`, `list-sites`, `get-site`, `find-extension-usage`, `list-alerts`. Elles sont exposées en REST (`/wp-abilities/v1/abilities/<nom>/run`, en GET) et, si le réglage « Intégrations » l'autorise, aux clients MCP de l'extension MCP Adapter.
+
 - Spec : `docs/superpowers/specs/2026-10-01-multisite-radar-v2-design.md`
 - Plans : `docs/superpowers/plans/`
 

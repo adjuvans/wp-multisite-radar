@@ -1,5 +1,13 @@
 # Changelog — Multisite Radar
 
+## [2.0.0-beta.5] - 2026-10-03
+
+### Jalon M5 — Intégrations
+- WP-CLI : nouvelles commandes `wp multisite-radar alerts`, `plugins list`, `themes list`, `export` et `settings get|set`, avec les formats habituels de WP-CLI. `export` accepte les filtres de la route REST de la ressource et écrit dans un fichier ou sur la sortie standard ; `settings set` applique la validation de la page Réglages.
+- Abilities API : cinq abilities en lecture seule, `multisite-radar/network-summary`, `list-sites`, `get-site`, `find-extension-usage` et `list-alerts`, sur le site principal, réservées aux comptes qui ont le droit `msradar_view`. Aucune adresse e-mail n'est renvoyée.
+- Réglages : section « Intégrations ». L'interrupteur « Permettre aux assistants IA de lire l'audit par MCP », désactivé par défaut, les propose aux clients MCP de l'extension MCP Adapter.
+- REST : chaque route de lecture publie le schéma de ses éléments.
+
 ## [2.0.0-beta.4] - 2026-10-02
 
 ### Jalon M4 — Santé avancée

@@ -16,6 +16,7 @@ msgstr ""
 
 #. Plugin Name of the plugin
 #: multisite-radar.php
+#: includes/Abilities/Registrar.php:46
 #: includes/Admin/Menu.php:49
 #: includes/Admin/Menu.php:74
 msgid "Multisite Radar"
@@ -1851,10 +1852,11 @@ msgstr "Analysé le (UTC)"
 msgid "Network Plugin Utilities 1.x is still loaded. Remove it: Multisite Radar replaces it and has taken over its settings."
 msgstr "Network Plugin Utilities 1.x est toujours chargée. Supprimez-la : Multisite Radar la remplace et a repris ses réglages."
 
-#: includes/Plugin.php:191
+#: includes/Plugin.php:215
 msgid "Multisite Radar requires a WordPress Multisite network. It does nothing on a single site."
 msgstr "Multisite Radar nécessite un réseau WordPress Multisite et n’a aucun effet sur un site unique."
 
+#: includes/Abilities/Ability.php:50
 #: includes/Rest/Controller.php:44
 msgid "Multisite Radar could not read its data. Try again in a moment."
 msgstr "Multisite Radar n’a pas pu lire ses données. Réessayez dans un instant."
@@ -1864,22 +1866,23 @@ msgstr "Multisite Radar n’a pas pu lire ses données. Réessayez dans un insta
 msgid "Expected a JSON object."
 msgstr "Un objet JSON est attendu."
 
-#: includes/Rest/ScanController.php:164
+#: includes/Rest/ScanController.php:166
 msgid "None of the requested sites belongs to this network."
 msgstr "Aucun des sites demandés n’appartient à ce réseau."
 
 #. translators: %s: alert rule identifier.
-#: includes/Rest/SettingsController.php:78
+#: includes/Settings/SettingsUpdater.php:35
 #, php-format
 msgid "Unknown alert rule: %s"
 msgstr "Règle d’alerte inconnue : %s"
 
-#: includes/Rest/SitesController.php:167
+#: includes/Rest/SitesController.php:168
 msgid "Sites analysed, with an activity date, and no activity since this date."
 msgstr "Sites analysés, ayant une date d’activité, et sans activité depuis cette date."
 
-#: includes/Rest/SitesController.php:236
-#: includes/Rest/SitesController.php:263
+#: includes/Abilities/GetSiteAbility.php:57
+#: includes/Rest/SitesController.php:237
+#: includes/Rest/SitesController.php:264
 msgid "Site not found."
 msgstr "Site introuvable."
 
@@ -2158,7 +2161,7 @@ msgstr "Extensions"
 msgid "Themes"
 msgstr "Thèmes"
 
-#: includes/Export/ExportHandler.php:185
+#: includes/Export/ExportHandler.php:195
 msgid "Export incomplete: the data could not be read to the end. Run the export again."
 msgstr "Export incomplet : les données n’ont pas pu être lues jusqu’au bout. Relancez l’export."
 
@@ -2178,11 +2181,11 @@ msgstr "Thème actif de (sites)"
 msgid "Parent of the active theme of (sites)"
 msgstr "Parent du thème actif de (sites)"
 
-#: includes/Rest/PluginsController.php:83
+#: includes/Rest/PluginsController.php:85
 msgid "This plugin is neither installed nor active on any site."
 msgstr "Cette extension n’est ni installée ni active sur aucun site."
 
-#: includes/Rest/ThemesController.php:84
+#: includes/Rest/ThemesController.php:86
 msgid "This theme is neither installed nor used by any site."
 msgstr "Ce thème n’est ni installé ni utilisé par aucun site."
 
@@ -2421,3 +2424,122 @@ msgstr "Mises à jour disponibles pour %s"
 #: includes/Export/SitesColumns.php:27
 msgid "Disk usage is an estimate"
 msgstr "Mesure du disque partielle"
+
+#: build/admin/settings.js:2
+msgid "Let AI assistants read the audit through MCP"
+msgstr "Permettre aux assistants IA de lire l’audit par MCP"
+
+#: build/admin/settings.js:2
+msgid "Offers the read-only abilities of Multisite Radar (network summary, sites, plugin and theme usage, alerts) to AI assistants connected with the MCP Adapter plugin. They act as the connected user, who needs the same rights as for these pages."
+msgstr "Propose les outils en lecture seule de Multisite Radar (synthèse du réseau, sites, utilisation des extensions et des thèmes, alertes) aux assistants IA connectés par l’extension MCP Adapter. Ils agissent au nom de l’utilisateur connecté, qui a besoin des mêmes droits que pour ces pages."
+
+#: build/admin/settings.js:3
+msgid "Integrations"
+msgstr "Intégrations"
+
+#: includes/Abilities/Ability.php:93
+msgid "Page of results, from 1."
+msgstr "Page de résultats, à partir de 1."
+
+#: includes/Abilities/Ability.php:100
+msgid "Results per page, 100 at most."
+msgstr "Résultats par page, 100 au plus."
+
+#: includes/Abilities/FindExtensionUsageAbility.php:32
+msgid "Find where a plugin or theme is used"
+msgstr "Trouver où une extension ou un thème est utilisé"
+
+#: includes/Abilities/FindExtensionUsageAbility.php:36
+msgid "Finds the sites of the network that use a plugin (active on the site, or network-activated) or a theme (as active or parent theme), with the plugin or theme details: version, status and available update. Identify a plugin by its file, e.g. akismet/akismet.php, and a theme by its folder, e.g. twentytwentyfive."
+msgstr "Trouve les sites du réseau qui utilisent une extension (active sur le site ou activée sur le réseau) ou un thème (comme thème actif ou parent), avec les détails de l’extension ou du thème : version, état et mise à jour disponible. Identifiez une extension par son fichier, par exemple akismet/akismet.php, et un thème par son dossier, par exemple twentytwentyfive."
+
+#: includes/Abilities/FindExtensionUsageAbility.php:46
+msgid "Kind of extension."
+msgstr "Extension ou thème."
+
+#: includes/Abilities/FindExtensionUsageAbility.php:51
+msgid "Plugin file, with or without \".php\", or theme folder."
+msgstr "Fichier de l’extension, avec ou sans « .php », ou dossier du thème."
+
+#: includes/Abilities/FindExtensionUsageAbility.php:84
+msgid "This plugin or theme is neither installed nor used on any site of the network."
+msgstr "Cette extension ou ce thème n’est ni installé ni utilisé sur aucun site du réseau."
+
+#: includes/Abilities/GetSiteAbility.php:26
+msgid "Get a site"
+msgstr "Fiche d’un site"
+
+#: includes/Abilities/GetSiteAbility.php:30
+msgid "Full audit sheet of one site of the network, by its ID: measures, content types and taxonomies with the plugin or theme that registers them, users by role and privileged accounts (logins only), last content, overdue scheduled tasks, alerts with their message, active plugins and theme, and the last analysis error if any."
+msgstr "Fiche d’audit complète d’un site du réseau, à partir de son identifiant : mesures, types de contenu et taxonomies avec l’extension ou le thème qui les déclare, utilisateurs par rôle et comptes à privilèges (identifiants de connexion seulement), derniers contenus, tâches planifiées en retard, alertes avec leur message, extensions et thème actifs, et dernière erreur d’analyse le cas échéant."
+
+#: includes/Abilities/GetSiteAbility.php:39
+msgid "Site ID, as returned by multisite-radar/list-sites."
+msgstr "Identifiant du site, tel que le renvoie multisite-radar/list-sites."
+
+#: includes/Abilities/ListAlertsAbility.php:29
+msgid "List alerts"
+msgstr "Lister les alertes"
+
+#: includes/Abilities/ListAlertsAbility.php:33
+msgid "Lists the health alerts of the network, one entry per site and rule, with the severity of the current settings and a readable message: sites without users or administrators, inactive sites, large media libraries, missing themes, pending updates, http addresses on an https network, nearly full upload quotas, heavy autoloaded options, sites hidden from search engines, overdue scheduled tasks, and rules added by other plugins. Rules switched off in the settings are left out."
+msgstr "Liste les alertes de santé du réseau, une entrée par site et par règle, avec la gravité des réglages actuels et un message lisible : sites sans utilisateurs ou sans administrateurs, sites inactifs, médiathèques volumineuses, thèmes manquants, mises à jour en attente, adresses http sur un réseau https, quotas de téléversement presque pleins, options chargées automatiquement trop lourdes, sites masqués aux moteurs de recherche, tâches planifiées en retard et règles ajoutées par d’autres extensions. Les règles désactivées dans les réglages sont omises."
+
+#: includes/Abilities/ListAlertsAbility.php:46
+msgid "Only alerts of these severities."
+msgstr "Seulement les alertes de ces gravités."
+
+#: includes/Abilities/ListAlertsAbility.php:54
+msgid "Only alerts of these rules."
+msgstr "Seulement les alertes de ces règles."
+
+#: includes/Abilities/ListAlertsAbility.php:58
+#: includes/Abilities/ListSitesAbility.php:40
+msgid "Text to find in the site name or address."
+msgstr "Texte à chercher dans le nom ou l’adresse du site."
+
+#: includes/Abilities/ListAlertsAbility.php:64
+#: includes/Abilities/ListSitesAbility.php:70
+msgid "Sort key."
+msgstr "Clé de tri."
+
+#: includes/Abilities/ListAlertsAbility.php:70
+#: includes/Abilities/ListSitesAbility.php:76
+msgid "Sort direction."
+msgstr "Sens du tri."
+
+#: includes/Abilities/ListSitesAbility.php:27
+msgid "List sites"
+msgstr "Lister les sites"
+
+#: includes/Abilities/ListSitesAbility.php:31
+msgid "Lists the sites of the network as last analysed, with their theme, user, content and media counts, disk, database and autoloaded options sizes in bytes, last activity and highest alert. Filter by text, alert severity, status, theme or plugin; sort and paginate. A null size or date means it was not measured yet; \"pending\" means the site waits for its first analysis."
+msgstr "Liste les sites du réseau tels qu’ils ont été analysés en dernier, avec leur thème, leurs nombres d’utilisateurs, de contenus et de médias, les tailles du disque, de la base de données et des options chargées automatiquement en octets, la dernière activité et l’alerte la plus grave. Filtrez par texte, gravité d’alerte, état, thème ou extension ; triez et paginez. Une taille ou une date nulle signifie qu’elle n’a pas encore été mesurée ; « pending » signifie que le site attend sa première analyse."
+
+#: includes/Abilities/ListSitesAbility.php:48
+msgid "Only sites whose highest alert has one of these severities (\"none\": no alert)."
+msgstr "Seulement les sites dont l’alerte la plus grave a l’une de ces gravités (« none » : aucune alerte)."
+
+#: includes/Abilities/ListSitesAbility.php:56
+msgid "Only sites with one of these statuses."
+msgstr "Seulement les sites ayant l’un de ces états."
+
+#: includes/Abilities/ListSitesAbility.php:60
+msgid "Only sites using this theme folder, as active or parent theme."
+msgstr "Seulement les sites qui utilisent ce dossier de thème, comme thème actif ou parent."
+
+#: includes/Abilities/ListSitesAbility.php:64
+msgid "Only sites where this plugin file is active, e.g. akismet/akismet.php. A network-activated plugin matches every site."
+msgstr "Seulement les sites où ce fichier d’extension est actif, par exemple akismet/akismet.php. Une extension activée sur le réseau correspond à tous les sites."
+
+#: includes/Abilities/NetworkSummaryAbility.php:31
+msgid "Network summary"
+msgstr "Synthèse du réseau"
+
+#: includes/Abilities/NetworkSummaryAbility.php:35
+msgid "Overview of this WordPress multisite network as last analysed by Multisite Radar: number of sites and analysis progress, sites with alerts by severity and by rule, and counts of installed, unused, missing and outdated plugins and themes. Start here, then use the other Multisite Radar abilities for details."
+msgstr "Vue d’ensemble de ce réseau multisite WordPress tel que Multisite Radar l’a analysé en dernier : nombre de sites et avancement de l’analyse, sites avec alertes par gravité et par règle, et nombres d’extensions et de thèmes installés, inutilisés, manquants et obsolètes. Commencez ici, puis utilisez les autres outils de Multisite Radar pour le détail."
+
+#: includes/Abilities/Registrar.php:47
+msgid "Read-only audit of the sites, plugins, themes and alerts of this multisite network."
+msgstr "Audit en lecture seule des sites, extensions, thèmes et alertes de ce réseau multisite."
