@@ -77,6 +77,40 @@ final class ListAlertsAbilityTest extends TestCase {
 		$this->assertSame( [ 4202 ], array_column( array_column( $inactive['items'], 'site' ), 'id' ) );
 	}
 
+	public function test_a_list_sent_as_comma_separated_text_filters_like_an_array(): void {
+		$by_severity = $this->list_alerts(
+			[
+				'search'   => 'Radar alert',
+				'severity' => 'error',
+			]
+		);
+		$this->assertSame( [ 4201 ], array_column( array_column( $by_severity['items'], 'site' ), 'id' ) );
+
+		$several = $this->list_alerts(
+			[
+				'search'   => 'Radar alert',
+				'severity' => 'error,warning',
+			]
+		);
+		$this->assertEqualsCanonicalizing( [ 4201, 4202 ], array_column( array_column( $several['items'], 'site' ), 'id' ) );
+
+		$by_rule = $this->list_alerts(
+			[
+				'search' => 'Radar alert',
+				'rule'   => 'inactive',
+			]
+		);
+		$this->assertSame( [ 4202 ], array_column( array_column( $by_rule['items'], 'site' ), 'id' ) );
+
+		$both = $this->list_alerts(
+			[
+				'search' => 'Radar alert',
+				'rule'   => 'inactive, no_users',
+			]
+		);
+		$this->assertEqualsCanonicalizing( [ 4201, 4202 ], array_column( array_column( $both['items'], 'site' ), 'id' ) );
+	}
+
 	public function test_a_disabled_rule_is_left_out(): void {
 		$this->plugin()->settings()->update( [ 'alerts' => [ 'rules' => [ 'inactive' => [ 'enabled' => false ] ] ] ] );
 

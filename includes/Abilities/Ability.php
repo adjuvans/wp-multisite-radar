@@ -126,10 +126,14 @@ abstract class Ability {
 	}
 
 	/**
-	 * @param mixed $value Liste de l'entrée.
+	 * @param mixed $value Liste de l'entrée : un tableau, ou un texte de valeurs séparées par des virgules (WordPress
+	 *                     accepte les deux pour un type « array », et une ability appelée directement ne convertit rien).
 	 * @return string[]
 	 */
 	protected static function strings( $value ): array {
-		return array_values( array_map( 'strval', array_filter( (array) $value, 'is_scalar' ) ) );
+		if ( ! is_array( $value ) && ! is_scalar( $value ) ) {
+			return [];
+		}
+		return array_values( array_map( 'strval', wp_parse_list( $value ) ) );
 	}
 }

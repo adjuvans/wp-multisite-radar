@@ -62,6 +62,25 @@ final class ListSitesAbilityTest extends TestCase {
 		$this->assertNull( $result['items'][1]['scanned_at_gmt'] );
 	}
 
+	public function test_a_list_sent_as_comma_separated_text_filters_like_an_array(): void {
+		$text = $this->list_sites(
+			[
+				'search'      => 'radar-',
+				'alert_level' => 'error',
+			]
+		);
+		$this->assertSame( [ 'Alpha' ], array_column( $text['items'], 'name' ) );
+
+		$several = $this->list_sites(
+			[
+				'search'      => 'radar-',
+				'orderby'     => 'name',
+				'alert_level' => 'error,warning',
+			]
+		);
+		$this->assertSame( [ 'Alpha' ], array_column( $several['items'], 'name' ) );
+	}
+
 	public function test_filters_by_alert_level_and_paginates(): void {
 		$errors = $this->list_sites(
 			[
