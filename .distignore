@@ -31,5 +31,6 @@
 /dist
 /*.zip
 /.superpowers
+/.claude
 /.wp-env.override.json
 /.env*
