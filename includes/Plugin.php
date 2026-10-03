@@ -43,6 +43,7 @@ use MultisiteRadar\Scan\NetworkStateWatcher;
 use MultisiteRadar\Scan\Queue;
 use MultisiteRadar\Settings\Preferences;
 use MultisiteRadar\Settings\Settings;
+use MultisiteRadar\Settings\SettingsUpdater;
 use MultisiteRadar\SitesMenu\Module as SitesMenuModule;
 use MultisiteRadar\SitesMenu\SitesListCache;
 use MultisiteRadar\Storage\ExtensionsRepository;
@@ -59,6 +60,8 @@ final class Plugin {
 	private static ?Plugin $instance = null;
 
 	private ?Settings $settings = null;
+
+	private ?SettingsUpdater $settings_updater = null;
 
 	private ?Preferences $preferences = null;
 
@@ -175,7 +178,7 @@ final class Plugin {
 			new UsersController( $this->users_query() ),
 			new InventoryController( $this->inventory_query() ),
 			new ScanController( $this->sites(), $this->runner(), $this->queue(), $this->scan_status_query() ),
-			new SettingsController( $this->settings(), $this->rules() ),
+			new SettingsController( $this->settings(), $this->settings_updater() ),
 			new AlertsController( $this->alerts_query() ),
 			new AlertRulesController( $this->rules() ),
 			new PreferencesController( $this->preferences() ),
@@ -201,6 +204,10 @@ final class Plugin {
 
 	public function settings(): Settings {
 		return $this->settings ??= new Settings();
+	}
+
+	public function settings_updater(): SettingsUpdater {
+		return $this->settings_updater ??= new SettingsUpdater( $this->settings(), $this->rules() );
 	}
 
 	public function sites(): SitesRepository {

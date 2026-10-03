@@ -1,8 +1,8 @@
 <?php
 namespace MultisiteRadar\Rest;
 
-use MultisiteRadar\Alerts\RuleRegistry;
 use MultisiteRadar\Settings\Settings;
+use MultisiteRadar\Settings\SettingsUpdater;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -18,11 +18,11 @@ final class SettingsController extends Controller {
 	protected $rest_base = 'settings';
 
 	private Settings $settings;
-	private RuleRegistry $rules;
+	private SettingsUpdater $updater;
 
-	public function __construct( Settings $settings, RuleRegistry $rules ) {
+	public function __construct( Settings $settings, SettingsUpdater $updater ) {
 		$this->settings = $settings;
-		$this->rules    = $rules;
+		$this->updater  = $updater;
 	}
 
 	public function register_routes(): void {
@@ -68,26 +68,7 @@ final class SettingsController extends Controller {
 			return new WP_Error( 'msradar_invalid_settings', __( 'Expected a JSON object.', 'multisite-radar' ), [ 'status' => 400 ] );
 		}
 
-		$rules = $patch['alerts']['rules'] ?? [];
-		foreach ( is_array( $rules ) ? $rules : [] as $rule_id => $config ) {
-			$rule = $this->rules->get( (string) $rule_id );
-			if ( null === $rule ) {
-				return new WP_Error(
-					'msradar_unknown_rule',
-					/* translators: %s: alert rule identifier. */
-					sprintf( __( 'Unknown alert rule: %s', 'multisite-radar' ), (string) $rule_id ),
-					[ 'status' => 400 ]
-				);
-			}
-			if ( is_array( $config ) && array_key_exists( 'params', $config ) ) {
-				$valid = rest_validate_value_from_schema( $config['params'], $rule->params_schema(), 'params' );
-				if ( is_wp_error( $valid ) ) {
-					return new WP_Error( 'msradar_invalid_settings', $valid->get_error_message(), [ 'status' => 400 ] );
-				}
-			}
-		}
-
-		$result = $this->settings->update( $patch );
+		$result = $this->updater->apply( $patch );
 		return is_wp_error( $result ) ? $result : new WP_REST_Response( $result );
 	}
 }
