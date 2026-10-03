@@ -292,12 +292,10 @@ final class Schemas {
 	}
 
 	/**
-	 * Date UTC sans décalage (Y-m-d\TH:i:s), ou null.
+	 * Date UTC sans décalage (Y-m-d\TH:i:s), ou null. Pas de « format » : date-time (RFC 3339) exige un décalage, que
+	 * ces valeurs n'ont pas, et un validateur strict les rejetterait.
 	 */
 	private static function date(): array {
-		return [
-			'type'   => [ 'string', 'null' ],
-			'format' => 'date-time',
-		];
+		return self::type( [ 'string', 'null' ] );
 	}
 }
