@@ -1,6 +1,9 @@
 <?php
 namespace MultisiteRadar;
 
+// Avant les imports : Plugin Check ne cherche ce garde que dans les 50 premières lignes du fichier.
+defined( 'ABSPATH' ) || exit;
+
 use MultisiteRadar\Abilities\FindExtensionUsageAbility;
 use MultisiteRadar\Abilities\GetSiteAbility;
 use MultisiteRadar\Abilities\ListAlertsAbility;
@@ -55,8 +58,6 @@ use MultisiteRadar\SitesMenu\SitesListCache;
 use MultisiteRadar\Storage\ExtensionsRepository;
 use MultisiteRadar\Storage\SitesRepository;
 use MultisiteRadar\Storage\UsersRepository;
-
-defined( 'ABSPATH' ) || exit;
 
 /**
  * Conteneur : construit les services à la demande et branche les hooks.
