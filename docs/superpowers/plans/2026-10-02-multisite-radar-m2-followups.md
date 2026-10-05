@@ -33,7 +33,12 @@ Points relevés pendant l'exécution du plan M2 (`2026-10-01-multisite-radar-m2-
 - récapitulatif manqué (WP-Cron en retard) : envoyé les jours suivants, une fois (2.0.0-rc.1, plan M7) ;
 - rétention des changements inférieure à 7 jours : les 7 jours du récapitulatif sont gardés (2.0.0-rc.1, plan M7) ;
 - adresses des destinataires du récapitulatif : exception ajoutée au texte de confidentialité (2.0.0-rc.1, plan M7) ;
-- `History` : chaque étape de la tâche quotidienne (capture, purges) est indépendante (2.0.0-rc.1, plan M7).
+- `History` : chaque étape de la tâche quotidienne (capture, purges) est indépendante (2.0.0-rc.1, plan M7) ;
+- `docs/release.md` : « Attendre la CI verte sur `main` », la CI ne tournant pas sur les tags (2.0.0-rc.1, revue finale du plan M7) ;
+- captures : une vraie erreur (`.notice-error`) n'est plus masquée (2.0.0-rc.1, revue finale du plan M7) ;
+- capture 6 : période de 30 jours, comme les données de démonstration (2.0.0-rc.1, revue finale du plan M7) ;
+- capture 7 : elle commence au titre de la carte « Alert rules » (2.0.0-rc.1, revue finale du plan M7) ;
+- récapitulatif : le dernier envoi est oublié quand le récapitulatif est éteint ou que son jour change, le suivant attend le jour réglé (2.0.0-rc.1, revue finale du plan M7).
 
 ## 1. À traiter avant la 2.0 finale
 
@@ -178,7 +183,7 @@ Points mineurs relevés pendant l'exécution du plan M7 (`2026-10-05-multisite-r
 
 **PHP.**
 - `SitesMenuController` trie toute la liste en cache avant de filtrer et de découper, à chaque frappe ; `include` et `search` ensemble ignorent `search` (écrit dans le docblock).
-- Récapitulatif : changer `digest_day` pour un jour de la semaine plus tôt envoie aussitôt pour ce jour passé si le dernier envoi est plus ancien (cohérent avec l'écart E8, à écrire dans la documentation) ; « 7 jours » est écrit en dur dans la description du champ de rétention (`Digest::DAYS` côté PHP).
+- Récapitulatif : « 7 jours » est écrit en dur dans la description du champ de rétention (`Digest::DAYS` côté PHP).
 - Le docblock de la classe `History` tient en une phrase très longue sur une seule ligne.
 - `Plugin Check` : `ReplacementsWrongNumber` est à la fois dans la directive du bloc de `SitesRepository::query` et dans un ignore en ligne (redondant).
 
@@ -195,10 +200,10 @@ Points mineurs relevés pendant l'exécution du plan M7 (`2026-10-05-multisite-r
 - Aucun test ne garde les motifs de trait des graphiques (`$msradar-dashes`) : seules les couleurs sont testées, et jsdom ne permet pas de vérifier `stroke-dasharray`.
 - Audit d'accessibilité : la boucle des onglets attend zéro squelette, ce qui peut passer avant l'apparition du contenu de l'onglet (attente imposée par le plan).
 - `bin/wporg-assets/render.mjs` : la bannière dépend de la police système de repli (le PNG diffère d'une machine à l'autre) ; aucun conseil d'installer Chromium quand son lancement échoue.
-- `wporg.spec.js` : masque tous les `.notice` de `#wpbody-content`, donc aussi une vraie erreur (cibler l'avis de mise à jour, ou vérifier d'abord l'absence de `.notice-error`) ; pas d'attente après `setViewportSize` avant les captures pleine page (un graphique pourrait être pris en cours de redimensionnement).
-- Captures : la 3 coupe « Press Room » derrière le panneau, la 7 commence au milieu d'une phrase, la 6 annonce 90 jours pour 30 jours de données et le graphique des sites est plat. Le jeu de démonstration laisse 10 sites dans l'environnement de test de wp-env (sans effet sur PHPUnit, qui utilise la base locale).
+- `wporg.spec.js` : pas d'attente après `setViewportSize` avant les captures pleine page (un graphique pourrait être pris en cours de redimensionnement).
+- Captures : la 3 coupe la ligne « Press Room » derrière le panneau, et dans la 6 le graphique « Sites » est plat, son libellé « 10 » chevauchant la ligne. Le jeu de démonstration laisse 10 sites dans l'environnement de test de wp-env (sans effet sur PHPUnit, qui utilise la base locale).
 - `bin/readme.mjs` : un readme en CRLF échoue (sens sûr) ; `field()` lit tout le fichier et non l'en-tête ; le marqueur de `section()` n'est pas ancré en début de ligne ; pas de test d'une légende « 10. » ni de zéro tag.
 
 **Publication.**
-- `docs/release.md`, étape 7 : « Attendre la CI verte » devrait dire « CI verte sur `main` » (la CI ne tourne pas sur les tags).
+- Couches : `Scan\History` importe `Reports\Digest` pour une seule constante (`Digest::DAYS`), une dépendance de la couche d'analyse vers celle des rapports. Acceptée à la revue finale du plan M7.
 - Le workflow de déploiement ne vérifie pas que le tag est atteignable depuis `main` (borné par le déclenchement manuel et l'approbation de l'environnement).
