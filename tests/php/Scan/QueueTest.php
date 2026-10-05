@@ -524,4 +524,40 @@ final class QueueTest extends TestCase {
 		)['items'];
 		$this->assertSame( [ 'no_users' ], array_column( $resolved, 'subject' ) );
 	}
+
+	public function test_a_failed_alert_write_records_no_event(): void {
+		global $wpdb;
+		$this->make_record(
+			3991,
+			[
+				'name'        => 'Failing write',
+				'users_count' => 0,
+				'scanned_at'  => '2026-09-01 00:00:00',
+				'data'        => [ 'alerts' => [] ],
+			]
+		);
+		$break    = static function ( string $query ): string {
+			return 0 === strpos( $query, 'UPDATE' ) && false !== strpos( $query, 'msradar_sites' ) ? 'UPDATE msradar_missing_table SET a = 1' : $query;
+		};
+		$suppress = $wpdb->suppress_errors( true );
+		add_filter( 'query', $break );
+		try {
+			$this->plugin()->queue()->recompute_alerts();
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $suppress );
+		}
+
+		$items = $this->plugin()->events()->query(
+			[
+				'network_id' => get_current_network_id(),
+				'since'      => null,
+				'types'      => [],
+				'site_id'    => 3991,
+				'page'       => 1,
+				'per_page'   => 20,
+			]
+		)['items'];
+		$this->assertSame( [], $items, 'No alert is recorded while the alert write fails.' );
+	}
 }

@@ -106,14 +106,15 @@ final class SitesRepository {
 	}
 
 	/**
+	 * @return bool Faux si l'écriture a échoué.
 	 * @throws \LogicException Si l'enregistrement vient d'une liste.
 	 */
-	public function save_alerts( SiteRecord $record ): void {
+	public function save_alerts( SiteRecord $record ): bool {
 		if ( $record->partial ) {
 			throw new \LogicException( 'A partial site record (read from a list) cannot be written back.' );
 		}
 		global $wpdb;
-		$wpdb->update(
+		$result = $wpdb->update(
 			Schema::sites_table(),
 			[
 				'alert_level'  => $record->alert_level,
@@ -123,6 +124,7 @@ final class SitesRepository {
 			],
 			[ 'site_id' => $record->site_id ]
 		);
+		return false !== $result;
 	}
 
 	public function delete( int $site_id ): void {

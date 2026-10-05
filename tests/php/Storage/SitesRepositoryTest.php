@@ -148,12 +148,31 @@ final class SitesRepositoryTest extends TestCase {
 		$record->data         = [ 'alerts' => [ [ 'rule' => 'no_users' ] ] ];
 		$record->name         = 'Ignored';
 
-		$this->sites->save_alerts( $record );
+		$this->assertTrue( $this->sites->save_alerts( $record ) );
 		$found = $this->sites->find( 1101 );
 
 		$this->assertSame( 3, $found->alert_level );
 		$this->assertSame( [ 'no_users' ], $found->alert_rule_ids() );
 		$this->assertSame( 'Keep me', $found->name );
+	}
+
+	public function test_save_alerts_reports_a_failed_write(): void {
+		global $wpdb;
+		$record = $this->make_record( 1102, [ 'name' => 'Keep me' ] );
+		$break  = static function ( string $query ): string {
+			return 0 === strpos( $query, 'UPDATE' ) && false !== strpos( $query, 'msradar_sites' ) ? 'UPDATE msradar_missing_table SET a = 1' : $query;
+		};
+
+		$suppress = $wpdb->suppress_errors( true );
+		add_filter( 'query', $break );
+		try {
+			$saved = $this->sites->save_alerts( $record );
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $suppress );
+		}
+
+		$this->assertFalse( $saved );
 	}
 
 	public function test_save_truncates_overlong_strings_instead_of_losing_the_record(): void {

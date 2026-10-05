@@ -201,8 +201,10 @@ final class Queue {
 		$before   = [ $record->alert_level, $record->alert_rules, $record->data['alerts'] ?? null ];
 		$this->evaluator->apply( $record, $now );
 		if ( [ $record->alert_level, $record->alert_rules, $record->data['alerts'] ?? null ] !== $before ) {
-			$this->sites->save_alerts( $record );
-			$this->changes->compare( $previous, $record );
+			// Un changement n'est noté que s'il est enregistré : sinon le même événement reviendrait à chaque recalcul.
+			if ( $this->sites->save_alerts( $record ) ) {
+				$this->changes->compare( $previous, $record );
+			}
 		}
 	}
 
