@@ -29,7 +29,7 @@ final class MenuTest extends TestCase {
 		$menu = new Menu();
 		$menu->add_pages();
 
-		$this->assertSame( [ 'multisite-radar', 'multisite-radar-sites', 'multisite-radar-plugins', 'multisite-radar-themes', 'multisite-radar-users', 'multisite-radar-alerts', 'multisite-radar-settings' ], $this->slugs() );
+		$this->assertSame( [ 'multisite-radar', 'multisite-radar-sites', 'multisite-radar-plugins', 'multisite-radar-themes', 'multisite-radar-users', 'multisite-radar-alerts', 'multisite-radar-reports', 'multisite-radar-settings' ], $this->slugs() );
 		$this->assertSame( 'sites', $menu->view_for_hook( (string) get_plugin_page_hookname( 'multisite-radar-sites', 'multisite-radar' ) ) );
 		$this->assertNull( $menu->view_for_hook( 'index.php' ) );
 	}
@@ -48,7 +48,7 @@ final class MenuTest extends TestCase {
 			remove_filter( 'msradar_capability_map', $map );
 		}
 
-		$this->assertSame( [ 'multisite-radar', 'multisite-radar-sites', 'multisite-radar-plugins', 'multisite-radar-themes', 'multisite-radar-users', 'multisite-radar-alerts' ], $this->slugs() );
+		$this->assertSame( [ 'multisite-radar', 'multisite-radar-sites', 'multisite-radar-plugins', 'multisite-radar-themes', 'multisite-radar-users', 'multisite-radar-alerts', 'multisite-radar-reports' ], $this->slugs() );
 	}
 
 	public function test_render_outputs_the_application_container_for_the_current_page(): void {

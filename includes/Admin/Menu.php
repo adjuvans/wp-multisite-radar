@@ -17,6 +17,7 @@ final class Menu {
 		'themes'   => 'multisite-radar-themes',
 		'users'    => 'multisite-radar-users',
 		'alerts'   => 'multisite-radar-alerts',
+		'reports'  => 'multisite-radar-reports',
 		'settings' => 'multisite-radar-settings',
 	];
 
@@ -40,6 +41,7 @@ final class Menu {
 			'themes'   => __( 'Themes', 'multisite-radar' ),
 			'users'    => __( 'Users', 'multisite-radar' ),
 			'alerts'   => __( 'Alerts', 'multisite-radar' ),
+			'reports'  => __( 'Reports', 'multisite-radar' ),
 			'settings' => __( 'Settings', 'multisite-radar' ),
 		];
 	}

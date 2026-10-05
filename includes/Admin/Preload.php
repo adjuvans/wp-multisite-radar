@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 final class Preload {
 
 	/**
-	 * @param string $view  overview, sites, plugins, themes, users, alerts ou settings.
+	 * @param string $view  overview, sites, plugins, themes, users, alerts, reports ou settings.
 	 * @param array  $query Paramètres d'URL de la page.
 	 * @param array  $prefs Préférences complètes de l'utilisateur.
 	 * @return string[]
@@ -44,6 +44,18 @@ final class Preload {
 			case 'alerts':
 				$paths[] = ViewQuery::path( '/alerts/summary' );
 				$paths[] = ViewQuery::path( '/alerts', ViewQuery::alerts( $query, $prefs ) );
+				break;
+			case 'reports':
+				$paths[] = ViewQuery::path( '/reports/trends', [ 'days' => 90 ] );
+				$paths[] = ViewQuery::path(
+					'/events',
+					[
+						'page'     => 1,
+						'per_page' => 20,
+					]
+				);
+				// Lu seulement avec msradar_manage : une réponse 403 n'est pas gardée (Preload::run()).
+				$paths[] = ViewQuery::path( '/settings' );
 				break;
 			case 'settings':
 				$paths[] = ViewQuery::path( '/settings' );

@@ -420,3 +420,19 @@ $msradar-tones: (
 	max-width: 280px;
 	margin-bottom: 12px;
 }
+
+.msradar-reports {
+	display: grid;
+	gap: 16px;
+
+	.components-card__header {
+		gap: 16px;
+		flex-wrap: wrap;
+	}
+}
+
+.msradar-reports__trends {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: 16px;
+}

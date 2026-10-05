@@ -16,6 +16,7 @@ const VIEWS = [
 	'themes',
 	'users',
 	'alerts',
+	'reports',
 	'settings',
 ];
 
