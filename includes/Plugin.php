@@ -205,7 +205,7 @@ final class Plugin {
 	 * s'il existe, reste prioritaire.
 	 */
 	public function load_textdomain(): void {
-		load_plugin_textdomain( 'multisite-radar', false, dirname( plugin_basename( MSRADAR_FILE ) ) . '/languages' ); // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- the plugin ships its own translations.
+		load_plugin_textdomain( 'multisite-radar', false, dirname( plugin_basename( MSRADAR_FILE ) ) . '/languages' ); // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- the plugin ships its own compiled translations (languages/), also in the WordPress.org package, until language packs exist.
 	}
 
 	public function register_rest_routes(): void {

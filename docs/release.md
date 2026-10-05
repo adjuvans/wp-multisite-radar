@@ -39,6 +39,8 @@ Procédure de publication sur WordPress.org (slug `multisite-radar`, compte prin
 4. Relancer avec la case décochée.
 5. Vérifier <https://wordpress.org/plugins/multisite-radar/> : version, bannière, icône, captures. La page peut mettre quelques minutes à se mettre à jour.
 
+Le workflow construit le paquet comme `make dist` (build, traductions compilées par `bin/i18n.sh`, contrôle du contenu) : le SVN reçoit les mêmes fichiers, `.mo` et `.json` compris, que le zip soumis.
+
 Le workflow refuse une pré-version (`v2.0.0-rc.1`) et un tag qui n'est pas la version du plugin.
 
 ## Traductions

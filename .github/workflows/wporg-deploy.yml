@@ -44,11 +44,18 @@ jobs:
       - run: npm run readme:check
       - name: Check that the tag is the version of the plugin
         run: test "$(node -p "require('./package.json').version")" = "$VERSION"
-      - run: npm run build
-      - name: Build the distributable directory
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+      - name: Install WP-CLI
         run: |
-          mkdir -p /tmp/build/multisite-radar
-          rsync -a --exclude-from=.distignore ./ /tmp/build/multisite-radar/
+          curl -sSfL -o /tmp/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          sudo install -m 0755 /tmp/wp-cli.phar /usr/local/bin/wp
+          wp --version
+      # Même paquet que celui soumis : version, build, traductions compilées (bin/i18n.sh) et contrôle du contenu.
+      - name: Build the package (make dist)
+        run: make dist
       - uses: 10up/action-wordpress-plugin-deploy@2.3.0
         with:
           dry-run: ${{ inputs.dry_run }}
@@ -57,5 +64,5 @@ jobs:
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SLUG: multisite-radar
           VERSION: ${{ env.VERSION }}
-          BUILD_DIR: /tmp/build/multisite-radar
+          BUILD_DIR: ${{ github.workspace }}/dist/multisite-radar
           ASSETS_DIR: .wordpress-org
