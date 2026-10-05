@@ -315,4 +315,25 @@ final class BatchRunnerTest extends TestCase {
 		$this->assertFalse( $scanned );
 		$this->assertSame( [ 'MultisiteRadar\Scan\BatchRunner::scan_site' ], $errors );
 	}
+
+	public function test_a_plugin_activated_between_two_analyses_is_recorded(): void {
+		$site_id = self::factory()->blog->create();
+		$runner  = $this->plugin()->runner();
+		$this->assertTrue( $runner->scan_site( $site_id ) );
+
+		update_blog_option( $site_id, 'active_plugins', [ 'akismet/akismet.php' ] );
+		$this->assertTrue( $runner->scan_site( $site_id ) );
+
+		$items = $this->plugin()->events()->query(
+			[
+				'network_id' => get_current_network_id(),
+				'since'      => null,
+				'types'      => [ 'plugin_activated' ],
+				'site_id'    => $site_id,
+				'page'       => 1,
+				'per_page'   => 20,
+			]
+		)['items'];
+		$this->assertSame( [ 'akismet/akismet.php' ], array_column( $items, 'subject' ) );
+	}
 }

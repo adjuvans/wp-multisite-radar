@@ -166,4 +166,47 @@ final class InvalidationTest extends TestCase {
 		$this->assertTrue( $later, 'Later subscribers of wp_delete_site still run.' );
 		$this->assertSame( [ Invalidation::class . '::on_site_deleted' ], $errors );
 	}
+
+	/**
+	 * @return array[]
+	 */
+	private function events_of( int $site_id ): array {
+		return $this->plugin()->events()->query(
+			[
+				'network_id' => get_current_network_id(),
+				'since'      => null,
+				'types'      => [],
+				'site_id'    => $site_id,
+				'page'       => 1,
+				'per_page'   => 20,
+			]
+		)['items'];
+	}
+
+	public function test_creating_and_deleting_a_site_are_recorded_with_its_name(): void {
+		$site_id = self::factory()->blog->create( [ 'title' => 'Journal & Co' ] );
+
+		$created = $this->events_of( $site_id );
+		$this->assertSame( [ 'site_created' ], array_column( $created, 'type' ) );
+		$this->assertStringContainsString( 'Journal', (string) $created[0]['meta']['name'] );
+
+		wp_delete_site( $site_id );
+
+		$this->assertSame( [ 'site_deleted', 'site_created' ], array_column( $this->events_of( $site_id ), 'type' ) );
+		$this->assertNull( $this->plugin()->sites()->find( $site_id ), 'The site row is still removed.' );
+	}
+
+	public function test_a_network_activation_is_recorded_for_the_whole_network(): void {
+		do_action( 'activated_plugin', 'akismet/akismet.php', true );
+		do_action( 'deactivated_plugin', 'akismet/akismet.php', true );
+
+		$items = array_values(
+			array_filter(
+				$this->events_of( 0 ),
+				static fn ( array $item ): bool => 0 === $item['site_id'] && 'akismet/akismet.php' === $item['subject']
+			)
+		);
+		$this->assertSame( [ 'plugin_deactivated', 'plugin_activated' ], array_column( $items, 'type' ) );
+		$this->assertSame( [ 'network' => true ], $items[0]['meta'] );
+	}
 }

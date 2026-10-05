@@ -46,6 +46,7 @@ use MultisiteRadar\Rest\SitesController;
 use MultisiteRadar\Rest\ThemesController;
 use MultisiteRadar\Rest\UsersController;
 use MultisiteRadar\Scan\BatchRunner;
+use MultisiteRadar\Scan\ChangeLog;
 use MultisiteRadar\Scan\Invalidation;
 use MultisiteRadar\Scan\Lock;
 use MultisiteRadar\Scan\NetworkStateWatcher;
@@ -81,6 +82,7 @@ final class Plugin {
 	private ?ExtensionsRepository $extensions = null;
 
 	private ?EventsRepository $events = null;
+	private ?ChangeLog $change_log    = null;
 
 	private ?SnapshotsRepository $snapshots = null;
 
@@ -268,11 +270,15 @@ final class Plugin {
 	}
 
 	public function runner(): BatchRunner {
-		return $this->runner ??= new BatchRunner( $this->sites(), $this->extensions(), $this->collector(), $this->evaluator(), $this->lock() );
+		return $this->runner ??= new BatchRunner( $this->sites(), $this->extensions(), $this->collector(), $this->evaluator(), $this->lock(), $this->change_log() );
 	}
 
 	public function extensions(): ExtensionsRepository {
 		return $this->extensions ??= new ExtensionsRepository();
+	}
+
+	public function change_log(): ChangeLog {
+		return $this->change_log ??= new ChangeLog( $this->events() );
 	}
 
 	public function events(): EventsRepository {
@@ -302,7 +308,7 @@ final class Plugin {
 	}
 
 	public function queue(): Queue {
-		return $this->queue ??= new Queue( $this->runner(), $this->sites(), $this->evaluator(), $this->settings() );
+		return $this->queue ??= new Queue( $this->runner(), $this->sites(), $this->evaluator(), $this->settings(), $this->change_log() );
 	}
 
 	public function sites_list_cache(): SitesListCache {
@@ -314,7 +320,7 @@ final class Plugin {
 	}
 
 	public function invalidation(): Invalidation {
-		return $this->invalidation ??= new Invalidation( $this->sites(), $this->extensions(), $this->settings() );
+		return $this->invalidation ??= new Invalidation( $this->sites(), $this->extensions(), $this->settings(), $this->change_log() );
 	}
 
 	public function state_watcher(): NetworkStateWatcher {

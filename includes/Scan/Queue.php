@@ -32,13 +32,15 @@ final class Queue {
 	private SitesRepository $sites;
 	private AlertEvaluator $evaluator;
 	private Settings $settings;
+	private ChangeLog $changes;
 	private bool $processed = false;
 
-	public function __construct( BatchRunner $runner, SitesRepository $sites, AlertEvaluator $evaluator, Settings $settings ) {
+	public function __construct( BatchRunner $runner, SitesRepository $sites, AlertEvaluator $evaluator, Settings $settings, ChangeLog $changes ) {
 		$this->runner    = $runner;
 		$this->sites     = $sites;
 		$this->evaluator = $evaluator;
 		$this->settings  = $settings;
+		$this->changes   = $changes;
 	}
 
 	public function reset(): void {
@@ -195,10 +197,12 @@ final class Queue {
 	}
 
 	private function recompute_site( SiteRecord $record, int $now ): void {
-		$before = [ $record->alert_level, $record->alert_rules, $record->data['alerts'] ?? null ];
+		$previous = clone $record;
+		$before   = [ $record->alert_level, $record->alert_rules, $record->data['alerts'] ?? null ];
 		$this->evaluator->apply( $record, $now );
 		if ( [ $record->alert_level, $record->alert_rules, $record->data['alerts'] ?? null ] !== $before ) {
 			$this->sites->save_alerts( $record );
+			$this->changes->compare( $previous, $record );
 		}
 	}
 

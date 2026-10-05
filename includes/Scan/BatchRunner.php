@@ -23,13 +23,15 @@ final class BatchRunner {
 	private SiteCollector $collector;
 	private AlertEvaluator $evaluator;
 	private Lock $lock;
+	private ChangeLog $changes;
 
-	public function __construct( SitesRepository $sites, ExtensionsRepository $extensions, SiteCollector $collector, AlertEvaluator $evaluator, Lock $lock ) {
+	public function __construct( SitesRepository $sites, ExtensionsRepository $extensions, SiteCollector $collector, AlertEvaluator $evaluator, Lock $lock, ChangeLog $changes ) {
 		$this->sites      = $sites;
 		$this->extensions = $extensions;
 		$this->collector  = $collector;
 		$this->evaluator  = $evaluator;
 		$this->lock       = $lock;
+		$this->changes    = $changes;
 	}
 
 	/**
@@ -130,6 +132,7 @@ final class BatchRunner {
 	 */
 	public function scan_site( int $site_id ): bool {
 		$this->sites->clear_dirty( $site_id );
+		$before = $this->previous( $site_id );
 
 		try {
 			$record = $this->collector->collect( $site_id );
@@ -163,8 +166,21 @@ final class BatchRunner {
 			return false;
 		}
 
+		$this->changes->compare( $before, $record );
 		do_action( 'msradar_site_scanned', $site_id, $record );
 		return true;
+	}
+
+	/**
+	 * L'état enregistré avant l'analyse, pour le journal des changements. Une lecture qui échoue ne bloque pas l'analyse.
+	 */
+	private function previous( int $site_id ): ?SiteRecord {
+		try {
+			return $this->sites->find( $site_id );
+		} catch ( \RuntimeException $error ) {
+			do_action( 'msradar_error', __METHOD__, $error );
+			return null;
+		}
 	}
 
 	private function record_failure( int $site_id, string $message ): void {

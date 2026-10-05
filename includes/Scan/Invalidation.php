@@ -19,11 +19,13 @@ final class Invalidation {
 	private SitesRepository $sites;
 	private ExtensionsRepository $extensions;
 	private Settings $settings;
+	private ChangeLog $changes;
 
-	public function __construct( SitesRepository $sites, ExtensionsRepository $extensions, Settings $settings ) {
+	public function __construct( SitesRepository $sites, ExtensionsRepository $extensions, Settings $settings, ChangeLog $changes ) {
 		$this->sites      = $sites;
 		$this->extensions = $extensions;
 		$this->settings   = $settings;
+		$this->changes    = $changes;
 	}
 
 	public function register(): void {
@@ -74,7 +76,10 @@ final class Invalidation {
 			return;
 		}
 		if ( $network_wide ) {
-			$this->sites->mark_all_dirty( get_current_network_id() );
+			$network_id = get_current_network_id();
+			$this->sites->mark_all_dirty( $network_id );
+			$type = ( 'activated_plugin' === current_action() ) ? 'plugin_activated' : 'plugin_deactivated';
+			$this->changes->record( $network_id, 0, $type, (string) $plugin, [ 'network' => true ] );
 			return;
 		}
 		$this->sites->mark_dirty( [ get_current_blog_id() ] );
@@ -117,6 +122,7 @@ final class Invalidation {
 			function () use ( $site ): void {
 				// WP_Site::$site_id contient l'ID du réseau.
 				$this->sites->insert_pending( (int) $site->blog_id, (int) $site->site_id, $site->domain . $site->path );
+				$this->changes->record( (int) $site->site_id, (int) $site->blog_id, 'site_created', $site->domain . $site->path, [ 'name' => (string) get_blog_option( (int) $site->blog_id, 'blogname', '' ) ] );
 			}
 		);
 	}
@@ -125,6 +131,15 @@ final class Invalidation {
 		if ( ! $this->ready() ) {
 			return;
 		}
+		// Le nom est lu avant la suppression de la ligne ; une lecture qui échoue n'empêche pas la suppression.
+		$name = '';
+		$this->safely(
+			__METHOD__,
+			function () use ( $site, &$name ): void {
+				$record = $this->sites->find( (int) $site->blog_id );
+				$name   = null !== $record ? $record->name : '';
+			}
+		);
 		$this->safely(
 			__METHOD__,
 			function () use ( $site ): void {
@@ -132,6 +147,7 @@ final class Invalidation {
 				$this->extensions->delete_for_site( (int) $site->blog_id );
 			}
 		);
+		$this->changes->record( (int) $site->site_id, (int) $site->blog_id, 'site_deleted', $site->domain . $site->path, [ 'name' => $name ] );
 	}
 
 	/**

@@ -483,4 +483,45 @@ final class QueueTest extends TestCase {
 
 		$this->assertSame( 0, $this->plugin()->sites()->count_dirty( $network ) );
 	}
+
+	public function test_the_alert_recompute_records_raised_and_resolved_alerts(): void {
+		$this->make_record(
+			3990,
+			[
+				'name'        => 'Recompute journal',
+				'users_count' => 0,
+				'scanned_at'  => '2026-09-01 00:00:00',
+				'data'        => [ 'alerts' => [] ],
+			]
+		);
+
+		$this->plugin()->queue()->recompute_alerts();
+
+		$items = $this->plugin()->events()->query(
+			[
+				'network_id' => get_current_network_id(),
+				'since'      => null,
+				'types'      => [],
+				'site_id'    => 3990,
+				'page'       => 1,
+				'per_page'   => 20,
+			]
+		)['items'];
+		$this->assertContains( [ 'alert_raised', 'no_users' ], array_map( static fn ( array $item ): array => [ $item['type'], $item['subject'] ], $items ) );
+
+		$this->plugin()->settings()->update( [ 'alerts' => [ 'rules' => [ 'no_users' => [ 'enabled' => false ] ] ] ] );
+		$this->plugin()->queue()->recompute_alerts();
+
+		$resolved = $this->plugin()->events()->query(
+			[
+				'network_id' => get_current_network_id(),
+				'since'      => null,
+				'types'      => [ 'alert_resolved' ],
+				'site_id'    => 3990,
+				'page'       => 1,
+				'per_page'   => 20,
+			]
+		)['items'];
+		$this->assertSame( [ 'no_users' ], array_column( $resolved, 'subject' ) );
+	}
 }
