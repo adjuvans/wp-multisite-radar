@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest';
 import {
+	chunkIds,
 	idsToTokens,
 	mergeSites,
 	sitesPath,
@@ -61,4 +62,16 @@ test( 'known sites are merged by ID, the latest name winning', () => {
 		{ id: 12, name: 'Blog RH' },
 		{ id: 20, name: 'Events' },
 	] );
+} );
+
+test( 'chosen IDs are read in chunks of at most 100, the server cap', () => {
+	const ids = Array.from( { length: 250 }, ( _, index ) => index + 1 );
+	const chunks = chunkIds( ids );
+	expect( chunks.map( ( chunk ) => chunk.length ) ).toEqual( [
+		100, 100, 50,
+	] );
+	expect( chunks.flat() ).toEqual( ids );
+	expect( chunkIds( [] ) ).toEqual( [] );
+	expect( chunkIds( [ 1, 2, 3 ] ) ).toEqual( [ [ 1, 2, 3 ] ] );
+	expect( chunkIds( [ 1, 2, 3 ], 2 ) ).toEqual( [ [ 1, 2 ], [ 3 ] ] );
 } );

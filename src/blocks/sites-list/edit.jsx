@@ -10,6 +10,7 @@ import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import ServerSideRender from '@wordpress/server-side-render';
 import {
+	chunkIds,
 	idsToTokens,
 	mergeSites,
 	sitesPath,
@@ -38,13 +39,12 @@ function useSites( chosen ) {
 		if ( ! missingKey ) {
 			return;
 		}
-		apiFetch( {
-			path: sitesPath( {
-				include: missingKey.split( ',' ).map( Number ),
-			} ),
-		} )
-			.then( remember )
-			.catch( () => {} );
+		// La route refuse plus de 100 identifiants : un lot par requête, un lot en échec laisse ses jetons en « #12 ».
+		chunkIds( missingKey.split( ',' ).map( Number ) ).forEach( ( ids ) =>
+			apiFetch( { path: sitesPath( { include: ids } ) } )
+				.then( remember )
+				.catch( () => {} )
+		);
 	}, [ missingKey, remember ] );
 
 	// Fonction stable : useDebounce en recrée une à chaque changement de son argument.

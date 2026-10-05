@@ -19,6 +19,26 @@ export function sitesPath( { search = '', include = [] } = {} ) {
 }
 
 /**
+ * Nombre maximal d'identifiants que la route accepte dans `include`.
+ */
+export const MAX_INCLUDE = 100;
+
+/**
+ * Découpe des identifiants en lots que la route accepte, pour en lire les noms un lot par requête.
+ *
+ * @param {number[]} ids  Identifiants.
+ * @param {number}   size Taille d'un lot.
+ * @return {number[][]} Les lots, dans l'ordre ; aucun lot pour une liste vide.
+ */
+export function chunkIds( ids, size = MAX_INCLUDE ) {
+	const chunks = [];
+	for ( let index = 0; index < ids.length; index += size ) {
+		chunks.push( ids.slice( index, index + size ) );
+	}
+	return chunks;
+}
+
+/**
  * Sites connus, sans doublon : un site déjà connu prend le nom le plus récent et garde sa place.
  *
  * @param {Array} current  Sites connus.
