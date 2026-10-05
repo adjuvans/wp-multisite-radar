@@ -9,6 +9,7 @@ import { buildPath } from '../../store/paths';
 import AlertsTab from './alerts-tab';
 import ContentTab from './content-tab';
 import ExtensionsTab from './extensions-tab';
+import HistoryTab from './history-tab';
 import SummaryTab from './summary-tab';
 import UsersTab from './users-tab';
 
@@ -19,6 +20,7 @@ function tabs() {
 		{ name: 'users', title: __( 'Users', 'multisite-radar' ) },
 		{ name: 'extensions', title: __( 'Extensions', 'multisite-radar' ) },
 		{ name: 'alerts', title: __( 'Alerts', 'multisite-radar' ) },
+		{ name: 'history', title: __( 'History', 'multisite-radar' ) },
 	];
 }
 
@@ -32,6 +34,8 @@ function Tab( { name, site } ) {
 			return <ExtensionsTab site={ site } />;
 		case 'alerts':
 			return <AlertsTab site={ site } />;
+		case 'history':
+			return <HistoryTab key={ site.id } siteId={ site.id } />;
 		default:
 			return <SummaryTab site={ site } />;
 	}

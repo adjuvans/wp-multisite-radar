@@ -487,3 +487,27 @@ test( 'MCP exposure is off by default and can be switched on', async () => {
 		integrations: { mcp_public: true },
 	} );
 } );
+
+test( 'the retention of the history is saved', async () => {
+	apiFetch.mockResolvedValue( {
+		...SETTINGS,
+		retention: { ...SETTINGS.retention, events_days: 30 },
+	} );
+	setup();
+
+	fireEvent.change(
+		screen.getByRole( 'spinbutton', {
+			name: /Keep the changes for \(days\)/,
+		} ),
+		{ target: { value: '30' } }
+	);
+	await act( async () => {
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Save settings' } )
+		);
+	} );
+
+	expect( apiFetch.mock.calls[ 0 ][ 0 ].data ).toEqual( {
+		retention: { events_days: 30 },
+	} );
+} );

@@ -138,7 +138,7 @@ final class AssetsTest extends RestTestCase {
 		$config = $this->assets()->config( 'overview' );
 
 		$this->assertSame( 'overview', $config['view'] );
-		$this->assertSame( [ '/multisite-radar/v1/preferences', '/multisite-radar/v1/inventory/summary', '/multisite-radar/v1/scan/status' ], array_keys( $config['preload'] ) );
+		$this->assertSame( [ '/multisite-radar/v1/preferences', '/multisite-radar/v1/inventory/summary', '/multisite-radar/v1/scan/status', '/multisite-radar/v1/events?page=1&per_page=5', '/multisite-radar/v1/reports/trends?days=30' ], array_keys( $config['preload'] ) );
 		$this->assertSame( $errors + 1, did_action( 'msradar_error' ) );
 	}
 

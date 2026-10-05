@@ -17,6 +17,7 @@ import {
 	INTEGRATIONS_FORM,
 	MENU_FORM,
 	mergeDeep,
+	RETENTION_FORM,
 	SCAN_FORM,
 } from './fields';
 import { getRuleFields } from './rule-fields';
@@ -144,6 +145,20 @@ export default function SettingsView() {
 								data={ data }
 								fields={ fields }
 								form={ INTEGRATIONS_FORM }
+								validity={ validity }
+								onChange={ onChange }
+							/>
+						</CardBody>
+					</Card>
+					<Card>
+						<CardHeader>
+							<h2>{ __( 'History', 'multisite-radar' ) }</h2>
+						</CardHeader>
+						<CardBody>
+							<DataForm
+								data={ data }
+								fields={ fields }
+								form={ RETENTION_FORM }
 								validity={ validity }
 								onChange={ onChange }
 							/>

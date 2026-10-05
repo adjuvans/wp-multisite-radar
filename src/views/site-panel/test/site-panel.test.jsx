@@ -399,3 +399,32 @@ test( 'a site analysed before the measures existed shows dashes, and no overdue 
 		within( screen.getByRole( 'dialog' ) ).getAllByText( '—' ).length
 	).toBeGreaterThanOrEqual( 3 );
 } );
+
+test( 'the History tab asks for the trends and the changes of the site', async () => {
+	setup();
+
+	fireEvent.click( screen.getByRole( 'tab', { name: 'History' } ) );
+
+	await waitFor( () => {
+		expect( apiFetch ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				path: '/multisite-radar/v1/reports/trends?days=90&site=12',
+			} )
+		);
+		expect( apiFetch ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				path: '/multisite-radar/v1/events?page=1&per_page=10&site=12',
+			} )
+		);
+	} );
+} );
+
+test( 'the History period select has a unique, explicit id', () => {
+	setup();
+
+	fireEvent.click( screen.getByRole( 'tab', { name: 'History' } ) );
+
+	expect( screen.getByRole( 'combobox', { name: 'Period' } ).id ).toBe(
+		'msradar-site-history-period'
+	);
+} );

@@ -21,6 +21,14 @@ final class Preload {
 				$paths[] = ViewQuery::path( '/alerts/summary' );
 				$paths[] = ViewQuery::path( '/inventory/summary' );
 				$paths[] = ViewQuery::path( '/scan/status' );
+				$paths[] = ViewQuery::path(
+					'/events',
+					[
+						'page'     => 1,
+						'per_page' => 5,
+					]
+				);
+				$paths[] = ViewQuery::path( '/reports/trends', [ 'days' => 30 ] );
 				break;
 			case 'sites':
 				$paths[] = ViewQuery::path( '/alerts/summary' );

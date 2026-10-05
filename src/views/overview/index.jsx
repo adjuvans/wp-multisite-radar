@@ -6,7 +6,8 @@ import Skeleton from '../../components/skeleton';
 import { useResource } from '../../hooks/use-resource';
 import { useScan } from '../../hooks/use-scan';
 import { buildPath } from '../../store/paths';
-import { ScanPanel, ScanProgress } from './scan-panel';
+import { AlertsTrend, RecentChanges } from './history';
+import { ScanPanel } from './scan-panel';
 import { Tiles, ToReview } from './tiles';
 
 function FirstRun( { total, scan, canManage } ) {
@@ -28,10 +29,11 @@ function FirstRun( { total, scan, canManage } ) {
 					total
 				) }
 			</p>
-			{ scan.running && <ScanProgress scan={ scan } /> }
-			{ canManage && ! scan.running && (
+			{ canManage && (
 				<Button
 					variant="primary"
+					isBusy={ scan.running }
+					disabled={ scan.running }
 					onClick={ () => scan.start( { scope: 'all' } ) }
 				>
 					{ __( 'Start the analysis', 'multisite-radar' ) }
@@ -80,6 +82,8 @@ export default function OverviewView() {
 					scan={ scan }
 					canManage={ canManage }
 				/>
+				<RecentChanges />
+				<AlertsTrend />
 			</div>
 		</div>
 	);

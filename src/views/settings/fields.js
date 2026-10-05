@@ -105,6 +105,26 @@ export function getSettingsFields( { postTypes = [], plugins = [] } ) {
 			),
 			Edit: 'toggle',
 		},
+		{
+			id: 'retention.events_days',
+			type: 'integer',
+			label: __( 'Keep the changes for (days)', 'multisite-radar' ),
+			description: __(
+				'Older changes are deleted every day.',
+				'multisite-radar'
+			),
+			isValid: { required: true, min: 1, max: 3650 },
+		},
+		{
+			id: 'retention.snapshots_days',
+			type: 'integer',
+			label: __( 'Keep the daily figures for (days)', 'multisite-radar' ),
+			description: __(
+				'Older daily figures, used by the trends, are deleted every day.',
+				'multisite-radar'
+			),
+			isValid: { required: true, min: 1, max: 3650 },
+		},
 	];
 }
 
@@ -128,6 +148,11 @@ export const INTEGRATIONS_FORM = {
 	fields: [ 'integrations.mcp_public' ],
 };
 
+export const RETENTION_FORM = {
+	layout: { type: 'regular' },
+	fields: [ 'retention.events_days', 'retention.snapshots_days' ],
+};
+
 /**
  * Formulaire complet, pour la validation : analyse, menu des sites, puis les champs de chaque règle.
  *
@@ -140,6 +165,7 @@ export function allForm( rules = [] ) {
 			...SCAN_FORM.fields,
 			...MENU_FORM.fields,
 			...INTEGRATIONS_FORM.fields,
+			...RETENTION_FORM.fields,
 			...rules.flatMap( ( rule ) => ruleForm( rule ).fields ),
 		],
 	};
@@ -200,6 +226,14 @@ export function changes( saved, current, rules = [] ) {
 			mcp_public: !! current.integrations?.mcp_public,
 		};
 	}
+	[ 'events_days', 'snapshots_days' ].forEach( ( key ) => {
+		if ( ! same( saved.retention?.[ key ], current.retention?.[ key ] ) ) {
+			patch.retention = {
+				...patch.retention,
+				[ key ]: current.retention?.[ key ],
+			};
+		}
+	} );
 	rules.forEach( ( rule ) => {
 		const after = ruleConfig( current, rule );
 		if ( ! same( ruleConfig( saved, rule ), after ) ) {

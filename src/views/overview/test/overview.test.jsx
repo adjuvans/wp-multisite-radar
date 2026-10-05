@@ -17,6 +17,8 @@ const PLUGINS_URL =
 	'https://example.test/wp-admin/network/admin.php?page=multisite-radar-plugins';
 const THEMES_URL =
 	'https://example.test/wp-admin/network/admin.php?page=multisite-radar-themes';
+const REPORTS_URL =
+	'https://example.test/wp-admin/network/admin.php?page=multisite-radar-reports';
 
 function summary( overrides = {} ) {
 	return {
@@ -96,6 +98,14 @@ function renderView( {
 			},
 			headers: {},
 		},
+		'/multisite-radar/v1/events?page=1&per_page=5': {
+			body: [],
+			headers: { 'X-WP-Total': '0', 'X-WP-TotalPages': '0' },
+		},
+		'/multisite-radar/v1/reports/trends?days=30': {
+			body: { days: 30, since: '2026-08-18', site: null, points: [] },
+			headers: {},
+		},
 	};
 	if ( ! preloadInventory ) {
 		delete preload[ '/multisite-radar/v1/inventory/summary' ];
@@ -103,7 +113,12 @@ function renderView( {
 	window.msradarAdmin = {
 		view: 'overview',
 		canManage,
-		pages: { sites: SITES_URL, plugins: PLUGINS_URL, themes: THEMES_URL },
+		pages: {
+			sites: SITES_URL,
+			plugins: PLUGINS_URL,
+			themes: THEMES_URL,
+			reports: REPORTS_URL,
+		},
 		preload,
 	};
 	const registry = createRegistry();
@@ -227,4 +242,41 @@ test( 'inventory tiles lead to the unused plugins and themes and to the updates'
 	).toBeInTheDocument();
 	await act( () => new Promise( ( resolve ) => setTimeout( resolve, 0 ) ) );
 	expect( apiFetch ).not.toHaveBeenCalled();
+} );
+
+test( 'during an analysis, the first-run button stays visible but disabled, and only the analysis panel shows progress', async () => {
+	renderView( {
+		data: summary( {
+			scanned_sites: 0,
+			pending_sites: 12,
+			by_severity: { error: 0, warning: 0, info: 0 },
+			by_rule: [],
+		} ),
+	} );
+
+	await act( async () => {
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Start the analysis' } )
+		);
+	} );
+
+	expect(
+		screen.getByRole( 'button', { name: 'Start the analysis' } )
+	).toBeDisabled();
+	expect( screen.getAllByRole( 'progressbar' ) ).toHaveLength( 1 );
+} );
+
+test( 'the overview shows the recent changes and the alerts of the last 30 days', () => {
+	renderView();
+
+	expect(
+		screen.getByRole( 'heading', { name: 'Recent changes' } )
+	).toBeInTheDocument();
+	expect(
+		screen.getByRole( 'link', { name: 'See all changes' } )
+	).toHaveAttribute( 'href', REPORTS_URL );
+	expect(
+		screen.getByRole( 'heading', { name: 'Alerts, last 30 days' } )
+	).toBeInTheDocument();
+	expect( screen.getByText( 'No change recorded yet.' ) ).toBeInTheDocument();
 } );
