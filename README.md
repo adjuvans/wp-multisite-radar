@@ -34,6 +34,7 @@ make i18n             # catalogue .pot, vérification et compilation des traduct
 make dist             # dist/multisite-radar-<version>.zip, filtré par .distignore
 make check            # lint + tests PHPUnit et Vitest
 make e2e WP_ENV_PORT=8890   # bout en bout ; make e2e-stop pour arrêter wp-env
+make bench            # banc de performance (BENCH_DB_*, BENCH_SITES=1000) ; résultats dans docs/benchmarks.md
 make version VERSION=2.0.0  # en-tête, constante, readme.txt, package.json et lock
 ```
 

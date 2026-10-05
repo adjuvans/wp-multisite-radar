@@ -15,7 +15,7 @@ WP_BASE_URL       ?= http://localhost:$(WP_ENV_PORT)
 export WP_ENV_PORT WP_ENV_TESTS_PORT WP_BASE_URL
 
 .DEFAULT_GOAL := help
-.PHONY: help install build i18n dist deploy-test deploy-prod lint test check e2e e2e-stop version clean
+.PHONY: help install build i18n dist deploy-test deploy-prod lint test check e2e e2e-stop bench version clean
 
 help: ## Affiche cette aide
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "} {printf "  %-12s %s\n", $$1, $$2}'
@@ -81,6 +81,9 @@ e2e: build ## Tests de bout en bout sur wp-env (Docker), laisse wp-env démarré
 
 e2e-stop: node_modules ## Arrête wp-env
 	npm run wp-env -- stop
+
+bench: build ## Banc de performance sur un multisite jetable (BENCH_DB_* requis ; BENCH_SITES=1000 par défaut)
+	bin/bench.sh
 
 version: node_modules ## Change la version partout : make version VERSION=x.y.z
 	@test -n "$(filter command line,$(origin VERSION))" || { echo "Usage : make version VERSION=x.y.z" >&2; exit 1; }
