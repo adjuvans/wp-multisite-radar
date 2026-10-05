@@ -91,11 +91,11 @@ final class SitesMenuController extends Controller {
 		$sites   = Renderer::select( $this->cache->get(), $include, [], 'name', 'asc' );
 		$search  = trim( (string) $request['search'] );
 		if ( [] === $include && '' !== $search ) {
-			$needle = remove_accents( $search );
+			$needle = Renderer::sort_key( $search );
 			$id     = ltrim( $search, '#' );
 			$sites  = array_filter(
 				$sites,
-				static fn ( array $site ): bool => false !== stripos( remove_accents( Renderer::label( $site ) ), $needle ) || (string) $site['id'] === $id
+				static fn ( array $site ): bool => false !== strpos( Renderer::sort_key( Renderer::label( $site ) ), $needle ) || (string) $site['id'] === $id
 			);
 		}
 		$limit = [] !== $include ? count( $include ) : (int) $request['per_page'];

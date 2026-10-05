@@ -78,7 +78,10 @@ final class Renderer {
 		return sprintf( '<%1$s %2$s>%3$s</%1$s>', $tag, $attributes, $items );
 	}
 
-	private static function sort_key( string $label ): string {
+	/**
+	 * Clé de tri et de recherche : minuscules (mbstring si disponible, donc aussi cyrillique ou grec) puis sans accents.
+	 */
+	public static function sort_key( string $label ): string {
 		return remove_accents( function_exists( 'mb_strtolower' ) ? mb_strtolower( $label ) : strtolower( $label ) );
 	}
 }

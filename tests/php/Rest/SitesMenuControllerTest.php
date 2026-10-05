@@ -53,6 +53,14 @@ final class SitesMenuControllerTest extends RestTestCase {
 		$this->assertSame( [ $site ], wp_list_pluck( $this->request( 'GET', '/sites-menu/sites', [ 'search' => '#' . $site ] )->get_data(), 'id' ) );
 	}
 
+	public function test_the_search_ignores_case_beyond_ascii(): void {
+		$site = self::factory()->blog->create( [ 'title' => 'Радар' ] );
+		$this->login_as( 'editor' );
+
+		$this->assertSame( [ $site ], wp_list_pluck( $this->request( 'GET', '/sites-menu/sites', [ 'search' => 'радар' ] )->get_data(), 'id' ) );
+		$this->assertSame( [ $site ], wp_list_pluck( $this->request( 'GET', '/sites-menu/sites', [ 'search' => 'РАДАР' ] )->get_data(), 'id' ) );
+	}
+
 	public function test_chosen_sites_are_read_back_by_id_with_their_name(): void {
 		$first  = self::factory()->blog->create( [ 'title' => 'Zeta' ] );
 		$second = self::factory()->blog->create( [ 'title' => 'Alpha' ] );
