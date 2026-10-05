@@ -38,6 +38,7 @@ use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Query\ThemesQuery;
 use MultisiteRadar\Query\TrendsQuery;
 use MultisiteRadar\Query\UsersQuery;
+use MultisiteRadar\Reports\Digest;
 use MultisiteRadar\Rest\AlertRulesController;
 use MultisiteRadar\Rest\AlertsController;
 use MultisiteRadar\Rest\EventsController;
@@ -113,6 +114,7 @@ final class Plugin {
 	private ?Invalidation $invalidation         = null;
 	private ?NetworkStateWatcher $state_watcher = null;
 	private ?History $history                   = null;
+	private ?Digest $digest                     = null;
 
 	private ?SitesQuery $sites_query = null;
 
@@ -173,6 +175,7 @@ final class Plugin {
 		$this->invalidation()->register();
 		$this->state_watcher()->register();
 		$this->history()->register();
+		$this->digest()->register();
 		$this->sites_menu()->register();
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 		add_action( 'wp_abilities_api_categories_init', [ $this, 'register_ability_category' ] );
@@ -213,7 +216,7 @@ final class Plugin {
 			new AlertsController( $this->alerts_query() ),
 			new AlertRulesController( $this->rules() ),
 			new EventsController( $this->events_query() ),
-			new ReportsController( $this->trends_query() ),
+			new ReportsController( $this->trends_query(), $this->digest() ),
 			new PreferencesController( $this->preferences() ),
 		];
 		foreach ( $controllers as $controller ) {
@@ -347,6 +350,10 @@ final class Plugin {
 
 	public function site_users_query(): SiteUsersQuery {
 		return $this->site_users_query ??= new SiteUsersQuery();
+	}
+
+	public function digest(): Digest {
+		return $this->digest ??= new Digest( $this->settings(), $this->events_query(), $this->alerts_query() );
 	}
 
 	public function trends_query(): TrendsQuery {

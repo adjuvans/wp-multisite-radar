@@ -3,6 +3,7 @@ namespace MultisiteRadar\Rest;
 
 use MultisiteRadar\Query\Schemas;
 use MultisiteRadar\Query\TrendsQuery;
+use MultisiteRadar\Reports\Digest;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -21,9 +22,11 @@ final class ReportsController extends Controller {
 	protected $rest_base = 'reports';
 
 	private TrendsQuery $trends;
+	private Digest $digest;
 
-	public function __construct( TrendsQuery $trends ) {
+	public function __construct( TrendsQuery $trends, Digest $digest ) {
 		$this->trends = $trends;
+		$this->digest = $digest;
 	}
 
 	public function register_routes(): void {
@@ -51,6 +54,17 @@ final class ReportsController extends Controller {
 				'schema' => [ $this, 'get_trends_schema' ],
 			]
 		);
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/digest/test',
+			[
+				[
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'send_test_digest' ],
+					'permission_callback' => [ $this, 'can_manage' ],
+				],
+			]
+		);
 	}
 
 	/**
@@ -74,5 +88,25 @@ final class ReportsController extends Controller {
 
 	public function get_trends_schema(): array {
 		return Schemas::for_rest( 'msradar-trends', Schemas::trends() );
+	}
+
+	/**
+	 * Envoie tout de suite le récapitulatif au seul utilisateur courant (écart E7). La réponse ne contient pas d'adresse.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function send_test_digest() {
+		return $this->guard(
+			function () {
+				$email = (string) wp_get_current_user()->user_email;
+				if ( ! is_email( $email ) ) {
+					return new WP_Error( 'msradar_no_email', __( 'Your account has no valid e-mail address.', 'multisite-radar' ), [ 'status' => 400 ] );
+				}
+				if ( ! $this->digest->send( [ $email ] ) ) {
+					return new WP_Error( 'msradar_mail_failed', __( 'The e-mail could not be sent. Check the e-mail settings of the server.', 'multisite-radar' ), [ 'status' => 500 ] );
+				}
+				return new WP_REST_Response( [ 'sent' => true ] );
+			}
+		);
 	}
 }

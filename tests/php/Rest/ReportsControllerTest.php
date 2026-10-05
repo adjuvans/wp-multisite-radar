@@ -67,4 +67,21 @@ final class ReportsControllerTest extends RestTestCase {
 
 		$this->assertSame( 500, $response->get_status() );
 	}
+
+	public function test_a_test_digest_goes_to_the_current_user_only(): void {
+		reset_phpmailer_instance();
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertSame( 403, $this->request( 'POST', '/reports/digest/test' )->get_status() );
+
+		$user = self::factory()->user->create( [ 'user_email' => 'tester@example.org' ] );
+		grant_super_admin( $user );
+		wp_set_current_user( $user );
+		$response = $this->request( 'POST', '/reports/digest/test' );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( [ 'sent' => true ], $response->get_data() );
+		$sent = tests_retrieve_phpmailer_instance()->mock_sent;
+		$this->assertCount( 1, $sent );
+		$this->assertSame( 'tester@example.org', $sent[0]['to'][0][0] );
+	}
 }

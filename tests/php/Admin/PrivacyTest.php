@@ -28,5 +28,6 @@ final class PrivacyTest extends TestCase {
 		$texts = array_column( \WP_Privacy_Policy_Content::get_suggested_policy_text(), 'policy_text', 'plugin_name' );
 		$this->assertArrayHasKey( 'Multisite Radar', $texts );
 		$this->assertStringContainsString( 'logins', $texts['Multisite Radar'] );
+		$this->assertStringContainsString( 'recipients', $texts['Multisite Radar'] );
 	}
 }
