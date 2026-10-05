@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1544 500" width="1544" height="500">
+	<title>Multisite Radar</title>
+	<defs>
+		<linearGradient id="msradar-background" x1="0" y1="0" x2="1" y2="1">
+			<stop offset="0" stop-color="#1e1e1e"/>
+			<stop offset="1" stop-color="#101517"/>
+		</linearGradient>
+		<linearGradient id="msradar-sweep" gradientUnits="userSpaceOnUse" x1="1240" y1="-50" x2="1499.8" y2="100">
+			<stop offset="0" stop-color="#3858e9" stop-opacity="0"/>
+			<stop offset="1" stop-color="#3858e9" stop-opacity="0.55"/>
+		</linearGradient>
+	</defs>
+	<rect width="1544" height="500" fill="url(#msradar-background)"/>
+	<g fill="none" stroke="#3858e9">
+		<circle cx="1240" cy="250" r="300" stroke-width="8"/>
+		<circle cx="1240" cy="250" r="200" stroke-width="6" stroke-opacity="0.7"/>
+		<circle cx="1240" cy="250" r="100" stroke-width="6" stroke-opacity="0.5"/>
+		<path d="M1240 -50v600M940 250h604" stroke-width="3" stroke-opacity="0.35"/>
+	</g>
+	<path d="M1240 250V-50a300 300 0 0 1 259.8 150z" fill="url(#msradar-sweep)"/>
+	<path d="M1240 250l259.8-150" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+	<circle cx="1384" cy="142" r="16" fill="#ffffff"/>
+	<circle cx="1112" cy="124" r="12" fill="#f0b849"/>
+	<circle cx="1130" cy="364" r="12" fill="#3858e9"/>
+	<circle cx="1360" cy="382" r="12" fill="#3858e9"/>
+	<circle cx="1240" cy="250" r="14" fill="#ffffff"/>
+	<g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif">
+		<text x="96" y="232" fill="#ffffff" font-size="96" font-weight="600">Multisite Radar</text>
+		<text x="98" y="300" fill="#c3c4c7" font-size="36">Audit every site of your WordPress network</text>
+	</g>
+</svg>

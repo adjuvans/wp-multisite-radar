@@ -10,6 +10,12 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Menu {
 
+	/**
+	 * Icône du menu : le radar de l'icône du plugin (bin/wporg-assets/menu-icon.svg), en une couleur que l'administration
+	 * remplace par celle du jeu de couleurs de l'utilisateur.
+	 */
+	public const ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCI+PHBhdGggZmlsbD0iYmxhY2siIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTEwIDFhOSA5IDAgMSAxIDAgMTggOSA5IDAgMCAxIDAtMTh6bTAgMS43NWE3LjI1IDcuMjUgMCAxIDAgMCAxNC41IDcuMjUgNy4yNSAwIDAgMCAwLTE0LjV6Ii8+PHBhdGggZmlsbD0iYmxhY2siIGQ9Ik0xMCAxMFYyLjc1YTcuMjUgNy4yNSAwIDAgMSA2LjI4IDMuNjN6Ii8+PGNpcmNsZSBmaWxsPSJibGFjayIgY3g9IjEwIiBjeT0iMTAiIHI9IjEuNzUiLz48Y2lyY2xlIGZpbGw9ImJsYWNrIiBjeD0iNiIgY3k9IjEzIiByPSIxLjI1Ii8+PGNpcmNsZSBmaWxsPSJibGFjayIgY3g9IjEzLjUiIGN5PSIxMy41IiByPSIxLjI1Ii8+PC9zdmc+';
+
 	public const PAGES = [
 		'overview' => 'multisite-radar',
 		'sites'    => 'multisite-radar-sites',
@@ -48,7 +54,7 @@ final class Menu {
 
 	public function add_pages(): void {
 		$parent = self::PAGES['overview'];
-		add_menu_page( __( 'Multisite Radar', 'multisite-radar' ), __( 'Multisite Radar', 'multisite-radar' ), Capabilities::VIEW, $parent, [ $this, 'render' ], 'dashicons-chart-area', 30 );
+		add_menu_page( __( 'Multisite Radar', 'multisite-radar' ), __( 'Multisite Radar', 'multisite-radar' ), Capabilities::VIEW, $parent, [ $this, 'render' ], self::ICON, 30 );
 		foreach ( self::titles() as $view => $title ) {
 			$hook = add_submenu_page( $parent, $title, $title, 'settings' === $view ? Capabilities::MANAGE : Capabilities::VIEW, self::PAGES[ $view ], [ $this, 'render' ] );
 			if ( false !== $hook ) {

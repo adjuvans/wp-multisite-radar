@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+	<title>Multisite Radar</title>
+	<defs>
+		<linearGradient id="msradar-sweep" gradientUnits="userSpaceOnUse" x1="128" y1="28" x2="214.6" y2="78">
+			<stop offset="0" stop-color="#3858e9" stop-opacity="0"/>
+			<stop offset="1" stop-color="#3858e9" stop-opacity="0.6"/>
+		</linearGradient>
+	</defs>
+	<rect width="256" height="256" fill="#1e1e1e"/>
+	<g fill="none" stroke="#3858e9">
+		<circle cx="128" cy="128" r="100" stroke-width="6"/>
+		<circle cx="128" cy="128" r="66" stroke-width="4" stroke-opacity="0.7"/>
+		<circle cx="128" cy="128" r="32" stroke-width="4" stroke-opacity="0.5"/>
+		<path d="M128 28v200M28 128h200" stroke-width="2" stroke-opacity="0.35"/>
+	</g>
+	<path d="M128 128V28a100 100 0 0 1 86.6 50z" fill="url(#msradar-sweep)"/>
+	<path d="M128 128l86.6-50" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+	<circle cx="176" cy="92" r="10" fill="#ffffff"/>
+	<circle cx="86" cy="86" r="8" fill="#f0b849"/>
+	<circle cx="92" cy="166" r="8" fill="#3858e9"/>
+	<circle cx="168" cy="176" r="8" fill="#3858e9"/>
+	<circle cx="128" cy="128" r="8" fill="#ffffff"/>
+</svg>

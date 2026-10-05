@@ -32,5 +32,6 @@
 /*.zip
 /.superpowers
 /.claude
+/.wordpress-org
 /.wp-env.override.json
 /.env*

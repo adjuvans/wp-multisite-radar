@@ -74,4 +74,22 @@ final class MenuTest extends TestCase {
 	public function test_urls_point_to_the_network_admin(): void {
 		$this->assertSame( network_admin_url( 'admin.php?page=multisite-radar-sites&rule=no_users' ), Menu::url( 'sites', [ 'rule' => 'no_users' ] ) );
 	}
+
+	public function test_the_menu_icon_is_the_radar_of_the_plugin_icon(): void {
+		( new Menu() )->add_pages();
+
+		$entries = array_values(
+			array_filter(
+				$GLOBALS['menu'],
+				static fn ( array $item ): bool => 'multisite-radar' === $item[2]
+			)
+		);
+		$this->assertSame( Menu::ICON, $entries[0][6] );
+		$prefix = 'data:image/svg+xml;base64,';
+		$this->assertStringStartsWith( $prefix, Menu::ICON );
+		$this->assertSame(
+			(string) file_get_contents( dirname( __DIR__, 3 ) . '/bin/wporg-assets/menu-icon.svg' ),
+			base64_decode( substr( Menu::ICON, strlen( $prefix ) ) ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Test only.
+		);
+	}
 }
