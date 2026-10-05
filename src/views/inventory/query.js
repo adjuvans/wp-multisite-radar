@@ -13,7 +13,13 @@ import {
  * État des pages Plugins et Thèmes (adresse de la page) et arguments REST, avec exactement les règles de PHP
  * (Admin\ViewQuery::plugins() et ::themes()) : tests/fixtures/view-queries.json vérifie la parité.
  */
-export const INVENTORY_ORDERBY = [ 'name', 'sites_count' ];
+export const INVENTORY_ORDERBY = [
+	'name',
+	'sites_count',
+	'status',
+	'version',
+	'update_version',
+];
 export const INVENTORY_STATUSES = {
 	plugins: [ 'network', 'local', 'unused', 'missing' ],
 	themes: [ 'used', 'unused', 'missing' ],

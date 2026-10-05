@@ -51,7 +51,9 @@ export function getPluginsFields() {
 		},
 		versionField(),
 		statusField( pluginStatusLabels(), {
-			unused: 'info',
+			network: 'success',
+			local: 'success',
+			unused: 'warning',
 			missing: 'error',
 		} ),
 		sitesCountField(),

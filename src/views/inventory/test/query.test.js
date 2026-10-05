@@ -80,7 +80,7 @@ describe( 'inventory view state', () => {
 			fromInventoryView(
 				{
 					filters: [],
-					sort: { field: 'version', direction: 'desc' },
+					sort: { field: 'file', direction: 'desc' },
 					page: 1,
 				},
 				state,

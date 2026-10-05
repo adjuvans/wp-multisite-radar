@@ -118,7 +118,7 @@ final class ThemesQuery {
 					&& ( ! $updates || null !== $item['update_version'] );
 			}
 		);
-		return InventoryList::sort( array_values( $items ), (string) $args['orderby'], (string) $args['order'] );
+		return InventoryList::sort( array_values( $items ), (string) $args['orderby'], (string) $args['order'], self::STATUSES );
 	}
 
 	/**

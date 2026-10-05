@@ -117,5 +117,26 @@
 		"query": { "orderby": "email", "membership": "many", "super_admin": "yes" },
 		"prefs": {},
 		"args": { "page": 1, "per_page": 20, "orderby": "login", "order": "asc" }
+	},
+	{
+		"name": "plugins: sorted by state",
+		"view": "plugins",
+		"query": { "orderby": "status", "order": "desc" },
+		"prefs": {},
+		"args": { "page": 1, "per_page": 20, "orderby": "status", "order": "desc" }
+	},
+	{
+		"name": "themes: sorted by update and version",
+		"view": "themes",
+		"query": { "orderby": "update_version" },
+		"prefs": {},
+		"args": { "page": 1, "per_page": 20, "orderby": "update_version", "order": "asc" }
+	},
+	{
+		"name": "plugins: sorted by version",
+		"view": "plugins",
+		"query": { "orderby": "version" },
+		"prefs": {},
+		"args": { "page": 1, "per_page": 20, "orderby": "version", "order": "asc" }
 	}
 ]

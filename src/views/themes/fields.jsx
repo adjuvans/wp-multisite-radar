@@ -73,7 +73,8 @@ export function getThemesFields() {
 					: __( 'No', 'multisite-radar' ),
 		},
 		statusField( themeStatusLabels(), {
-			unused: 'info',
+			used: 'success',
+			unused: 'warning',
 			missing: 'error',
 		} ),
 		sitesCountField( ( { item } ) =>

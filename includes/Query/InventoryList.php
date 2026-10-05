@@ -5,12 +5,12 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Listes d'inventaire (plugins, thèmes) construites en mémoire : quelques centaines d'éléments au plus.
- * Recherche sans casse, tri par nom ou par nombre de sites avec départage stable, pagination bornée comme en REST.
+ * Recherche sans casse, tri par nom, nombre de sites, état, version ou mise à jour avec départage stable, pagination bornée comme en REST.
  * Chaque élément a au moins id (string), name (string) et sites_count (int).
  */
 final class InventoryList {
 
-	public const ORDERBY = [ 'name', 'sites_count' ];
+	public const ORDERBY = [ 'name', 'sites_count', 'status', 'version', 'update_version' ];
 
 	/**
 	 * Le texte cherché apparaît-il dans l'une des valeurs, sans tenir compte de la casse ?
@@ -29,18 +29,21 @@ final class InventoryList {
 	}
 
 	/**
-	 * Tri par nom (ordre naturel, sans casse) ou par nombre de sites ; à égalité, par nom puis par identifiant.
+	 * Tri par nom (ordre naturel, sans casse), nombre de sites, état (dans l'ordre de $statuses ; un état inconnu en
+	 * dernier), version (version_compare) ou mise à jour (sans mise à jour d'abord) ; à égalité, par nom puis par
+	 * identifiant, quel que soit le sens.
 	 *
-	 * @param array[] $items
+	 * @param array[]  $items
+	 * @param string[] $statuses États dans l'ordre du tri croissant.
 	 * @return array[]
 	 */
-	public static function sort( array $items, string $orderby, string $order ): array {
-		$by_count = 'sites_count' === $orderby;
-		$sign     = 'desc' === strtolower( $order ) ? -1 : 1;
+	public static function sort( array $items, string $orderby, string $order, array $statuses = [] ): array {
+		$sign = 'desc' === strtolower( $order ) ? -1 : 1;
+		$rank = array_flip( array_values( $statuses ) );
 		usort(
 			$items,
-			static function ( array $a, array $b ) use ( $by_count, $sign ): int {
-				$primary = $by_count ? $a['sites_count'] <=> $b['sites_count'] : strnatcasecmp( $a['name'], $b['name'] );
+			static function ( array $a, array $b ) use ( $orderby, $sign, $rank ): int {
+				$primary = self::compare( $a, $b, $orderby, $rank );
 				if ( 0 !== $primary ) {
 					return $sign * $primary;
 				}
@@ -49,6 +52,24 @@ final class InventoryList {
 			}
 		);
 		return $items;
+	}
+
+	/**
+	 * @param array<string, int> $rank État => rang.
+	 */
+	private static function compare( array $a, array $b, string $orderby, array $rank ): int {
+		switch ( $orderby ) {
+			case 'sites_count':
+				return $a['sites_count'] <=> $b['sites_count'];
+			case 'status':
+				return ( $rank[ (string) ( $a['status'] ?? '' ) ] ?? PHP_INT_MAX ) <=> ( $rank[ (string) ( $b['status'] ?? '' ) ] ?? PHP_INT_MAX );
+			case 'version':
+				return version_compare( (string) ( $a['version'] ?? '' ), (string) ( $b['version'] ?? '' ) );
+			case 'update_version':
+				return ( null !== ( $a['update_version'] ?? null ) ) <=> ( null !== ( $b['update_version'] ?? null ) );
+			default:
+				return strnatcasecmp( $a['name'], $b['name'] );
+		}
 	}
 
 	/**

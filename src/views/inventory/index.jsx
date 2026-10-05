@@ -73,7 +73,6 @@ export default function InventoryView( {
 				id: 'sites',
 				label: __( 'Show the sites', 'multisite-radar' ),
 				icon: listView,
-				isPrimary: true,
 				callback: ( [ item ] ) => setOpen( item ),
 			},
 		],
