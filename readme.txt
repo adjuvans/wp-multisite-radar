@@ -4,7 +4,7 @@ Tags: multisite, network, audit, inventory, admin
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.0-beta.6
+Stable tag: 2.0.0-rc.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -109,6 +109,13 @@ Deleting the plugin in Network Admin > Plugins removes its tables, its network o
 7. Settings: switch an alert rule off, change its severity or its threshold.
 
 == Changelog ==
+
+= 2.0.0-rc.1 =
+* Release candidate of 2.0.0, ready for WordPress.org.
+* The "Network sites" block loads the sites of the network on demand instead of the whole list.
+* Analysing the selected sites again during an analysis now says so, and the Sites table fits a 1440 px screen.
+* Charts: higher contrast, a stroke pattern for each series, round isolated points and a message when no figures exist.
+* Weekly summary: a summary missed by a late WP-Cron goes out on the next days, once, and its week of changes is always kept.
 
 = 2.0.0-beta.6 =
 * History: journal of changes, daily figures and trend charts for the network and for each site.

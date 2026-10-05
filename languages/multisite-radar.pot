@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-3.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Multisite Radar 2.0.0-beta.6\n"
+"Project-Id-Version: Multisite Radar 2.0.0-rc.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/multisite-radar\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-05T08:48:42+00:00\n"
+"POT-Creation-Date: 2026-10-05T11:04:32+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: multisite-radar\n"
@@ -17,8 +17,8 @@ msgstr ""
 #. Plugin Name of the plugin
 #: multisite-radar.php
 #: includes/Abilities/Registrar.php:46
-#: includes/Admin/Menu.php:51
-#: includes/Admin/Menu.php:76
+#: includes/Admin/Menu.php:57
+#: includes/Admin/Menu.php:82
 #: includes/Reports/DashboardWidget.php:36
 msgid "Multisite Radar"
 msgstr ""
@@ -533,7 +533,7 @@ msgstr ""
 #: build/admin/overview.js:3
 #: build/admin/reports.js:3
 #: build/admin/sites.js:18
-#: includes/Reports/Digest.php:175
+#: includes/Reports/Digest.php:196
 #, js-format,php-format
 msgid "%1$s: %2$s"
 msgstr ""
@@ -1212,6 +1212,12 @@ msgstr ""
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
+msgid "No change of this kind recorded yet."
+msgstr ""
+
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
 msgid "No change recorded yet."
 msgstr ""
 
@@ -1231,6 +1237,12 @@ msgstr ""
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "Not enough history yet: the chart appears after two daily snapshots."
+msgstr ""
+
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "No figures for this period."
 msgstr ""
 
 #. translators: 1: chart title, 2: first day, 3: last day, 4: latest values.
@@ -1264,6 +1276,12 @@ msgstr ""
 
 #: build/admin/overview.js:4
 msgid "Alerts, last 30 days"
+msgstr ""
+
+#: build/admin/overview.js:4
+#: build/admin/reports.js:5
+#: build/admin/sites.js:20
+msgid "Loading the trends…"
 msgstr ""
 
 #: build/admin/overview.js:4
@@ -1321,11 +1339,11 @@ msgstr ""
 #: build/admin/themes.js:4
 #: build/admin/users.js:1
 #: build/blocks/sites-list/index.js:1
-#: includes/Admin/Menu.php:39
+#: includes/Admin/Menu.php:45
 #: includes/Export/PluginsExport.php:23
 #: includes/Export/ThemesExport.php:26
 #: includes/Reports/DashboardWidget.php:57
-#: includes/Reports/Digest.php:144
+#: includes/Reports/Digest.php:165
 msgid "Sites"
 msgstr ""
 
@@ -1426,6 +1444,11 @@ msgstr ""
 #: build/admin/overview.js:11
 #: build/admin/sites.js:25
 msgid "The analysis could not be run."
+msgstr ""
+
+#: build/admin/overview.js:11
+#: build/admin/sites.js:25
+msgid "An analysis is already running. Select the sites again once it is complete."
 msgstr ""
 
 #: build/admin/overview.js:11
@@ -1679,11 +1702,6 @@ msgstr[1] ""
 
 #: build/admin/reports.js:5
 #: build/admin/sites.js:20
-msgid "Loading the trends…"
-msgstr ""
-
-#: build/admin/reports.js:5
-#: build/admin/sites.js:20
 msgid "Content and media"
 msgstr ""
 
@@ -1768,7 +1786,7 @@ msgid "Keep the changes for (days)"
 msgstr ""
 
 #: build/admin/settings.js:2
-msgid "Older changes are deleted every day."
+msgid "Older changes are deleted every day. While the weekly e-mail summary is on, the changes of its last 7 days are always kept."
 msgstr ""
 
 #: build/admin/settings.js:2
@@ -1979,7 +1997,7 @@ msgstr[1] ""
 #: build/admin/sites.js:21
 #: build/admin/sites.js:24
 #: build/admin/sites.js:25
-#: includes/Admin/Menu.php:42
+#: includes/Admin/Menu.php:48
 #: includes/Export/SitesColumns.php:22
 msgid "Users"
 msgstr ""
@@ -2003,7 +2021,7 @@ msgstr ""
 #: build/admin/sites.js:20
 #: build/admin/sites.js:24
 #: build/admin/sites.js:25
-#: includes/Admin/Menu.php:43
+#: includes/Admin/Menu.php:49
 #: includes/Export/SitesColumns.php:32
 msgid "Alerts"
 msgstr ""
@@ -2446,36 +2464,36 @@ msgstr ""
 msgid "Third-party licenses"
 msgstr ""
 
-#: includes/Admin/Menu.php:38
+#: includes/Admin/Menu.php:44
 msgid "Overview"
 msgstr ""
 
-#: includes/Admin/Menu.php:40
+#: includes/Admin/Menu.php:46
 msgid "Plugins"
 msgstr ""
 
-#: includes/Admin/Menu.php:41
+#: includes/Admin/Menu.php:47
 msgid "Themes"
 msgstr ""
 
-#: includes/Admin/Menu.php:44
+#: includes/Admin/Menu.php:50
 msgid "Reports"
 msgstr ""
 
-#: includes/Admin/Menu.php:45
+#: includes/Admin/Menu.php:51
 msgid "Settings"
 msgstr ""
 
-#: includes/Admin/Menu.php:82
+#: includes/Admin/Menu.php:88
 msgid "Multisite Radar needs JavaScript to display this page."
 msgstr ""
 
-#: includes/Admin/Menu.php:95
+#: includes/Admin/Menu.php:101
 msgid "Pre-release version"
 msgstr ""
 
 #: includes/Admin/Privacy.php:22
-msgid "Multisite Radar is an audit tool for network administrators. It collects no data from visitors and makes no external requests. To build its inventory of the network, it keeps in the network database a copy of data that WordPress already holds: for each site, the user IDs and logins of up to 50 administrators and editors, and the number of users per role. This copy is refreshed in the background and deleted when the plugin is uninstalled. When a user account is deleted, the sites it belonged to are analysed again. It also keeps a history of the changes of the network (sites created or deleted, plugins and themes, alerts) and daily figures of each site, for the retention period set in its settings. If the weekly e-mail summary is enabled, the addresses of its recipients are kept in the plugin settings and used only to send it."
+msgid "Multisite Radar is an audit tool for network administrators. It collects no data from visitors and makes no external requests. To build its inventory of the network, it keeps in the network database a copy of data that WordPress already holds: for each site, the user IDs and logins of up to 50 administrators and editors, and the number of users per role. This copy is refreshed in the background and deleted when the plugin is uninstalled. When a user account is deleted, the sites it belonged to are analysed again. It also keeps a history of the changes of the network (sites created or deleted, plugins and themes, alerts) and daily figures of each site, for the retention period set in its settings. If the weekly e-mail summary is enabled, the addresses of its recipients are kept in the plugin settings and used only to send it; the network administrators who can change these settings can read them."
 msgstr ""
 
 #. translators: %s: alert rule identifier.
@@ -2791,11 +2809,11 @@ msgstr ""
 msgid "Parent of the active theme of (sites)"
 msgstr ""
 
-#: includes/Install/LegacyMigration.php:237
+#: includes/Install/LegacyMigration.php:239
 msgid "Network Plugin Utilities 1.x is still loaded. Remove it: Multisite Radar replaces it and has taken over its settings."
 msgstr ""
 
-#: includes/Plugin.php:245
+#: includes/Plugin.php:247
 msgid "Multisite Radar requires a WordPress Multisite network. It does nothing on a single site."
 msgstr ""
 
@@ -2856,12 +2874,12 @@ msgid "Alert resolved: %s."
 msgstr ""
 
 #: includes/Reports/DashboardWidget.php:58
-#: includes/Reports/Digest.php:145
+#: includes/Reports/Digest.php:166
 msgid "Sites with an error"
 msgstr ""
 
 #: includes/Reports/DashboardWidget.php:59
-#: includes/Reports/Digest.php:146
+#: includes/Reports/Digest.php:167
 msgid "Sites with a warning"
 msgstr ""
 
@@ -2869,24 +2887,24 @@ msgstr ""
 msgid "Main alerts"
 msgstr ""
 
-#: includes/Reports/DashboardWidget.php:83
-#: includes/Reports/Digest.php:247
+#: includes/Reports/DashboardWidget.php:84
+#: includes/Reports/Digest.php:268
 msgid "Open Multisite Radar"
 msgstr ""
 
 #. translators: %s: network name.
-#: includes/Reports/Digest.php:139
+#: includes/Reports/Digest.php:160
 #, php-format
 msgid "Multisite Radar summary for %s"
 msgstr ""
 
-#: includes/Reports/Digest.php:142
-#: includes/Reports/Digest.php:186
+#: includes/Reports/Digest.php:163
+#: includes/Reports/Digest.php:207
 msgid "Network"
 msgstr ""
 
 #. translators: %s: number of new alerts.
-#: includes/Reports/Digest.php:151
+#: includes/Reports/Digest.php:172
 #, php-format
 msgid "%s new alert"
 msgid_plural "%s new alerts"
@@ -2894,25 +2912,25 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of resolved alerts.
-#: includes/Reports/Digest.php:156
+#: includes/Reports/Digest.php:177
 #, php-format
 msgid "%s resolved alert"
 msgid_plural "%s resolved alerts"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/Reports/Digest.php:160
+#: includes/Reports/Digest.php:181
 msgid "Other changes"
 msgstr ""
 
 #. translators: %s: network name.
-#: includes/Reports/Digest.php:167
+#: includes/Reports/Digest.php:188
 #, php-format
 msgid "[%s] Weekly summary from Multisite Radar"
 msgstr ""
 
 #. translators: %s: number of further alerts.
-#: includes/Reports/Digest.php:192
+#: includes/Reports/Digest.php:213
 #, php-format
 msgid "and %s more"
 msgid_plural "and %s more"
@@ -2920,7 +2938,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of sites.
-#: includes/Reports/Digest.php:208
+#: includes/Reports/Digest.php:229
 #, php-format
 msgid "%s site created"
 msgid_plural "%s sites created"
@@ -2928,7 +2946,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of sites.
-#: includes/Reports/Digest.php:210
+#: includes/Reports/Digest.php:231
 #, php-format
 msgid "%s site deleted"
 msgid_plural "%s sites deleted"
@@ -2936,7 +2954,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of plugins.
-#: includes/Reports/Digest.php:212
+#: includes/Reports/Digest.php:233
 #, php-format
 msgid "%s plugin activated"
 msgid_plural "%s plugins activated"
@@ -2944,7 +2962,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of plugins.
-#: includes/Reports/Digest.php:214
+#: includes/Reports/Digest.php:235
 #, php-format
 msgid "%s plugin deactivated"
 msgid_plural "%s plugins deactivated"
@@ -2952,20 +2970,20 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of themes.
-#: includes/Reports/Digest.php:216
+#: includes/Reports/Digest.php:237
 #, php-format
 msgid "%s theme switched"
 msgid_plural "%s themes switched"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/Reports/Digest.php:224
+#: includes/Reports/Digest.php:245
 msgid "No other change."
 msgstr ""
 
 #. translators: %d: number of days.
-#: includes/Reports/Digest.php:235
 #: includes/Reports/Digest.php:256
+#: includes/Reports/Digest.php:277
 #, php-format
 msgid "Changes of the last %d day."
 msgid_plural "Changes of the last %d days."
@@ -2973,7 +2991,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: address of the Multisite Radar overview page.
-#: includes/Reports/Digest.php:264
+#: includes/Reports/Digest.php:285
 #, php-format
 msgid "Open Multisite Radar: %s"
 msgstr ""
@@ -3005,6 +3023,10 @@ msgstr ""
 
 #: includes/Rest/SitesController.php:169
 msgid "Sites analysed, with an activity date, and no activity since this date."
+msgstr ""
+
+#: includes/Rest/SitesMenuController.php:88
+msgid "The network sites menu is disabled."
 msgstr ""
 
 #: includes/Rest/ThemesController.php:87

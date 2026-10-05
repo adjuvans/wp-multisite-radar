@@ -21,23 +21,23 @@ Points relevés pendant l'exécution du plan M2 (`2026-10-01-multisite-radar-m2-
 - ability `multisite-radar/recent-changes` (écart E1 du plan M5) (2.0.0-beta.6, plan M6) ;
 - Vue d'ensemble : deux `<progress>` pendant une analyse (FirstRun et ScanPanel) ; FirstRun masque son bouton au lieu de le désactiver (2.0.0-beta.6, plan M6) ;
 - `SchemaTest::test_version_2_adds_the_siteurl_column` vérifiait la version 3 : nom trompeur (2.0.0-beta.6, plan M6) ;
-- chemin sans test : désinstallation (2.0.0-beta.6, plan M6).
+- chemin sans test : désinstallation (2.0.0-beta.6, plan M6) ;
+- action groupée « Réanalyser » pendant une analyse : un avis le signale (2.0.0-rc.1, plan M7) ;
+- colonne « Analysé le » tronquée à 1440 px de large (2.0.0-rc.1, plan M7) ;
+- l'éditeur de blocs ne charge plus la liste de tous les sites : `GET /sites-menu/sites`, à la demande (2.0.0-rc.1, plan M7) ;
+- test du cache du menu des sites au-delà de 100 sites (2.0.0-rc.1, plan M7) ;
+- accessibilité : lien vers le ticket amont de DataViews, audit de tous les onglets de la fiche (2.0.0-rc.1, plan M7) ;
+- graphique : point isolé rond, tons à 3:1 au moins, message d'une liste vide filtrée, série entièrement nulle (message au lieu d'un tracé vide) (2.0.0-rc.1, plan M7) ;
+- tendances : page remise à zéro quand la prop `site` change (2.0.0-rc.1, plan M7) ;
+- carte des alertes des 30 derniers jours : squelette pendant le chargement (2.0.0-rc.1, plan M7) ;
+- récapitulatif manqué (WP-Cron en retard) : envoyé les jours suivants, une fois (2.0.0-rc.1, plan M7) ;
+- rétention des changements inférieure à 7 jours : les 7 jours du récapitulatif sont gardés (2.0.0-rc.1, plan M7) ;
+- adresses des destinataires du récapitulatif : exception ajoutée au texte de confidentialité (2.0.0-rc.1, plan M7) ;
+- `History` : chaque étape de la tâche quotidienne (capture, purges) est indépendante (2.0.0-rc.1, plan M7).
 
 ## 1. À traiter avant la 2.0 finale
 
-**Action groupée « Réanalyser » pendant une analyse** (`src/hooks/use-scan.js`, `src/views/sites/actions.js`).
-- DataViews 19.1 ignore `disabled` sur les actions groupées. Pendant une analyse, le bouton reste actif ; la garde de réentrance renvoie l'analyse en cours, donc la nouvelle sélection n'est ni marquée ni analysée, et « Analyse terminée. » s'affiche.
-- Correctif : un avis « une analyse est déjà en cours », ou mettre la sélection en file d'attente.
-
-**Colonne « Analysé le » tronquée.** Sur la page Sites, à 1440 px de large, la colonne passe sous la colonne fixe « Actions », en anglais comme en français. Pistes : masquer une colonne par défaut, raccourcir certaines colonnes, ou laisser les en-têtes passer à la ligne.
-
-**L'éditeur de blocs intègre la liste de tous les sites** (`includes/SitesMenu/Block.php`, `editor_data()`). Environ 40 octets par site public, à chaque chargement de l'éditeur sur chaque site, soit 200 Ko pour 5 000 sites. Correctif : charger la liste à la demande.
-
-**Cache du menu des sites au-delà de 100 sites.** Le chemin qui lit les sites par lots de 100 n'a pas de test : c'est le test le plus utile à ajouter avant la 2.0.
-
-**Accessibilité.** L'audit axe exclut un champ caché de DataViews 19.1, invisible et sans libellé en amont : ajouter le lien vers le ticket amont et retirer l'exclusion quand DataViews sera corrigé. L'audit de la fiche ne couvre que l'onglet par défaut.
-
-**Publication.** Confirmer « Tested up to: 7.1 » au moment de la soumission à WordPress.org.
+**Publication.** Confirmer "Tested up to" au moment de la soumission (7.1 au 2026-10-05).
 
 ## 2. Points mineurs
 
@@ -145,7 +145,6 @@ Points mineurs relevés pendant l'exécution du plan M6 (`2026-10-04-multisite-r
 - `SnapshotsRepository::capture()` supprime puis insère sans transaction : un insert qui échoue fait perdre le jour jusqu'à la capture suivante. Les relevés incluent les sites archivés, indésirables ou supprimés qui ont été analysés (les totaux du réseau les comptent, comme la synthèse des alertes).
 - `EventsRepository` stocke une chaîne vide quand `wp_json_encode` échoue (les métadonnées se relisent comme `[]`).
 - `Invalidation::on_plugin_change` déduit le type d'événement de `current_action()` : faux si la méthode est appelée hors de ses crochets (prévu par le plan). Les alertes sont identifiées par la règle seule : un changement d'arguments au sein d'une règle est invisible.
-- `History` : un seul `try` pour la capture et les deux purges (une table de relevés cassée saute la purge du journal).
 - `SitesRepository::find_many()`, appelé par `EventsQuery::list()`, n'est pas limité au réseau courant : un site déplacé vers un autre réseau après l'événement afficherait sa nouvelle identité.
 
 **REST et abilities.**
@@ -160,9 +159,7 @@ Points mineurs relevés pendant l'exécution du plan M6 (`2026-10-04-multisite-r
 - La boucle d'affichage de `DashboardWidget::render()` est hors du `try` ; la classe `msradar-widget__figures` n'a pas de feuille de style ; pas de test de la branche « Aucune alerte » ni des chiffres.
 
 **Interface.**
-- Graphique des tendances : un point isolé devient une ellipse (`preserveAspectRatio="none"`) ; les tons « information » et « avertissement » sont sous 3:1 contre le blanc (WCAG 1.4.11) ; le message d'une liste vide avec filtre dit « No change recorded yet. » ; l'étiquette du maximum utilise le format de `series[0]` (axe partagé).
-- La page n'est pas remise à zéro quand la prop `site` change.
-- La carte des alertes des 30 derniers jours n'affiche rien pendant le chargement (pas de squelette).
+- Graphique des tendances : l'étiquette du maximum utilise le format de `series[0]` (axe partagé).
 
 **Tests.**
 - Non testés : le plancher et le plafond de la rétention (0 et 3651 désactivent « Save »), le réglage `snapshots_days` et l'isolation des purges au niveau de `History`, le fait que les requêtes de l'Historique attendent l'onglet, la date, la pagination absente en mode compact et la remise à zéro de la page au changement de filtre du composant liste, un nom avec des chevrons qui reste du texte, la lecture du journal ou du nom qui échoue pendant `scan_site` ou `on_site_deleted`.
@@ -170,12 +167,38 @@ Points mineurs relevés pendant l'exécution du plan M6 (`2026-10-04-multisite-r
 - Alignements de forme dans `Plugin.php` et `ChangeLogTest`.
 
 **Revue finale de M6.**
-- Récapitulatif : `wp_date( 'w' ) === digest_day` saute la semaine si la tâche quotidienne glisse après minuit (WP-Cron tardif) ; envoyer dès que le jour réglé est atteint si rien n'est parti depuis 6 jours.
-- Rétention des changements inférieure à 7 jours : la purge (priorité 20) ampute le récapitulatif (priorité 30) qui annonce 7 jours ; borner à 7 quand le récapitulatif est actif, ou le signaler.
 - Charge sur un grand réseau : `network_series` lit la clé primaire pour chaque ligne (index couvrant à mesurer avant un schéma 5), `COUNT(*)` inutile pour les listes compactes, purges en un seul `DELETE` sans limite (prévoir des lots).
 - Onglet Historique limité aux 10 derniers changements (liste compacte, sans pagination ni page filtrée par site).
-- Adresses des destinataires du récapitulatif visibles dans `GET /settings` (`msradar_manage`) et `wp multisite-radar settings get` : exception à documenter dans le texte de confidentialité.
-- Série entièrement nulle (mesure du disque désactivée) : `TrendChart` trace un graphique vide au lieu d'un message.
-- Contraste des tons `info` / `warning` du graphique sous 3:1 (WCAG 1.4.11) : à régler avant la 2.0 finale.
 - Relevés quotidiens portant le niveau d'alerte de la veille pour les règles liées au temps (recalcul après la capture).
 - `/events?site=<autre réseau>` renvoie une liste vide quand `/reports/trends` renvoie 404.
+
+## 7. Reportés par le plan M7
+
+Points mineurs relevés pendant l'exécution du plan M7 (`2026-10-05-multisite-radar-m7-publication.md`), par les revues de tâche, et laissés pour plus tard.
+
+**PHP.**
+- `SitesMenuController` trie toute la liste en cache avant de filtrer et de découper, à chaque frappe ; `include` et `search` ensemble ignorent `search` (écrit dans le docblock).
+- Récapitulatif : changer `digest_day` pour un jour de la semaine plus tôt envoie aussitôt pour ce jour passé si le dernier envoi est plus ancien (cohérent avec l'écart E8, à écrire dans la documentation) ; « 7 jours » est écrit en dur dans la description du champ de rétention (`Digest::DAYS` côté PHP).
+- Le docblock de la classe `History` tient en une phrase très longue sur une seule ligne.
+- `Plugin Check` : `ReplacementsWrongNumber` est à la fois dans la directive du bloc de `SitesRepository::query` et dans un ignore en ligne (redondant).
+
+**JS.**
+- Accessibilité du widget : le correctif utilise un style en ligne, faute de feuille de style du widget.
+- Page Sites : le tableau déborde encore en dessous d'environ 1440 px de large (seul 1440 px est corrigé) ; les captures utilisent 1440 × 1000 pour cette page.
+
+**Tests et outillage.**
+- `bin/bench.sh` : un échec de connexion est rapporté comme « base occupée », sans gérer les hôtes IPv6, les sockets ni l'absence de `mysqli` ; un seul message d'échec pour trois causes ; `mktemp` avant le `trap` laisse un dossier vide si `BENCH_SITES` est invalide ; `BENCH_RUNS` et `BENCH_MAX_MS` ne sont pas validés et `BENCH_SITES=00` est accepté ; le nettoyage tait les échecs de `DROP` ; le contrôle de base occupée passe après le téléchargement de 25 Mo de WordPress ; l'en-tête ne cite ni `rsync`, ni `php-mysqli`, ni l'accès réseau.
+- `bin/bench/routes.php` ne vérifie que le code HTTP 200 : un mauvais paramètre ou un résultat vide passerait.
+- `bin/plugin-check-report.mjs` : le rapport passe pour « exécuté » si WP-CLI plante après l'en-tête CSV (`|| true` masque le code de sortie) ; `parseCsv` est exporté depuis un script à code de premier niveau, donc non importable dans un test (imposé par le plan).
+- `layout.spec.js` : la tolérance de « + 1 » px n'est pas commentée. Pas de test qu'un premier `start()` légitime n'affiche pas l'avis « déjà en cours ».
+- Test e2e du bloc : le seuil de requêtes (`< 10`) est large ; pas de test de l'accès anonyme ni de `include` avec `search`.
+- Aucun test ne garde les motifs de trait des graphiques (`$msradar-dashes`) : seules les couleurs sont testées, et jsdom ne permet pas de vérifier `stroke-dasharray`.
+- Audit d'accessibilité : la boucle des onglets attend zéro squelette, ce qui peut passer avant l'apparition du contenu de l'onglet (attente imposée par le plan).
+- `bin/wporg-assets/render.mjs` : la bannière dépend de la police système de repli (le PNG diffère d'une machine à l'autre) ; aucun conseil d'installer Chromium quand son lancement échoue.
+- `wporg.spec.js` : masque tous les `.notice` de `#wpbody-content`, donc aussi une vraie erreur (cibler l'avis de mise à jour, ou vérifier d'abord l'absence de `.notice-error`) ; pas d'attente après `setViewportSize` avant les captures pleine page (un graphique pourrait être pris en cours de redimensionnement).
+- Captures : la 3 coupe « Press Room » derrière le panneau, la 7 commence au milieu d'une phrase, la 6 annonce 90 jours pour 30 jours de données et le graphique des sites est plat. Le jeu de démonstration laisse 10 sites dans l'environnement de test de wp-env (sans effet sur PHPUnit, qui utilise la base locale).
+- `bin/readme.mjs` : un readme en CRLF échoue (sens sûr) ; `field()` lit tout le fichier et non l'en-tête ; le marqueur de `section()` n'est pas ancré en début de ligne ; pas de test d'une légende « 10. » ni de zéro tag.
+
+**Publication.**
+- `docs/release.md`, étape 7 : « Attendre la CI verte » devrait dire « CI verte sur `main` » (la CI ne tourne pas sur les tags).
+- Le workflow de déploiement ne vérifie pas que le tag est atteignable depuis `main` (borné par le déclenchement manuel et l'approbation de l'environnement).

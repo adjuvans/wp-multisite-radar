@@ -1,5 +1,18 @@
 # Changelog — Multisite Radar
 
+## [2.0.0-rc.1] - 2026-10-05
+
+### Jalon M7 — Publication
+- Candidate à la version 2.0.0, prête pour WordPress.org : readme complet et vérifié en CI, icône, bannière et sept captures générées par script, nouvelle icône du menu.
+- Plugin Check sans erreur ni avertissement, vérifié en mode strict en CI et par `make plugin-check`. Chaque requête SQL directe porte sa justification.
+- Banc de performance `make bench` ; résultats sur 1 000 et 5 000 sites dans `docs/benchmarks.md`.
+- Bloc « Network sites » : les sites proposés se chargent à la demande (`GET /sites-menu/sites`), au lieu d'une liste complète injectée dans l'éditeur.
+- Sites : « Analyse again » pendant une analyse le signale ; le tableau tient sur un écran de 1440 px.
+- Graphiques : couleurs contrastées et un motif de trait par série, points isolés ronds, message quand aucune mesure n'existe. Journal : message propre à un filtre vide, retour à la première page quand le site change.
+- Récapitulatif : un envoi manqué (WP-Cron en retard) part les jours suivants, une fois ; ses 7 jours de changements sont gardés même avec une rétention plus courte. Chaque étape de la tâche quotidienne de l'historique est indépendante.
+- Accessibilité : audit de tous les onglets de la fiche et du widget du tableau de bord.
+- Publication : workflow manuel « Deploy to WordPress.org », procédure `docs/release.md`, actions GitHub sur Node 24.
+
 ## [2.0.0-beta.6] - 2026-10-05
 
 ### Jalon M6 — Historique et rapports
