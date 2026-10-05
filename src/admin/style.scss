@@ -214,6 +214,14 @@
 	}
 }
 
+// DataViews 19.1 donne au moins 15ch à chaque cellule : avec huit colonnes,
+// la page Sites déborde dès 1440 px et la colonne fixe « Actions » recouvre
+// la dernière (écart E6 du plan M7). Les nombres, alignés à droite, n'en ont
+// pas besoin : leur colonne se règle sur son en-tête.
+.msradar-app .dataviews-view-table__cell-content-wrapper.dataviews-view-table__cell-align-end {
+	min-width: auto;
+}
+
 .msradar-pager {
 	display: flex;
 	align-items: center;

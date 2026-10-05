@@ -6,7 +6,7 @@ import { download, external, info, update, wordpress } from '@wordpress/icons';
  *
  * @param {Object}                    options
  * @param {boolean}                   options.canManage  Droit de lancer une analyse.
- * @param {boolean}                   options.isScanning Une analyse est en cours : « Analyse again » est désactivée.
+ * @param {boolean}                   options.isScanning Une analyse est en cours : « Analyse again » est désactivée (DataViews 19.1 l'ignore pour les actions groupées ; useScan l'annonce).
  * @param {( item: Object ) => void}  options.onOpen     Ouvre la fiche d'un site.
  * @param {( ids: number[] ) => void} options.onRescan   Reçoit les identifiants à réanalyser.
  * @param {( ids: number[] ) => void} options.onExport   Reçoit les identifiants à exporter.

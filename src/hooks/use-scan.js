@@ -25,7 +25,8 @@ function wait( ms ) {
  * jusqu'à ce qu'il n'en reste plus. Un lot sans progrès (le cron détient le verrou) fait attendre puis réessayer ;
  * après maxWaits essais sans progrès, l'interface s'arrête et annonce que l'analyse continue en arrière-plan.
  * Une analyse ciblée ({ scope: 'ids', ids }) passe ses ids à chaque lot : seuls ces sites sont traités et comptés,
- * l'arriéré du réseau reste au cron. Une seule analyse à la fois : start() pendant qu'elle tourne renvoie sa promesse.
+ * l'arriéré du réseau reste au cron. Une seule analyse à la fois : start() pendant qu'elle tourne renvoie sa promesse
+ * et l'annonce par un avis, car DataViews 19.1 laisse « Analyse again » cliquable pendant une analyse.
  *
  * @param {Object} options          Réglages (raccourcis par les tests).
  * @param {number} options.waitMs   Attente entre deux lots sans progrès.
@@ -147,14 +148,22 @@ export function useScan( { waitMs = 3000, maxWaits = 20 } = {} ) {
 
 	const start = useCallback(
 		( request ) => {
-			if ( ! active.current ) {
-				active.current = run( request ).finally( () => {
-					active.current = null;
-				} );
+			if ( active.current ) {
+				createInfoNotice(
+					__(
+						'An analysis is already running. Select the sites again once it is complete.',
+						'multisite-radar'
+					),
+					{ type: 'snackbar' }
+				);
+				return active.current;
 			}
+			active.current = run( request ).finally( () => {
+				active.current = null;
+			} );
 			return active.current;
 		},
-		[ run ]
+		[ run, createInfoNotice ]
 	);
 
 	return { ...progress, start };

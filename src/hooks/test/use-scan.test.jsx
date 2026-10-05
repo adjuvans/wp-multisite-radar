@@ -227,7 +227,7 @@ test( 'a second start while an analysis runs returns the running one instead of 
 			locked: false,
 		} ),
 	} );
-	const { hook } = setup();
+	const { registry, hook } = setup();
 
 	let first;
 	let second;
@@ -237,6 +237,10 @@ test( 'a second start while an analysis runs returns the running one instead of 
 	} );
 	expect( second ).toBe( first );
 	expect( marks ).toEqual( [ { scope: 'ids', ids: [ 1 ] } ] );
+	// DataViews 19.1 laisse « Analyse again » cliquable : l'utilisateur apprend que sa sélection n'a pas été analysée.
+	expect( messages( registry ) ).toContain(
+		'An analysis is already running. Select the sites again once it is complete.'
+	);
 
 	await act( async () => {
 		release();
