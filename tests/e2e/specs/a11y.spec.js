@@ -8,6 +8,7 @@ const PAGES = [
 	'page=multisite-radar-themes',
 	'page=multisite-radar-users',
 	'page=multisite-radar-alerts',
+	'page=multisite-radar-reports',
 	'page=multisite-radar-settings',
 ];
 
