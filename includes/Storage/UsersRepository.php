@@ -3,7 +3,7 @@ namespace MultisiteRadar\Storage;
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Multisite Radar's own network tables: no WordPress API reads or writes them, and the query services cache what they need.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Network-wide aggregation over the users, usermeta and blogs tables (sites per user, membership filters across all sites), which WP_User_Query cannot express without one query per site; read-only, and the query services cache what they need.
 
 /**
  * SQL des comptes de l'installation (tables globales users, usermeta, blogs) et de leur nombre de sites.
