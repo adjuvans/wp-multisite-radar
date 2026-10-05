@@ -1578,7 +1578,7 @@ msgstr "Chargement des comptes…"
 
 #. translators: %d: site ID.
 #: build/admin/sites.js:24
-#: includes/Query/EventsQuery.php:115
+#: includes/Query/EventsQuery.php:145
 #: includes/Query/SitesQuery.php:169
 #: includes/SitesMenu/Renderer.php:56
 #, js-format,php-format
@@ -2473,10 +2473,6 @@ msgstr "Mesure du disque partielle"
 msgid "Let AI assistants read the audit through MCP"
 msgstr "Permettre aux assistants IA de lire l’audit par MCP"
 
-#: build/admin/settings.js:2
-msgid "Offers the read-only abilities of Multisite Radar (network summary, sites, plugin and theme usage, alerts) to AI assistants connected with the MCP Adapter plugin. They act as the connected user, who needs the same rights as for these pages."
-msgstr "Propose les outils en lecture seule de Multisite Radar (synthèse du réseau, sites, utilisation des extensions et des thèmes, alertes) aux assistants IA connectés par l’extension MCP Adapter. Ils agissent au nom de l’utilisateur connecté, qui a besoin des mêmes droits que pour ces pages."
-
 #: build/admin/settings.js:3
 msgid "Integrations"
 msgstr "Intégrations"
@@ -2883,58 +2879,58 @@ msgstr "Rapports"
 msgid "Multisite Radar is an audit tool for network administrators. It collects no data from visitors and makes no external requests. To build its inventory of the network, it keeps in the network database a copy of data that WordPress already holds: for each site, the user IDs and logins of up to 50 administrators and editors, and the number of users per role. This copy is refreshed in the background and deleted when the plugin is uninstalled. When a user account is deleted, the sites it belonged to are analysed again. It also keeps a history of the changes of the network (sites created or deleted, plugins and themes, alerts) and daily figures of each site, for the retention period set in its settings. If the weekly e-mail summary is enabled, the addresses of its recipients are kept in the plugin settings and used only to send it."
 msgstr "Multisite Radar est un outil d’audit destiné aux administrateurs du réseau. Il ne collecte aucune donnée sur les visiteurs et n’effectue aucune requête externe. Pour dresser l’inventaire du réseau, il conserve dans la base de données du réseau une copie de données que WordPress détient déjà : pour chaque site, les ID et les identifiants de connexion de 50 administrateurs et éditeurs au plus, ainsi que le nombre de comptes par rôle. Cette copie est actualisée en arrière-plan et supprimée lors de la désinstallation de l’extension. Lorsqu’un compte est supprimé, les sites auxquels il appartenait sont analysés de nouveau. Il conserve aussi un historique des changements du réseau (sites créés ou supprimés, extensions et thèmes, alertes) et des relevés quotidiens de chaque site, pendant la durée de rétention définie dans ses réglages. Si le récapitulatif hebdomadaire par e-mail est activé, les adresses de ses destinataires sont conservées dans les réglages de l’extension et servent uniquement à l’envoyer."
 
-#: includes/Query/EventsQuery.php:148
+#: includes/Query/EventsQuery.php:178
 msgid "Site created."
 msgstr "Site créé."
 
-#: includes/Query/EventsQuery.php:150
+#: includes/Query/EventsQuery.php:180
 msgid "Site deleted."
 msgstr "Site supprimé."
 
 #. translators: %s: plugin name.
-#: includes/Query/EventsQuery.php:154
+#: includes/Query/EventsQuery.php:184
 #, php-format
 msgid "Plugin %s network activated."
 msgstr "Extension %s activée sur le réseau."
 
 #. translators: %s: plugin name.
-#: includes/Query/EventsQuery.php:157
+#: includes/Query/EventsQuery.php:187
 #, php-format
 msgid "Plugin %s activated."
 msgstr "Extension %s activée."
 
 #. translators: %s: plugin name.
-#: includes/Query/EventsQuery.php:161
+#: includes/Query/EventsQuery.php:191
 #, php-format
 msgid "Plugin %s network deactivated."
 msgstr "Extension %s désactivée sur le réseau."
 
 #. translators: %s: plugin name.
-#: includes/Query/EventsQuery.php:164
+#: includes/Query/EventsQuery.php:194
 #, php-format
 msgid "Plugin %s deactivated."
 msgstr "Extension %s désactivée."
 
 #. translators: %s: theme name.
-#: includes/Query/EventsQuery.php:169
+#: includes/Query/EventsQuery.php:199
 #, php-format
 msgid "Theme switched to %s."
 msgstr "Thème changé pour %s."
 
 #. translators: 1: previous theme name, 2: new theme name.
-#: includes/Query/EventsQuery.php:172
+#: includes/Query/EventsQuery.php:202
 #, php-format
 msgid "Theme switched from %1$s to %2$s."
 msgstr "Thème %1$s remplacé par %2$s."
 
 #. translators: %s: alert rule label.
-#: includes/Query/EventsQuery.php:175
+#: includes/Query/EventsQuery.php:205
 #, php-format
 msgid "New alert: %s."
 msgstr "Nouvelle alerte : %s."
 
 #. translators: %s: alert rule label.
-#: includes/Query/EventsQuery.php:178
+#: includes/Query/EventsQuery.php:208
 #, php-format
 msgid "Alert resolved: %s."
 msgstr "Alerte résolue : %s."
@@ -3070,6 +3066,10 @@ msgstr "Uniquement les changements depuis cette date."
 msgid "Your account has no valid e-mail address."
 msgstr "Votre compte n’a pas d’adresse e-mail valide."
 
-#: includes/Rest/ReportsController.php:106
+#: includes/Rest/ReportsController.php:115
 msgid "The e-mail could not be sent. Check the e-mail settings of the server."
 msgstr "L’e-mail n’a pas pu être envoyé. Vérifiez les réglages e-mail du serveur."
+
+#: build/admin/settings.js:2
+msgid "Offers the read-only abilities of Multisite Radar (network summary, sites, plugin and theme usage, alerts, recent changes) to AI assistants connected with the MCP Adapter plugin. They act as the connected user, who needs the same rights as for these pages."
+msgstr "Propose les outils en lecture seule de Multisite Radar (synthèse du réseau, sites, utilisation des extensions et des thèmes, alertes, derniers changements) aux assistants IA connectés par l’extension MCP Adapter. Ils agissent au nom de l’utilisateur connecté, qui a besoin des mêmes droits que pour ces pages."

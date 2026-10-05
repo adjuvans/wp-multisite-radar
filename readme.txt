@@ -17,7 +17,7 @@ Data is collected in the background with lightweight SQL queries, so the network
 
 Health alerts flag sites without users or administrators, inactive sites, large media libraries, missing themes, pending updates, http addresses on an https network, nearly full upload quotas, heavy autoloaded options, sites hidden from search engines and overdue scheduled tasks. Each rule can be switched off, given another severity and tuned in the settings.
 
-The audit is also available from the command line: `wp multisite-radar` lists sites, alerts, plugins and themes, exports them as CSV or JSON, and reads or changes the settings. Six read-only abilities of the WordPress Abilities API describe the network, its sites, the use of each plugin and theme, and its alerts; a setting, off by default, offers them to AI assistants through the MCP Adapter plugin.
+The audit is also available from the command line: `wp multisite-radar` lists sites, alerts, plugins and themes, exports them as CSV or JSON, and reads or changes the settings. Six read-only abilities of the WordPress Abilities API describe the network, its sites, the use of each plugin and theme, its alerts and its recent changes; a setting, off by default, offers them to AI assistants through the MCP Adapter plugin.
 
 Multisite Radar also keeps the history of the network: a journal of changes (sites, plugins, themes, alerts), daily figures of each site with trend charts, an optional weekly e-mail summary and a widget on the network dashboard.
 
@@ -28,6 +28,7 @@ Source code: https://github.com/adjuvans/wp-multisite-radar
 = 2.0.0-beta.6 =
 * History: journal of changes, daily figures and trend charts for the network and for each site.
 * New Reports page, weekly e-mail summary and network dashboard widget.
+* A sixth read-only ability lists the latest changes of the network: sites created or deleted, plugins activated or deactivated, themes switched, alerts raised or resolved, filterable by date, kind and site.
 
 = 2.0.0-beta.5 =
 * WP-CLI: alerts, plugins and themes lists, exports and settings from the command line.

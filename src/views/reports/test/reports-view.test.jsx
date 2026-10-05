@@ -110,6 +110,19 @@ test( 'shows the trends of the network from the preloaded data', () => {
 	expect( screen.getByText( 'No change recorded yet.' ) ).toBeInTheDocument();
 } );
 
+test( 'the events filter keeps its own id next to the digest form', () => {
+	setup();
+
+	expect(
+		screen.getByRole( 'combobox', { name: 'Kind of change' } ).id
+	).toMatch( /^msradar-events-type-/ );
+	expect(
+		screen.getByRole( 'checkbox', {
+			name: /Send a weekly summary by e-mail/,
+		} )
+	).toBeInTheDocument();
+} );
+
 test( 'another period asks for its trends', async () => {
 	setup();
 

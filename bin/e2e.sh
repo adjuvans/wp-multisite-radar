@@ -208,6 +208,9 @@ expect "the recent-changes ability lists the creation of the hidden site" \
 	"$(jq -r --arg id "$HIDDEN_ID" '"\(.status) \(.data.items | map(select(.type == "site_created" and (.site.id | tostring) == $id)) | length)"' <<<"$CHANGES")" "200 1"
 
 # Désinstallation (uninstall.php) : les tables et options du plugin disparaissent. --skip-delete garde les fichiers.
+# Les tables existent avant : sinon le « 0 » d'après ne prouverait rien.
+expect "the plugin tables exist before uninstalling" \
+	"$(wpe eval 'global $wpdb; echo count( $wpdb->get_col( $wpdb->prepare( "SHOW TABLES LIKE %s", $wpdb->esc_like( $wpdb->base_prefix . "msradar_" ) . "%" ) ) );' | awk '{ print ( $1 > 0 ) ? "yes" : "no" }')" "yes"
 wpe plugin deactivate multisite-radar --network >/dev/null
 wpe plugin uninstall multisite-radar --skip-delete >/dev/null
 expect "uninstalling drops the tables of the plugin" \

@@ -144,9 +144,9 @@ Points mineurs relevés pendant l'exécution du plan M6 (`2026-10-04-multisite-r
 **Stockage et tâches planifiées.**
 - `SnapshotsRepository::capture()` supprime puis insère sans transaction : un insert qui échoue fait perdre le jour jusqu'à la capture suivante. Les relevés incluent les sites archivés, indésirables ou supprimés qui ont été analysés (les totaux du réseau les comptent, comme la synthèse des alertes).
 - `EventsRepository` stocke une chaîne vide quand `wp_json_encode` échoue (les métadonnées se relisent comme `[]`).
-- `ChangeLog::on_plugin_change` déduit le type d'événement de `current_action()` : faux si la méthode est appelée hors de ses crochets (prévu par le plan). Un site supprimé avant sa première analyse donne `site_deleted` avec un nom vide (l'URL reste comme sujet). Les alertes sont identifiées par la règle seule : un changement d'arguments au sein d'une règle est invisible.
-- `History` : un seul `try` pour la capture et les deux purges (une table de relevés cassée saute la purge du journal), et `maybe_send` comme `ChangeLog` n'attrapent que `RuntimeException`. À juger à la revue finale : un `\Throwable` pour tous les services de la tâche `msradar_daily` (`TypeError`, filtre `wp_mail` qui lève).
-- `EventsQuery::find_many()` n'est pas limité au réseau courant : un site déplacé vers un autre réseau après l'événement afficherait sa nouvelle identité.
+- `Invalidation::on_plugin_change` déduit le type d'événement de `current_action()` : faux si la méthode est appelée hors de ses crochets (prévu par le plan). Les alertes sont identifiées par la règle seule : un changement d'arguments au sein d'une règle est invisible.
+- `History` : un seul `try` pour la capture et les deux purges (une table de relevés cassée saute la purge du journal).
+- `SitesRepository::find_many()`, appelé par `EventsQuery::list()`, n'est pas limité au réseau courant : un site déplacé vers un autre réseau après l'événement afficherait sa nouvelle identité.
 
 **REST et abilities.**
 - `MIN_DAYS` vaut 2 à deux endroits (`TrendsQuery` et les arguments de la route).
@@ -155,9 +155,9 @@ Points mineurs relevés pendant l'exécution du plan M6 (`2026-10-04-multisite-r
 - La précharge de `/settings` est inconditionnelle (un 403 est ignoré par `Preload::run`, prévu par le plan) et sans test de lecteur PHP.
 
 **E-mail et widget.**
-- Pas de test du plafond de 20 éléments (« et N de plus »), des erreurs REST 400 `msradar_no_email` et 500 `msradar_mail_failed`, ni du retrait de `phpmailer_init` après l'envoi.
+- Pas de test du plafond de 20 éléments (« et N de plus ») ni de l'erreur REST 400 `msradar_no_email`.
 - Un destinataire servi suffit à marquer le jour comme envoyé (contrat documenté, sans commentaire dans le code). `wp_date` utilise le fuseau du site courant (le site principal sous WP-Cron). `_n()` avec le même texte au singulier et au pluriel.
-- `DashboardWidget::render()` n'attrape que `RuntimeException` et sa boucle d'affichage est hors du `try` ; la classe `msradar-widget__figures` n'a pas de feuille de style ; pas de test de la branche « Aucune alerte » ni des chiffres.
+- La boucle d'affichage de `DashboardWidget::render()` est hors du `try` ; la classe `msradar-widget__figures` n'a pas de feuille de style ; pas de test de la branche « Aucune alerte » ni des chiffres.
 
 **Interface.**
 - Graphique des tendances : un point isolé devient une ellipse (`preserveAspectRatio="none"`) ; les tons « information » et « avertissement » sont sous 3:1 contre le blanc (WCAG 1.4.11) ; le message d'une liste vide avec filtre dit « No change recorded yet. » ; l'étiquette du maximum utilise le format de `series[0]` (axe partagé).
@@ -165,7 +165,17 @@ Points mineurs relevés pendant l'exécution du plan M6 (`2026-10-04-multisite-r
 - La carte des alertes des 30 derniers jours n'affiche rien pendant le chargement (pas de squelette).
 
 **Tests.**
-- Aucun test n'échoue si l'identifiant du filtre d'`EventsList` revient à la valeur par défaut : ajouter `expect( getByRole( 'combobox', { name: 'Kind of change' } ).id ).toMatch( /^msradar-events-type-/ )` dans `reports-view.test.jsx` (le test à deux `EventsList` n'est pas une vraie garde).
 - Non testés : le plancher et le plafond de la rétention (0 et 3651 désactivent « Save »), le réglage `snapshots_days` et l'isolation des purges au niveau de `History`, le fait que les requêtes de l'Historique attendent l'onglet, la date, la pagination absente en mode compact et la remise à zéro de la page au changement de filtre du composant liste, un nom avec des chevrons qui reste du texte, la lecture du journal ou du nom qui échoue pendant `scan_site` ou `on_site_deleted`.
-- `history.spec.js` : pas d'assertion avant la désinstallation que les tables `msradar` existent (le « 0 » peut passer à vide) ; la recherche d'identifiants dupliqués s'exécute avant que le graphique soit sûrement monté.
+- `history.spec.js` : la recherche d'identifiants dupliqués s'exécute avant que le graphique soit sûrement monté.
 - Alignements de forme dans `Plugin.php` et `ChangeLogTest`.
+
+**Revue finale de M6.**
+- Récapitulatif : `wp_date( 'w' ) === digest_day` saute la semaine si la tâche quotidienne glisse après minuit (WP-Cron tardif) ; envoyer dès que le jour réglé est atteint si rien n'est parti depuis 6 jours.
+- Rétention des changements inférieure à 7 jours : la purge (priorité 20) ampute le récapitulatif (priorité 30) qui annonce 7 jours ; borner à 7 quand le récapitulatif est actif, ou le signaler.
+- Charge sur un grand réseau : `network_series` lit la clé primaire pour chaque ligne (index couvrant à mesurer avant un schéma 5), `COUNT(*)` inutile pour les listes compactes, purges en un seul `DELETE` sans limite (prévoir des lots).
+- Onglet Historique limité aux 10 derniers changements (liste compacte, sans pagination ni page filtrée par site).
+- Adresses des destinataires du récapitulatif visibles dans `GET /settings` (`msradar_manage`) et `wp multisite-radar settings get` : exception à documenter dans le texte de confidentialité.
+- Série entièrement nulle (mesure du disque désactivée) : `TrendChart` trace un graphique vide au lieu d'un message.
+- Contraste des tons `info` / `warning` du graphique sous 3:1 (WCAG 1.4.11) : à régler avant la 2.0 finale.
+- Relevés quotidiens portant le niveau d'alerte de la veille pour les règles liées au temps (recalcul après la capture).
+- `/events?site=<autre réseau>` renvoie une liste vide quand `/reports/trends` renvoie 404.

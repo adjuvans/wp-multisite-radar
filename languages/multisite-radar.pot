@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-05T08:23:39+00:00\n"
+"POT-Creation-Date: 2026-10-05T08:48:42+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: multisite-radar\n"
@@ -1760,7 +1760,7 @@ msgid "Let AI assistants read the audit through MCP"
 msgstr ""
 
 #: build/admin/settings.js:2
-msgid "Offers the read-only abilities of Multisite Radar (network summary, sites, plugin and theme usage, alerts) to AI assistants connected with the MCP Adapter plugin. They act as the connected user, who needs the same rights as for these pages."
+msgid "Offers the read-only abilities of Multisite Radar (network summary, sites, plugin and theme usage, alerts, recent changes) to AI assistants connected with the MCP Adapter plugin. They act as the connected user, who needs the same rights as for these pages."
 msgstr ""
 
 #: build/admin/settings.js:2
@@ -2105,7 +2105,7 @@ msgstr ""
 
 #. translators: %d: site ID.
 #: build/admin/sites.js:24
-#: includes/Query/EventsQuery.php:115
+#: includes/Query/EventsQuery.php:145
 #: includes/Query/SitesQuery.php:169
 #: includes/SitesMenu/Renderer.php:56
 #, js-format,php-format
@@ -2799,58 +2799,58 @@ msgstr ""
 msgid "Multisite Radar requires a WordPress Multisite network. It does nothing on a single site."
 msgstr ""
 
-#: includes/Query/EventsQuery.php:148
+#: includes/Query/EventsQuery.php:178
 msgid "Site created."
 msgstr ""
 
-#: includes/Query/EventsQuery.php:150
+#: includes/Query/EventsQuery.php:180
 msgid "Site deleted."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/Query/EventsQuery.php:154
+#: includes/Query/EventsQuery.php:184
 #, php-format
 msgid "Plugin %s network activated."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/Query/EventsQuery.php:157
+#: includes/Query/EventsQuery.php:187
 #, php-format
 msgid "Plugin %s activated."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/Query/EventsQuery.php:161
+#: includes/Query/EventsQuery.php:191
 #, php-format
 msgid "Plugin %s network deactivated."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/Query/EventsQuery.php:164
+#: includes/Query/EventsQuery.php:194
 #, php-format
 msgid "Plugin %s deactivated."
 msgstr ""
 
 #. translators: %s: theme name.
-#: includes/Query/EventsQuery.php:169
+#: includes/Query/EventsQuery.php:199
 #, php-format
 msgid "Theme switched to %s."
 msgstr ""
 
 #. translators: 1: previous theme name, 2: new theme name.
-#: includes/Query/EventsQuery.php:172
+#: includes/Query/EventsQuery.php:202
 #, php-format
 msgid "Theme switched from %1$s to %2$s."
 msgstr ""
 
 #. translators: %s: alert rule label.
-#: includes/Query/EventsQuery.php:175
+#: includes/Query/EventsQuery.php:205
 #, php-format
 msgid "New alert: %s."
 msgstr ""
 
 #. translators: %s: alert rule label.
-#: includes/Query/EventsQuery.php:178
+#: includes/Query/EventsQuery.php:208
 #, php-format
 msgid "Alert resolved: %s."
 msgstr ""
@@ -2995,7 +2995,7 @@ msgstr ""
 msgid "Your account has no valid e-mail address."
 msgstr ""
 
-#: includes/Rest/ReportsController.php:106
+#: includes/Rest/ReportsController.php:115
 msgid "The e-mail could not be sent. Check the e-mail settings of the server."
 msgstr ""
 

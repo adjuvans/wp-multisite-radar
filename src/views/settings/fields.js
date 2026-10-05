@@ -100,7 +100,7 @@ export function getSettingsFields( { postTypes = [], plugins = [] } ) {
 				'multisite-radar'
 			),
 			description: __(
-				'Offers the read-only abilities of Multisite Radar (network summary, sites, plugin and theme usage, alerts) to AI assistants connected with the MCP Adapter plugin. They act as the connected user, who needs the same rights as for these pages.',
+				'Offers the read-only abilities of Multisite Radar (network summary, sites, plugin and theme usage, alerts, recent changes) to AI assistants connected with the MCP Adapter plugin. They act as the connected user, who needs the same rights as for these pages.',
 				'multisite-radar'
 			),
 			Edit: 'toggle',
