@@ -13,6 +13,7 @@ final class RegistrarTest extends RestTestCase {
 		'multisite-radar/get-site',
 		'multisite-radar/find-extension-usage',
 		'multisite-radar/list-alerts',
+		'multisite-radar/recent-changes',
 	];
 
 	public function test_the_abilities_are_registered_read_only_in_their_category(): void {

@@ -203,4 +203,8 @@ expect "the MCP switch reaches the registered ability" "$(wpe eval 'echo wp_json
 wpe multisite-radar settings set integrations.mcp_public false >/dev/null
 expect "the MCP switch off reaches the registered ability" "$(wpe eval 'echo wp_json_encode( wp_get_ability( "multisite-radar/list-sites" )->get_meta_item( "mcp" ) );' | jq -r '.public')" "false"
 
+CHANGES="$(wpe --user=admin eval '$response = rest_do_request( new WP_REST_Request( "GET", "/wp-abilities/v1/abilities/multisite-radar/recent-changes/run" ) ); echo wp_json_encode( [ "status" => $response->get_status(), "data" => $response->get_data() ] );')"
+expect "the recent-changes ability lists the creation of the hidden site" \
+	"$(jq -r --arg id "$HIDDEN_ID" '"\(.status) \(.data.items | map(select(.type == "site_created" and (.site.id | tostring) == $id)) | length)"' <<<"$CHANGES")" "200 1"
+
 echo "E2E OK"

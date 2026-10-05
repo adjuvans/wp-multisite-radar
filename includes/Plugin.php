@@ -9,6 +9,7 @@ use MultisiteRadar\Abilities\GetSiteAbility;
 use MultisiteRadar\Abilities\ListAlertsAbility;
 use MultisiteRadar\Abilities\ListSitesAbility;
 use MultisiteRadar\Abilities\NetworkSummaryAbility;
+use MultisiteRadar\Abilities\RecentChangesAbility;
 use MultisiteRadar\Abilities\Registrar;
 use MultisiteRadar\Admin\Assets;
 use MultisiteRadar\Admin\Footer;
@@ -376,6 +377,7 @@ final class Plugin {
 				new GetSiteAbility( $this->sites_query() ),
 				new FindExtensionUsageAbility( $this->plugins_query(), $this->themes_query(), $this->sites_query() ),
 				new ListAlertsAbility( $this->alerts_query(), $this->rules() ),
+				new RecentChangesAbility( $this->events_query() ),
 			]
 		);
 	}
