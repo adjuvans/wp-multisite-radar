@@ -1,4 +1,9 @@
-import { dateI18n, getSettings, humanTimeDiff } from '@wordpress/date';
+import {
+	dateI18n,
+	getSettings,
+	gmdateI18n,
+	humanTimeDiff,
+} from '@wordpress/date';
 import { __, sprintf } from '@wordpress/i18n';
 
 const EMPTY = '—';
@@ -88,4 +93,15 @@ export function formatDisk( bytes, estimate = false ) {
 
 export function displayUrl( url ) {
 	return ( url || '' ).replace( /^https?:\/\//, '' ).replace( /\/$/, '' );
+}
+
+/**
+ * Jour d'un instantané (« Y-m-d », jour UTC) au format de date du site, sans le décaler dans le fuseau du site.
+ *
+ * @param {?string} day Jour « Y-m-d ».
+ */
+export function formatDay( day ) {
+	return day
+		? gmdateI18n( getSettings().formats.date, `${ day }T00:00:00Z` )
+		: EMPTY;
 }

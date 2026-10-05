@@ -1,7 +1,9 @@
 import { beforeAll, expect, test } from 'vitest';
+import { getSettings, setSettings } from '@wordpress/date';
 import {
 	displayUrl,
 	formatBytes,
+	formatDay,
 	formatDisk,
 	formatNumber,
 	formatRelative,
@@ -50,4 +52,23 @@ test( 'a disk measure cut short by its time budget is a minimum', () => {
 	expect( formatDisk( 2048, false ) ).toBe( '2 KB' );
 	expect( formatDisk( 2048, true ) ).toBe( 'at least 2 KB' );
 	expect( formatDisk( null, true ) ).toBe( '—' );
+} );
+
+test( 'a snapshot day keeps its calendar date in a timezone behind UTC', () => {
+	const previous = getSettings();
+	setSettings( {
+		...previous,
+		formats: { ...previous.formats, date: 'Y-m-d' },
+		timezone: { ...previous.timezone, offset: -10, string: '' },
+	} );
+
+	try {
+		expect( formatDay( '2026-09-01' ) ).toBe( '2026-09-01' );
+	} finally {
+		setSettings( previous );
+	}
+} );
+
+test( 'a missing day is shown as a dash', () => {
+	expect( formatDay( null ) ).toBe( '—' );
 } );

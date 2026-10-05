@@ -335,3 +335,88 @@
 		margin-bottom: 16px;
 	}
 }
+
+.msradar-trend {
+	margin: 0 0 24px;
+}
+
+.msradar-trend__title {
+	font-weight: 600;
+	margin-bottom: 8px;
+}
+
+.msradar-trend__plot {
+	position: relative;
+}
+
+.msradar-trend__chart {
+	display: block;
+	width: 100%;
+	height: 160px;
+	border-bottom: 1px solid #c3c4c7;
+	border-left: 1px solid #c3c4c7;
+}
+
+.msradar-trend__max {
+	position: absolute;
+	top: 0;
+	left: 4px;
+	font-size: 11px;
+	color: #50575e;
+}
+
+.msradar-trend__axis {
+	display: flex;
+	justify-content: space-between;
+	font-size: 11px;
+	color: #50575e;
+}
+
+.msradar-trend__line {
+	stroke-width: 2;
+}
+
+.msradar-trend__legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin: 8px 0;
+}
+
+.msradar-trend__swatch {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	margin-right: 4px;
+	border-radius: 2px;
+	vertical-align: middle;
+}
+
+$msradar-tones: (
+	accent: var(--wp-admin-theme-color),
+	info: #72aee6,
+	warning: #dba617,
+	error: #d63638,
+);
+
+@each $tone, $color in $msradar-tones {
+	.msradar-trend__line--#{$tone} {
+		stroke: $color;
+	}
+
+	.msradar-trend__dot--#{$tone},
+	.msradar-trend__swatch--#{$tone} {
+		fill: $color;
+		background: $color;
+	}
+}
+
+.msradar-trend__data summary {
+	cursor: pointer;
+	margin: 4px 0 8px;
+}
+
+.msradar-events-list .components-base-control {
+	max-width: 280px;
+	margin-bottom: 12px;
+}
