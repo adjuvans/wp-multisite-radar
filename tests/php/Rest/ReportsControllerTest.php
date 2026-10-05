@@ -1,0 +1,70 @@
+<?php
+namespace MultisiteRadar\Tests\Rest;
+
+use MultisiteRadar\Tests\RestTestCase;
+
+final class ReportsControllerTest extends RestTestCase {
+
+	public function set_up(): void {
+		parent::set_up();
+		$this->make_record(
+			4901,
+			[
+				'name'       => 'Reported',
+				'scanned_at' => '2026-09-01 00:00:00',
+			]
+		);
+		$this->make_record(
+			4902,
+			[
+				'network_id' => 2,
+				'scanned_at' => '2026-09-01 00:00:00',
+			]
+		);
+		$this->plugin()->snapshots()->capture( get_current_network_id(), gmdate( 'Y-m-d' ) );
+	}
+
+	public function test_trends_of_the_network_and_of_a_site_for_the_view_capability(): void {
+		$this->assertSame( 401, $this->request( 'GET', '/reports/trends' )->get_status() );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertSame( 403, $this->request( 'GET', '/reports/trends' )->get_status() );
+
+		$this->login_as_super_admin();
+		$network = $this->request( 'GET', '/reports/trends' );
+		$this->assertSame( 200, $network->get_status() );
+		$this->assertSame( 90, $network->get_data()['days'] );
+		$this->assertSame( [ gmdate( 'Y-m-d' ) ], array_column( $network->get_data()['points'], 'day' ) );
+
+		$site = $this->request(
+			'GET',
+			'/reports/trends',
+			[
+				'site' => 4901,
+				'days' => 7,
+			]
+		);
+		$this->assertSame( 200, $site->get_status() );
+		$this->assertSame( 4901, $site->get_data()['site'] );
+
+		$this->assertSame( 404, $this->request( 'GET', '/reports/trends', [ 'site' => 4902 ] )->get_status() );
+		$this->assertSame( 400, $this->request( 'GET', '/reports/trends', [ 'days' => 1 ] )->get_status() );
+	}
+
+	public function test_a_failed_read_is_a_500(): void {
+		global $wpdb;
+		$this->login_as_super_admin();
+		$break    = static function ( string $query ): string {
+			return false !== strpos( $query, 'msradar_snapshots' ) ? 'SELECT * FROM msradar_missing_table' : $query;
+		};
+		$suppress = $wpdb->suppress_errors( true );
+		add_filter( 'query', $break );
+		try {
+			$response = $this->request( 'GET', '/reports/trends' );
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $suppress );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+	}
+}

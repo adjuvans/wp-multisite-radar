@@ -252,6 +252,49 @@ final class Schemas {
 	}
 
 	/**
+	 * Séries de TrendsQuery : points du réseau, ou d'un site si « site » n'est pas null.
+	 */
+	public static function trends(): array {
+		$count = self::type( 'integer' );
+		return self::object(
+			[
+				'days'   => $count,
+				'since'  => self::type( 'string' ),
+				'site'   => self::type( [ 'integer', 'null' ] ),
+				'points' => self::list_of(
+					[
+						'anyOf' => [
+							self::object(
+								[
+									'day'            => self::type( 'string' ),
+									'sites'          => $count,
+									'content_count'  => $count,
+									'media_count'    => $count,
+									'alerts_error'   => $count,
+									'alerts_warning' => $count,
+									'alerts_info'    => $count,
+								]
+							),
+							self::object(
+								[
+									'day'           => self::type( 'string' ),
+									'users_count'   => $count,
+									'content_count' => $count,
+									'media_count'   => $count,
+									'disk_bytes'    => self::type( [ 'integer', 'null' ] ),
+									'db_bytes'      => self::type( [ 'integer', 'null' ] ),
+									'alert_level'   => self::enum( Severity::names() ),
+									'alerts_count'  => $count,
+								]
+							),
+						],
+					]
+				),
+			]
+		);
+	}
+
+	/**
 	 * Une page d'une liste, telle que la renvoient les abilities (en REST, la pagination passe par les en-têtes).
 	 */
 	public static function page_of( array $item ): array {

@@ -35,6 +35,7 @@ use MultisiteRadar\Query\ScanStatusQuery;
 use MultisiteRadar\Query\SiteUsersQuery;
 use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Query\ThemesQuery;
+use MultisiteRadar\Query\TrendsQuery;
 use MultisiteRadar\Query\UsersQuery;
 use MultisiteRadar\Rest\AlertRulesController;
 use MultisiteRadar\Rest\AlertsController;
@@ -42,6 +43,7 @@ use MultisiteRadar\Rest\EventsController;
 use MultisiteRadar\Rest\InventoryController;
 use MultisiteRadar\Rest\PluginsController;
 use MultisiteRadar\Rest\PreferencesController;
+use MultisiteRadar\Rest\ReportsController;
 use MultisiteRadar\Rest\ScanController;
 use MultisiteRadar\Rest\SettingsController;
 use MultisiteRadar\Rest\SitesController;
@@ -114,6 +116,8 @@ final class Plugin {
 	private ?SitesQuery $sites_query = null;
 
 	private ?EventsQuery $events_query = null;
+
+	private ?TrendsQuery $trends_query = null;
 
 	private ?ScanStatusQuery $scan_status_query = null;
 
@@ -208,6 +212,7 @@ final class Plugin {
 			new AlertsController( $this->alerts_query() ),
 			new AlertRulesController( $this->rules() ),
 			new EventsController( $this->events_query() ),
+			new ReportsController( $this->trends_query() ),
 			new PreferencesController( $this->preferences() ),
 		];
 		foreach ( $controllers as $controller ) {
@@ -341,6 +346,10 @@ final class Plugin {
 
 	public function site_users_query(): SiteUsersQuery {
 		return $this->site_users_query ??= new SiteUsersQuery();
+	}
+
+	public function trends_query(): TrendsQuery {
+		return $this->trends_query ??= new TrendsQuery( $this->snapshots(), $this->sites() );
 	}
 
 	public function events_query(): EventsQuery {

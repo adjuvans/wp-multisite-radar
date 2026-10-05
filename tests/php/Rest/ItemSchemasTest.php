@@ -51,6 +51,7 @@ final class ItemSchemasTest extends RestTestCase {
 			'alerts summary'    => [ '/alerts/summary', false ],
 			'inventory summary' => [ '/inventory/summary', false ],
 			'scan status'       => [ '/scan/status', false ],
+			'trends'            => [ '/reports/trends', false ],
 		];
 	}
 
