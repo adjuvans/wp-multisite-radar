@@ -65,8 +65,11 @@ final class ChangeLog {
 			];
 		};
 
-		$old_plugins = self::plugins( $before );
-		$new_plugins = self::plugins( $after );
+		// Les plugins du site (option brute) évitent de noter une fausse (dés)activation quand un plugin passe
+		// de local à réseau ; sans cette clé d'un côté (relevé 2.0.0-beta.5), on compare les plugins locaux des deux côtés.
+		$key         = isset( $before->data['plugins_site'], $after->data['plugins_site'] ) ? 'plugins_site' : 'plugins_local';
+		$old_plugins = self::plugins( $before, $key );
+		$new_plugins = self::plugins( $after, $key );
 		foreach ( array_diff( $new_plugins, $old_plugins ) as $file ) {
 			$add( 'plugin_activated', $file );
 		}
@@ -89,10 +92,11 @@ final class ChangeLog {
 	}
 
 	/**
+	 * @param string $key Clé de `data` à lire : `plugins_site` ou `plugins_local`.
 	 * @return string[] Fichiers des plugins activés sur le site.
 	 */
-	private static function plugins( SiteRecord $record ): array {
-		return array_values( array_unique( array_filter( array_map( 'strval', (array) ( $record->data['plugins_local'] ?? [] ) ) ) ) );
+	private static function plugins( SiteRecord $record, string $key ): array {
+		return array_values( array_unique( array_filter( array_map( 'strval', (array) ( $record->data[ $key ] ?? [] ) ) ) ) );
 	}
 
 	/**

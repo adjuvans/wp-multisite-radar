@@ -65,6 +65,42 @@ final class ChangeLogTest extends TestCase {
 		}
 	}
 
+	private function with_site_plugins( SiteRecord $record, array $site_plugins ): SiteRecord {
+		$record->data['plugins_site'] = $site_plugins;
+		return $record;
+	}
+
+	public function test_network_activating_a_locally_active_plugin_records_nothing_on_the_site(): void {
+		$before = $this->with_site_plugins( $this->state( [ 'a/a.php' ], 'twentytwentyfive', [] ), [ 'a/a.php' ] );
+		$after  = $this->with_site_plugins( $this->state( [], 'twentytwentyfive', [] ), [ 'a/a.php' ] );
+
+		$this->assertSame( [], ChangeLog::diff( $before, $after, self::NOW ) );
+	}
+
+	public function test_network_deactivating_a_locally_active_plugin_records_nothing_on_the_site(): void {
+		$before = $this->with_site_plugins( $this->state( [], 'twentytwentyfive', [] ), [ 'a/a.php' ] );
+		$after  = $this->with_site_plugins( $this->state( [ 'a/a.php' ], 'twentytwentyfive', [] ), [ 'a/a.php' ] );
+
+		$this->assertSame( [], ChangeLog::diff( $before, $after, self::NOW ) );
+	}
+
+	public function test_a_genuine_local_activation_is_still_recorded_with_the_site_plugins(): void {
+		$before = $this->with_site_plugins( $this->state( [], 'twentytwentyfive', [] ), [] );
+		$after  = $this->with_site_plugins( $this->state( [ 'a/a.php' ], 'twentytwentyfive', [] ), [ 'a/a.php' ] );
+
+		$events = ChangeLog::diff( $before, $after, self::NOW );
+
+		$this->assertSame( [ 'plugin_activated' ], array_column( $events, 'type' ) );
+		$this->assertSame( [ 'a/a.php' ], array_column( $events, 'subject' ) );
+	}
+
+	public function test_a_before_record_without_site_plugins_compares_the_local_plugins(): void {
+		$before = $this->state( [ 'a/a.php' ], 'twentytwentyfive', [] );
+		$after  = $this->with_site_plugins( $this->state( [ 'a/a.php' ], 'twentytwentyfive', [] ), [ 'a/a.php', 'n/n.php' ] );
+
+		$this->assertSame( [], ChangeLog::diff( $before, $after, self::NOW ) );
+	}
+
 	public function test_a_severity_change_alone_records_nothing(): void {
 		$before = $this->state( [], 'twentytwentyfive', [ 'inactive' => 'warning' ] );
 		$after  = $this->state( [], 'twentytwentyfive', [ 'inactive' => 'error' ] );

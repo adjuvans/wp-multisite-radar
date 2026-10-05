@@ -112,6 +112,7 @@ final class SiteCollector {
 				'privileged' => $users['privileged'],
 			],
 			'plugins_local' => array_values( array_diff( $active_plugins, $network_plugins ) ),
+			'plugins_site'  => array_values( $active_plugins ),
 			'last_content'  => $last,
 			'options'       => [
 				'blog_public'     => (int) ( $options['blog_public'] ?? 1 ),

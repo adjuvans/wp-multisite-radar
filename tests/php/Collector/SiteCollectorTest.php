@@ -296,6 +296,7 @@ final class SiteCollectorTest extends TestCase {
 		$record = $this->collect( $site_id );
 
 		$this->assertSame( [ 'acme/acme.php' ], $record->data['plugins_local'] );
+		$this->assertSame( [ 'acme/acme.php', 'netwide/netwide.php' ], $record->data['plugins_site'] );
 		$this->assertSame( 'child-theme', $record->theme_stylesheet );
 		$this->assertSame( 'parent-theme', $record->theme_template );
 		$this->assertSame( 'fr_FR', $record->data['options']['locale'] );
@@ -332,6 +333,7 @@ final class SiteCollectorTest extends TestCase {
 
 		$this->assertSame( '', $record->name, 'The fallback name is applied when reading, in the reader’s language.' );
 		$this->assertSame( [], $record->data['plugins_local'] );
+		$this->assertSame( [], $record->data['plugins_site'] );
 		$this->assertSame( RegistryProbe::STATUS_MISSING, $record->registry_status );
 	}
 
