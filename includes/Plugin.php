@@ -47,6 +47,7 @@ use MultisiteRadar\Rest\ThemesController;
 use MultisiteRadar\Rest\UsersController;
 use MultisiteRadar\Scan\BatchRunner;
 use MultisiteRadar\Scan\ChangeLog;
+use MultisiteRadar\Scan\History;
 use MultisiteRadar\Scan\Invalidation;
 use MultisiteRadar\Scan\Lock;
 use MultisiteRadar\Scan\NetworkStateWatcher;
@@ -106,6 +107,7 @@ final class Plugin {
 
 	private ?Invalidation $invalidation         = null;
 	private ?NetworkStateWatcher $state_watcher = null;
+	private ?History $history                   = null;
 
 	private ?SitesQuery $sites_query = null;
 
@@ -161,6 +163,7 @@ final class Plugin {
 		$this->queue()->register();
 		$this->invalidation()->register();
 		$this->state_watcher()->register();
+		$this->history()->register();
 		$this->sites_menu()->register();
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 		add_action( 'wp_abilities_api_categories_init', [ $this, 'register_ability_category' ] );
@@ -325,6 +328,10 @@ final class Plugin {
 
 	public function state_watcher(): NetworkStateWatcher {
 		return $this->state_watcher ??= new NetworkStateWatcher( $this->network_state() );
+	}
+
+	public function history(): History {
+		return $this->history ??= new History( $this->snapshots(), $this->events(), $this->settings() );
 	}
 
 	public function site_users_query(): SiteUsersQuery {
