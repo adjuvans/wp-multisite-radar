@@ -9,11 +9,10 @@ defined( 'ABSPATH' ) || exit;
 final class Schema {
 
 	/**
-	 * 1 : tables de M1 ; 2 : colonne siteurl (M2) ; 3 : aucune colonne nouvelle, mais la mise à niveau relance une
-	 * analyse complète qui remplit les mesures disque, base, autoload et tâches planifiées (M4, écart E8).
-	 * Les tables events/snapshots de M6 prendront la version 4.
+	 * 1 : tables de M1 ; 2 : colonne siteurl (M2) ; 3 : mesures de M4, remplies par une analyse complète ;
+	 * 4 : tables msradar_events et msradar_snapshots (M6), sans nouvelle analyse (écart E2 du plan M6).
 	 */
-	public const VERSION = 3;
+	public const VERSION = 4;
 	public const OPTION  = 'msradar_db_version';
 
 	public static function sites_table(): string {
@@ -26,11 +25,21 @@ final class Schema {
 		return $wpdb->base_prefix . 'msradar_site_extensions';
 	}
 
+	public static function events_table(): string {
+		global $wpdb;
+		return $wpdb->base_prefix . 'msradar_events';
+	}
+
+	public static function snapshots_table(): string {
+		global $wpdb;
+		return $wpdb->base_prefix . 'msradar_snapshots';
+	}
+
 	/**
 	 * @return string[]
 	 */
 	public static function tables(): array {
-		return [ self::sites_table(), self::extensions_table() ];
+		return [ self::sites_table(), self::extensions_table(), self::events_table(), self::snapshots_table() ];
 	}
 
 	/**
@@ -43,6 +52,8 @@ final class Schema {
 		$charset_collate = $wpdb->get_charset_collate();
 		$sites           = self::sites_table();
 		$extensions      = self::extensions_table();
+		$events          = self::events_table();
+		$snapshots       = self::snapshots_table();
 
 		dbDelta(
 			"CREATE TABLE {$sites} (
@@ -92,6 +103,39 @@ slug varchar(191) NOT NULL,
 role varchar(10) NOT NULL DEFAULT '',
 PRIMARY KEY  (site_id,type,slug),
 KEY type_slug (type,slug)
+) {$charset_collate};"
+		);
+
+		dbDelta(
+			"CREATE TABLE {$events} (
+id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+network_id bigint(20) unsigned NOT NULL DEFAULT 1,
+site_id bigint(20) unsigned NOT NULL DEFAULT 0,
+type varchar(40) NOT NULL,
+subject varchar(191) NOT NULL DEFAULT '',
+meta longtext NULL,
+created_at datetime NOT NULL,
+PRIMARY KEY  (id),
+KEY network_created (network_id,created_at),
+KEY site_created (site_id,created_at),
+KEY type_created (type,created_at)
+) {$charset_collate};"
+		);
+
+		dbDelta(
+			"CREATE TABLE {$snapshots} (
+site_id bigint(20) unsigned NOT NULL,
+day date NOT NULL,
+network_id bigint(20) unsigned NOT NULL DEFAULT 1,
+users_count int(10) unsigned NOT NULL DEFAULT 0,
+content_count int(10) unsigned NOT NULL DEFAULT 0,
+media_count int(10) unsigned NOT NULL DEFAULT 0,
+disk_bytes bigint(20) unsigned DEFAULT NULL,
+db_bytes bigint(20) unsigned DEFAULT NULL,
+alert_level tinyint(3) unsigned NOT NULL DEFAULT 0,
+alerts_count smallint(5) unsigned NOT NULL DEFAULT 0,
+PRIMARY KEY  (site_id,day),
+KEY network_day (network_id,day)
 ) {$charset_collate};"
 		);
 

@@ -473,4 +473,14 @@ final class QueueTest extends TestCase {
 		$this->plugin()->settings()->update( [ 'scan' => [ 'measure_disk' => false ] ] );
 		$this->assertSame( 0, $this->plugin()->sites()->count_dirty( $network ), 'Saving the same value again is not a change.' );
 	}
+
+	public function test_an_upgrade_from_version_3_adds_the_history_tables_without_a_new_analysis(): void {
+		$network = get_current_network_id();
+		$this->plugin()->sites()->seed_from_blogs( $network );
+		$this->mark_all_clean();
+
+		do_action( 'msradar_upgraded', 4, 3 );
+
+		$this->assertSame( 0, $this->plugin()->sites()->count_dirty( $network ) );
+	}
 }

@@ -53,7 +53,7 @@ final class Queue {
 		add_action( self::HOOK_RECOMPUTE, [ $this, 'run_recompute' ] );
 		add_action( 'msradar_activated', [ $this, 'schedule' ] );
 		add_action( 'msradar_deactivated', [ $this, 'unschedule' ] );
-		add_action( 'msradar_upgraded', [ $this, 'on_upgraded' ] );
+		add_action( 'msradar_upgraded', [ $this, 'on_upgraded' ], 10, 2 );
 		add_action( 'msradar_settings_updated', [ $this, 'on_settings_updated' ], 10, 2 );
 		add_action( 'admin_init', [ $this, 'ensure_scheduled' ] );
 	}
@@ -259,14 +259,17 @@ final class Queue {
 	}
 
 	/**
-	 * Après une mise à niveau du schéma, les nouvelles colonnes ne se remplissent qu'à l'analyse :
-	 * tout le réseau courant est marqué (la version 2 ajoute siteurl, la version 3 remplit les mesures de M4).
+	 * Les colonnes ajoutées jusqu'à la version 3 du schéma ne se remplissent qu'à l'analyse : tout le réseau courant
+	 * est alors marqué. La version 4 n'ajoute que les tables de l'historique : rien à réanalyser (écart E2 du plan M6).
 	 *
-	 * @param mixed $version Version de schéma installée.
+	 * @param mixed $version  Version de schéma installée.
+	 * @param mixed $previous Version avant la mise à niveau (0 : inconnue ou première installation).
 	 */
-	public function on_upgraded( $version = 0 ): void {
+	public function on_upgraded( $version = 0, $previous = 0 ): void {
 		$this->schedule();
-		$this->request_full_scan( get_current_network_id() );
+		if ( (int) $previous < 3 ) {
+			$this->request_full_scan( get_current_network_id() );
+		}
 	}
 
 	/**

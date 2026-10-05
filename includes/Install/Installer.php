@@ -31,10 +31,11 @@ final class Installer {
 		if ( Schema::is_current() ) {
 			return;
 		}
+		$previous = (int) get_site_option( Schema::OPTION, 0 );
 		if ( ! self::install() ) {
 			return;
 		}
-		do_action( 'msradar_upgraded', Schema::VERSION );
+		do_action( 'msradar_upgraded', Schema::VERSION, $previous );
 	}
 
 	/**

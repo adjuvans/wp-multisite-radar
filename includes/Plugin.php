@@ -55,8 +55,10 @@ use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Settings\SettingsUpdater;
 use MultisiteRadar\SitesMenu\Module as SitesMenuModule;
 use MultisiteRadar\SitesMenu\SitesListCache;
+use MultisiteRadar\Storage\EventsRepository;
 use MultisiteRadar\Storage\ExtensionsRepository;
 use MultisiteRadar\Storage\SitesRepository;
+use MultisiteRadar\Storage\SnapshotsRepository;
 use MultisiteRadar\Storage\UsersRepository;
 
 /**
@@ -77,6 +79,10 @@ final class Plugin {
 	private ?SitesRepository $sites = null;
 
 	private ?ExtensionsRepository $extensions = null;
+
+	private ?EventsRepository $events = null;
+
+	private ?SnapshotsRepository $snapshots = null;
 
 	private ?RegistryProbe $probe = null;
 
@@ -267,6 +273,14 @@ final class Plugin {
 
 	public function extensions(): ExtensionsRepository {
 		return $this->extensions ??= new ExtensionsRepository();
+	}
+
+	public function events(): EventsRepository {
+		return $this->events ??= new EventsRepository();
+	}
+
+	public function snapshots(): SnapshotsRepository {
+		return $this->snapshots ??= new SnapshotsRepository();
 	}
 
 	/**

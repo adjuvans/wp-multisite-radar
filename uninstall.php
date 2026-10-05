@@ -13,11 +13,11 @@ if ( ! is_multisite() ) {
 
 global $wpdb;
 
-foreach ( [ 'msradar_sites', 'msradar_site_extensions' ] as $msradar_table ) {
+foreach ( [ 'msradar_sites', 'msradar_site_extensions', 'msradar_events', 'msradar_snapshots' ] as $msradar_table ) {
 	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->base_prefix . $msradar_table ) );
 }
 
-$msradar_network_options = [ 'msradar_settings', 'msradar_db_version', 'msradar_last_full_scan', 'msradar_legacy_migrated', 'msradar_legacy_aliases', 'msradar_legacy_menu_cursor', 'msradar_recompute_cursor', 'msradar_network_state' ];
+$msradar_network_options = [ 'msradar_settings', 'msradar_db_version', 'msradar_last_full_scan', 'msradar_legacy_migrated', 'msradar_legacy_aliases', 'msradar_legacy_menu_cursor', 'msradar_recompute_cursor', 'msradar_network_state', 'msradar_digest_sent' ];
 $msradar_network_ids     = get_networks(
 	[
 		'fields' => 'ids',

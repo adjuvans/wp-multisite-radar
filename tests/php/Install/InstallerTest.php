@@ -55,4 +55,21 @@ final class InstallerTest extends TestCase {
 	public function test_upgrade_is_hooked_on_admin_init(): void {
 		$this->assertNotFalse( has_action( 'admin_init', [ Installer::class, 'maybe_upgrade' ] ) );
 	}
+
+	public function test_maybe_upgrade_passes_the_previous_schema_version(): void {
+		$seen = [];
+		add_action(
+			'msradar_upgraded',
+			static function ( $version, $previous ) use ( &$seen ): void {
+				$seen[] = [ $version, $previous ];
+			},
+			10,
+			2
+		);
+
+		update_site_option( Schema::OPTION, 3 );
+		Installer::maybe_upgrade();
+
+		$this->assertSame( [ [ Schema::VERSION, 3 ] ], $seen );
+	}
 }
