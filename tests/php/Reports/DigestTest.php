@@ -178,6 +178,40 @@ final class DigestTest extends TestCase {
 		$this->assertSame( [], $this->sent() );
 	}
 
+	public function test_an_exception_thrown_by_the_mailer_is_reported_and_the_alt_body_callback_is_removed(): void {
+		global $wp_filter;
+		$this->enable(
+			[
+				'mode'   => 'custom',
+				'emails' => [ 'one@example.org' ],
+			]
+		);
+		$reported = [];
+		$report   = static function ( string $context ) use ( &$reported ): void {
+			$reported[] = $context;
+		};
+		$boom     = static function (): void {
+			throw new \PHPMailer\PHPMailer\Exception( 'boom' );
+		};
+		$count    = static function () use ( &$wp_filter ): int {
+			return isset( $wp_filter['phpmailer_init'] ) ? array_sum( array_map( 'count', $wp_filter['phpmailer_init']->callbacks ) ) : 0;
+		};
+		$before   = $count();
+		add_action( 'msradar_error', $report );
+		add_action( 'phpmailer_init', $boom );
+		try {
+			$this->plugin()->digest()->maybe_send( self::NOW );
+			$during = $count();
+		} finally {
+			remove_action( 'phpmailer_init', $boom );
+			remove_action( 'msradar_error', $report );
+		}
+
+		$this->assertSame( [ Digest::class . '::maybe_send' ], $reported );
+		$this->assertFalse( get_site_option( Digest::SENT_OPTION ) );
+		$this->assertSame( $before + 1, $during, 'Only the callback added by the test is left on phpmailer_init.' );
+	}
+
 	public function test_it_runs_on_the_daily_task_after_the_history(): void {
 		$this->assertSame( 30, has_action( Queue::HOOK_DAILY, [ $this->plugin()->digest(), 'maybe_send' ] ) );
 	}

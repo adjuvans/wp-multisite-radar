@@ -60,7 +60,7 @@ final class Digest {
 		}
 		try {
 			$sent = $this->send( $recipients, $now );
-		} catch ( \RuntimeException $error ) {
+		} catch ( \Throwable $error ) {
 			do_action( 'msradar_error', __METHOD__, $error );
 			return;
 		}

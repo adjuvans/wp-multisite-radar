@@ -102,7 +102,16 @@ final class ReportsController extends Controller {
 				if ( ! is_email( $email ) ) {
 					return new WP_Error( 'msradar_no_email', __( 'Your account has no valid e-mail address.', 'multisite-radar' ), [ 'status' => 400 ] );
 				}
-				if ( ! $this->digest->send( [ $email ] ) ) {
+				try {
+					$sent = $this->digest->send( [ $email ] );
+				} catch ( \RuntimeException $error ) {
+					throw $error; // Lecture en échec : la garde répond 500 (msradar_storage_error).
+				} catch ( \Throwable $error ) {
+					// Un hook tiers (phpmailer_init, pre_wp_mail) a levé une exception : même réponse qu'un envoi raté.
+					do_action( 'msradar_error', __METHOD__, $error );
+					$sent = false;
+				}
+				if ( ! $sent ) {
 					return new WP_Error( 'msradar_mail_failed', __( 'The e-mail could not be sent. Check the e-mail settings of the server.', 'multisite-radar' ), [ 'status' => 500 ] );
 				}
 				return new WP_REST_Response( [ 'sent' => true ] );

@@ -73,6 +73,27 @@ final class DashboardWidgetTest extends TestCase {
 		$this->assertStringContainsString( 'could not read its data', $html );
 	}
 
+	public function test_an_exception_thrown_by_a_third_party_filter_shows_the_message(): void {
+		$reported = [];
+		$report   = static function ( string $context ) use ( &$reported ): void {
+			$reported[] = $context;
+		};
+		$boom     = static function () {
+			throw new \Exception( 'boom' );
+		};
+		add_action( 'msradar_error', $report );
+		add_filter( 'site_transient_update_plugins', $boom );
+		try {
+			$html = $this->render();
+		} finally {
+			remove_filter( 'site_transient_update_plugins', $boom );
+			remove_action( 'msradar_error', $report );
+		}
+
+		$this->assertStringContainsString( 'could not read its data', $html );
+		$this->assertSame( [ DashboardWidget::class . '::render' ], $reported );
+	}
+
 	public function test_it_is_hooked_on_the_network_dashboard(): void {
 		$this->assertSame( 10, has_action( 'wp_network_dashboard_setup', [ $this->plugin()->dashboard_widget(), 'add' ] ) );
 	}

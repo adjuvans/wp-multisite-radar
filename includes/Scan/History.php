@@ -46,7 +46,7 @@ final class History {
 			$this->snapshots->capture( $network_id, gmdate( 'Y-m-d', $now ) );
 			$this->snapshots->purge( $network_id, gmdate( 'Y-m-d', $now - $snapshots * DAY_IN_SECONDS ) );
 			$this->events->purge( $network_id, gmdate( 'Y-m-d H:i:s', $now - $events * DAY_IN_SECONDS ) );
-		} catch ( \RuntimeException $error ) {
+		} catch ( \Throwable $error ) {
 			do_action( 'msradar_error', __METHOD__, $error );
 		}
 	}

@@ -121,7 +121,7 @@ final class ChangeLog {
 		}
 		try {
 			$this->events->insert( $events );
-		} catch ( \RuntimeException $error ) {
+		} catch ( \Throwable $error ) {
 			do_action( 'msradar_error', self::class, $error );
 		}
 	}

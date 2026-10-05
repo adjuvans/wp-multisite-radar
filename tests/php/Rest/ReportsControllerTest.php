@@ -84,4 +84,23 @@ final class ReportsControllerTest extends RestTestCase {
 		$this->assertCount( 1, $sent );
 		$this->assertSame( 'tester@example.org', $sent[0]['to'][0][0] );
 	}
+
+	public function test_an_exception_thrown_while_sending_the_test_digest_becomes_a_mail_error(): void {
+		$user = self::factory()->user->create( [ 'user_email' => 'tester@example.org' ] );
+		grant_super_admin( $user );
+		wp_set_current_user( $user );
+		$boom = static function (): void {
+			throw new \PHPMailer\PHPMailer\Exception( 'boom' );
+		};
+		add_action( 'phpmailer_init', $boom );
+		try {
+			$response = $this->request( 'POST', '/reports/digest/test' );
+		} finally {
+			remove_action( 'phpmailer_init', $boom );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'msradar_mail_failed', $response->get_data()['code'] );
+		$this->assertStringNotContainsString( '@', (string) wp_json_encode( $response->get_data() ) );
+	}
 }

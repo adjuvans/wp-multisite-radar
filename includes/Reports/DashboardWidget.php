@@ -47,7 +47,7 @@ final class DashboardWidget {
 					'per_page' => self::TOP,
 				]
 			);
-		} catch ( \RuntimeException $error ) {
+		} catch ( \Throwable $error ) {
 			do_action( 'msradar_error', __METHOD__, $error );
 			echo '<p>' . esc_html__( 'Multisite Radar could not read its data. Try again in a moment.', 'multisite-radar' ) . '</p>';
 			return;
