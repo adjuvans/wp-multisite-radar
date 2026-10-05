@@ -1,8 +1,11 @@
 import { expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
+import apiFetch from '@wordpress/api-fetch';
 import { createCoreStore } from '../../../store';
 import UserPanel from '..';
+
+vi.mock( '@wordpress/api-fetch', () => ( { default: vi.fn() } ) );
 
 function renderPanel( body ) {
 	const preload = {
@@ -11,11 +14,15 @@ function renderPanel( body ) {
 	window.msradarAdmin = { pages: {}, preload };
 	const registry = createRegistry();
 	registry.register( createCoreStore( preload ) );
-	render(
+	const panel = ( userId, title ) => (
 		<RegistryProvider value={ registry }>
-			<UserPanel userId={ 7 } title="jo" onClose={ vi.fn() } />
+			<UserPanel userId={ userId } title={ title } onClose={ vi.fn() } />
 		</RegistryProvider>
 	);
+	const { rerender } = render( panel( 7, 'jo' ) );
+	return {
+		showAccount: ( userId, title ) => rerender( panel( userId, title ) ),
+	};
 }
 
 const ACCOUNT = {
@@ -73,4 +80,20 @@ test( 'without the e-mail the panel shows no e-mail row', () => {
 	expect( screen.queryByText( 'Email' ) ).not.toBeInTheDocument();
 	expect( screen.queryByText( /more site/ ) ).not.toBeInTheDocument();
 	expect( email ).toBe( 'jo@example.test' );
+} );
+
+test( 'while the next account loads, the panel shows its title and a skeleton, not the previous account', () => {
+	// Le compte 8 n'est pas préchargé : apiFetch, simulé, ne répond jamais.
+	apiFetch.mockImplementation( () => new Promise( () => {} ) );
+	const { showAccount } = renderPanel( ACCOUNT );
+	expect( screen.getByText( 'jo@example.test' ) ).toBeInTheDocument();
+
+	showAccount( 8, 'sam' );
+
+	expect( screen.getByRole( 'dialog', { name: 'sam' } ) ).toBeInTheDocument();
+	expect( screen.getByText( 'Loading the account…' ) ).toBeInTheDocument();
+	expect( screen.queryByText( 'jo@example.test' ) ).not.toBeInTheDocument();
+	expect(
+		screen.queryByRole( 'link', { name: 'Edit the account' } )
+	).not.toBeInTheDocument();
 } );

@@ -19,7 +19,8 @@ import { DateCell } from '../sites/fields';
  */
 export default function UserPanel( { userId, title, onClose } ) {
 	const user = useResource( buildPath( `/users/${ userId }` ) );
-	const data = user.data;
+	// Pendant le chargement d'un autre compte, useResource garde la fiche précédente : on ne l'affiche pas.
+	const data = user.isFresh ? user.data : null;
 	const name = data ? data.display_name || data.login : title;
 	const fullName = data
 		? [ data.first_name, data.last_name ].filter( Boolean ).join( ' ' )
