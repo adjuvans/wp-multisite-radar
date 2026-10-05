@@ -104,7 +104,7 @@ Deleting the plugin in Network Admin > Plugins removes its tables, its network o
 2. Sites: every site of the network with its theme, users, content, activity and alerts, with filters and CSV or JSON export.
 3. Side panel of a site: content types with the plugin or theme that registers them.
 4. Alerts: one line per site and rule, by severity.
-5. Plugins: the sites that use each plugin, unused plugins and available updates.
+5. Plugins: the sites that use each plugin, network-activated plugins and unused plugins.
 6. Reports: trends of the network and journal of changes.
 7. Settings: switch an alert rule off, change its severity or its threshold.
 

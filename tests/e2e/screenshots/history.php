@@ -57,7 +57,7 @@ use MultisiteRadar\Plugin;
 		[ 'events', 'plugin_activated', 'msradar-demo-cpt/msradar-demo-cpt.php', [], 6 ],
 		[ 'hr', 'plugin_activated', 'msradar-demo-cpt/msradar-demo-cpt.php', [], 4 ],
 		[ 'engineering', 'theme_switched', 'twentytwentyfive', [ 'from' => 'twentytwentyfour' ], 2 ],
-		[ 'support', 'plugin_deactivated', 'hello.php', [], 1 ],
+		[ 'lab', 'plugin_deactivated', 'hello.php', [], 1 ],
 		[ 'marketing', 'alert_resolved', 'no_admin', [], 1 ],
 	];
 	$rows    = [];

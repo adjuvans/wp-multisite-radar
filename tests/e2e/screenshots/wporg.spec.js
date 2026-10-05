@@ -12,6 +12,8 @@ test.describe.configure( { mode: 'serial' } );
 
 async function shoot( page, number, fullPage = false ) {
 	const size = page.viewportSize();
+	// Une vraie erreur ne doit pas être masquée par la règle ci-dessous.
+	await expect( page.locator( '.notice-error' ) ).toHaveCount( 0 );
 	// Les avis de WordPress (mise à jour disponible) et la version du plugin n'ont pas leur place dans les captures :
 	// elles ne doivent pas vieillir à chaque publication.
 	await page.addStyleTag( {
@@ -90,6 +92,8 @@ test( '5. Plugins', async ( { admin, page } ) => {
 
 test( '6. Reports', async ( { admin, page } ) => {
 	await open( admin, page, 'page=multisite-radar-reports' );
+	// Les données de démonstration couvrent 30 jours.
+	await page.locator( '#msradar-reports-period' ).selectOption( '30' );
 	await expect(
 		page.locator( '.msradar-reports__trends svg.msradar-trend__chart' )
 	).toHaveCount( 3 );
@@ -106,6 +110,16 @@ test( '7. Settings, an alert rule', async ( { admin, page } ) => {
 		name: /Months without activity/,
 	} );
 	await expect( months ).toBeVisible();
-	await months.scrollIntoViewIfNeeded();
+	// La capture commence en haut de la carte, titre compris, pas au milieu d'une phrase de la carte précédente.
+	await page
+		.locator( '#msradar-app' )
+		.getByRole( 'heading', { name: 'Alert rules' } )
+		.evaluate( ( heading ) => {
+			const top = heading
+				.closest( '.components-card' )
+				.getBoundingClientRect().top;
+			// 32 px de barre d'administration, plus une marge.
+			window.scrollBy( 0, top - 56 );
+		} );
 	await shoot( page, 7 );
 } );

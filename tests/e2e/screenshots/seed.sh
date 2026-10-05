@@ -39,7 +39,8 @@ site intranet 'Intranet' 88 30 twentytwentyfour
 
 wp plugin activate msradar-demo-cpt --url="$URL/events/"
 wp plugin activate msradar-demo-cpt --url="$URL/hr/"
-wp plugin activate hello --url="$URL/lab/"
+# Hello Dolly reste installé mais inutilisé (capture de l'écran Plugins) ; on le désactive si un seed précédent l'a activé.
+wp plugin deactivate hello --url="$URL/lab/" || true
 
 # demo_event <chemin> <nombre> : des contenus du type de démonstration, une seule fois par site.
 demo_event() {
