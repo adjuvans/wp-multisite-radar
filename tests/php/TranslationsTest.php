@@ -84,4 +84,19 @@ final class TranslationsTest extends TestCase {
 		}
 		$this->assertSame( [], $broken );
 	}
+
+	/**
+	 * Le texte de confidentialité désigne l'écran des comptes par le nom que lui donne le menu.
+	 *
+	 * @dataProvider provide_po_files
+	 */
+	public function test_the_privacy_text_names_the_users_screen_as_the_menu_does( string $file ): void {
+		$po    = self::load( $file );
+		$users = $po->entries['Users']->translations[0] ?? '';
+		$this->assertNotSame( '', $users );
+
+		$texts = array_filter( $po->entries, static fn ( \Translation_Entry $entry ): bool => false !== strpos( $entry->singular, 'Its Users screen' ) );
+		$this->assertCount( 1, $texts );
+		$this->assertStringContainsString( $users, (string) ( reset( $texts )->translations[0] ?? '' ) );
+	}
 }
