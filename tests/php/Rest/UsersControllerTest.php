@@ -57,6 +57,9 @@ final class UsersControllerTest extends RestTestCase {
 
 	public function test_the_detail_route(): void {
 		$this->assertSame( 401, $this->request( 'GET', '/users/1' )->get_status() );
+		// Un administrateur de site n'a pas le droit de voir Multisite Radar.
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertSame( 403, $this->request( 'GET', '/users/1' )->get_status() );
 		$this->login_as_super_admin();
 
 		$response = $this->request( 'GET', '/users/1' );
