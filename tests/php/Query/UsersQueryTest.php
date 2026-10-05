@@ -246,6 +246,55 @@ final class UsersQueryTest extends TestCase {
 		);
 	}
 
+	public function test_a_membership_filter_sorted_by_published_content_with_a_search(): void {
+		add_user_to_blog( $this->site_b, $this->solo, 'author' );
+		// Membre de plusieurs sites et premier par contenus publiés, mais hors de la recherche.
+		$heavy = self::factory()->user->create( [ 'user_login' => 'elsewhere_heavy' ] );
+		remove_user_from_blog( $heavy, get_current_blog_id() );
+		add_user_to_blog( $this->site_a, $heavy, 'author' );
+		add_user_to_blog( $this->site_b, $heavy, 'author' );
+		$this->plugin()->authors()->replace_for_site(
+			$this->site_a,
+			[
+				$this->multi => 2,
+				$this->solo  => 1,
+				$heavy       => 9,
+			]
+		);
+		$this->plugin()->authors()->replace_for_site(
+			$this->site_b,
+			[
+				$this->solo   => 4,
+				$this->nobody => 7,
+			]
+		);
+
+		// Table dérivée des appartenances, jointure des contenus publiés et recherche (e-mail compris) : chaque
+		// fragment apporte ses paramètres à prepare().
+		$result = $this->query()->list(
+			[
+				'search'     => 'radar_',
+				'with_email' => true,
+				'membership' => 'several',
+				'orderby'    => 'published',
+				'order'      => 'desc',
+			]
+		);
+
+		$this->assertSame( 2, $result['total'] );
+		$this->assertSame( [ 'radar_solo', 'radar_multi' ], wp_list_pluck( $result['items'], 'login' ) );
+		$this->assertSame( [ 5, 2 ], wp_list_pluck( $result['items'], 'published' ) );
+		$this->assertSame(
+			[ 'radar_multi', 'radar_solo' ],
+			$this->logins(
+				[
+					'membership' => 'several',
+					'orderby'    => 'published',
+				]
+			)
+		);
+	}
+
 	public function test_sorting_by_email_needs_the_email(): void {
 		$this->assertSame(
 			$this->logins( [ 'orderby' => 'login' ] ),
