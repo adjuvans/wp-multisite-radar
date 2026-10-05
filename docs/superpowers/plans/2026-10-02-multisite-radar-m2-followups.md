@@ -17,7 +17,11 @@ Points relevés pendant l'exécution du plan M2 (`2026-10-01-multisite-radar-m2-
 - Réglages : l'état « modifié » redevient faux au retour à la valeur initiale, et l'enregistrement n'envoie que les valeurs modifiées (2.0.0-beta.4, plan M4) ;
 - `Plugin.php` : le `use` de `ThemesController` est dans l'ordre alphabétique (2.0.0-beta.4, plan M4) ;
 - commentaire de l'audit d'accessibilité : l'exclusion vaut pour toutes les pages auditées (2.0.0-beta.4, plan M4) ;
-- schémas d'élément des routes `/plugins`, `/themes`, `/users`, `/alerts`, `/alerts/summary`, `/inventory/summary` et `/scan/status` (2.0.0-beta.5, plan M5).
+- schémas d'élément des routes `/plugins`, `/themes`, `/users`, `/alerts`, `/alerts/summary`, `/inventory/summary` et `/scan/status` (2.0.0-beta.5, plan M5) ;
+- ability `multisite-radar/recent-changes` (écart E1 du plan M5) (2.0.0-beta.6, plan M6) ;
+- Vue d'ensemble : deux `<progress>` pendant une analyse (FirstRun et ScanPanel) ; FirstRun masque son bouton au lieu de le désactiver (2.0.0-beta.6, plan M6) ;
+- `SchemaTest::test_version_2_adds_the_siteurl_column` vérifiait la version 3 : nom trompeur (2.0.0-beta.6, plan M6) ;
+- chemin sans test : désinstallation (2.0.0-beta.6, plan M6).
 
 ## 1. À traiter avant la 2.0 finale
 
@@ -55,13 +59,12 @@ Tous jugés « peuvent attendre » par la revue finale.
 - `useResource` : une réponse arrivée après `invalidate()` est mise en cache comme fraîche (un compteur de génération corrigerait) ; écriture d'une ref pendant le rendu.
 - `useUrlState` perd les paramètres inconnus et le `#hash`, et n'écoute pas `popstate`.
 - Sites : `layout=table` est écrit dans l'URL après tout changement de vue ; en grille, `badgeFields` est perdu au premier chargement avec `?layout=grid`.
-- Vue d'ensemble : deux `<progress>` pendant une analyse (FirstRun et ScanPanel) ; FirstRun masque son bouton au lieu de le désactiver.
 - Fiche : le focus revient sur `body` si la ligne d'origine a été remplacée ; pas de pagination au-delà de la dernière page des comptes.
 
 **Outillage et tests.**
 - `bin/version.mjs` : erreur nue dans `read()`, format de version non validé par `check()`.
 - `tests/e2e/setup.sh` : le retrait de l'utilisateur du site « vide » n'a lieu qu'à sa création ; avertissement de dépréciation de wp-env (`testsEnvironment: false`).
-- Chemins sans test : erreur 500 de `/alerts`, repli du message sur le libellé, échappement des jokers LIKE, `X-WP-TotalPages` > 1, branches de repli des rôles et des tris de `SiteUsersQuery`, 401 et méta non tableau des préférences, chemin d'erreur de `wp multisite-radar sites list`, cas `status` / `registry_status` / `rule` d'`export.test`, `&site=` inconnu, onglet Contenu et `scan_error`, vidage du cache sur suppression de site et entre réseaux, désinstallation.
+- Chemins sans test : erreur 500 de `/alerts`, repli du message sur le libellé, échappement des jokers LIKE, `X-WP-TotalPages` > 1, branches de repli des rôles et des tris de `SiteUsersQuery`, 401 et méta non tableau des préférences, chemin d'erreur de `wp multisite-radar sites list`, cas `status` / `registry_status` / `rule` d'`export.test`, `&site=` inconnu, onglet Contenu et `scan_error`, vidage du cache sur suppression de site et entre réseaux.
 
 ## 3. Reportés par le plan M3
 
@@ -108,15 +111,13 @@ Points mineurs relevés pendant l'exécution du plan M4 (`2026-10-02-multisite-r
 
 **Tests et outillage.**
 - Non couverts côté PHP : le contrôle de budget en cours de dossier (les tests n'utilisent que 0.0), le repli quand `information_schema` renvoie `NULL` (sans privilège), `scanned_at` nul pour `search_hidden`, `heavy_autoload` et `cron_overdue` (seule `no_admin` l'est), `deleted_theme`, `upgrader_process_complete` et le transient `update_themes` (même chemin de code), `_fields` sur `/alert-rules` et l'encodage `{}` sur la réponse envoyée ou préchargée (testé seulement sur `get_data()`).
-- `SchemaTest::test_version_2_adds_the_siteurl_column` vérifie maintenant la version 3 : son nom est trompeur. `RulesTest` (thème manquant) suppose `twentytwentyfive` installé (commenté).
+- `RulesTest` (thème manquant) suppose `twentytwentyfive` installé (commenté).
 - Non couverts côté JS : la branche nulle de `cron` (tiret) ; un test de la fiche s'intitule « dashes » mais passe `overdue_count` à 0 ; pas de test de `changes()` pour un réglage de type tableau (`analysis_plugins`).
 - E2E des réglages : `.first() sur les textes d'alerte tolère les doublons, et le champ numérique est cherché tantôt dans l'application, tantôt dans la page.
 
 ## 5. Reportés par le plan M5
 
 Points mineurs relevés pendant l'exécution du plan M5 (`2026-10-03-multisite-radar-m5-integrations.md`), par les revues de tâche et la revue finale, et laissés pour plus tard.
-
-**Ability différée.** `multisite-radar/recent-changes` (changements récents du réseau) attend le journal d'activité de M6 : écart E1 du plan M5.
 
 **PHP.**
 - Schémas : les indicateurs `readonly` sont absents du schéma de la fiche d'un site. `ScanController::status()` reste un simple relais d'une ligne.
@@ -135,3 +136,36 @@ Points mineurs relevés pendant l'exécution du plan M5 (`2026-10-03-multisite-r
 - `RegistrarTest` vérifie `mcp.public` sur `definitions()`, non sur les métadonnées de l'ability enregistrée. La branche 404 des thèmes de `find-extension-usage` n'est pas testée.
 - WP-CLI : pas de test unitaire de l'erreur de règle inconnue d'`AlertsCommand` (e2e seulement, qui ne vérifie que le code de sortie non nul, comme pour le dossier manquant de `export`) ; les alertes e2e comptent sur `search_hidden` actif à la gravité « info » par défaut, sans commentaire ; pas de test e2e de `--fields` ni d'un format autre que JSON pour `plugins list` et `themes list` ; les chemins de lecture interrompue et de fichier non inscriptible de `export` ne sont pas testés ; la branche `settings get --format=yaml` non plus.
 - `tests/e2e/integrations.spec.js` : le nettoyage du bloc `finally` n'est pas protégé, si bien qu'un appel REST en échec masquerait l'erreur de l'assertion.
+
+## 6. Reportés par le plan M6
+
+Points mineurs relevés pendant l'exécution du plan M6 (`2026-10-04-multisite-radar-m6-history.md`), par les revues de tâche, et laissés pour plus tard. La revue finale de M6 peut en ajouter ou en retirer : cette liste reprend le registre de l'exécution et n'est pas exhaustive.
+
+**Stockage et tâches planifiées.**
+- `SnapshotsRepository::capture()` supprime puis insère sans transaction : un insert qui échoue fait perdre le jour jusqu'à la capture suivante. Les relevés incluent les sites archivés, indésirables ou supprimés qui ont été analysés (les totaux du réseau les comptent, comme la synthèse des alertes).
+- `EventsRepository` stocke une chaîne vide quand `wp_json_encode` échoue (les métadonnées se relisent comme `[]`).
+- `ChangeLog::on_plugin_change` déduit le type d'événement de `current_action()` : faux si la méthode est appelée hors de ses crochets (prévu par le plan). Un site supprimé avant sa première analyse donne `site_deleted` avec un nom vide (l'URL reste comme sujet). Les alertes sont identifiées par la règle seule : un changement d'arguments au sein d'une règle est invisible.
+- `History` : un seul `try` pour la capture et les deux purges (une table de relevés cassée saute la purge du journal), et `maybe_send` comme `ChangeLog` n'attrapent que `RuntimeException`. À juger à la revue finale : un `\Throwable` pour tous les services de la tâche `msradar_daily` (`TypeError`, filtre `wp_mail` qui lève).
+- `EventsQuery::find_many()` n'est pas limité au réseau courant : un site déplacé vers un autre réseau après l'événement afficherait sa nouvelle identité.
+
+**REST et abilities.**
+- `MIN_DAYS` vaut 2 à deux endroits (`TrendsQuery` et les arguments de la route).
+- `ReportsControllerTest` utilise `gmdate( 'Y-m-d' )` dans `set_up` et dans l'assertion : fragile autour de minuit UTC.
+- Pas de test REST pour `days=3651` ni `site=0`. Pas de test d'une liste de types séparés par des virgules, ni de `page` / `per_page`, pour `recent-changes`.
+- La précharge de `/settings` est inconditionnelle (un 403 est ignoré par `Preload::run`, prévu par le plan) et sans test de lecteur PHP.
+
+**E-mail et widget.**
+- Pas de test du plafond de 20 éléments (« et N de plus »), des erreurs REST 400 `msradar_no_email` et 500 `msradar_mail_failed`, ni du retrait de `phpmailer_init` après l'envoi.
+- Un destinataire servi suffit à marquer le jour comme envoyé (contrat documenté, sans commentaire dans le code). `wp_date` utilise le fuseau du site courant (le site principal sous WP-Cron). `_n()` avec le même texte au singulier et au pluriel.
+- `DashboardWidget::render()` n'attrape que `RuntimeException` et sa boucle d'affichage est hors du `try` ; la classe `msradar-widget__figures` n'a pas de feuille de style ; pas de test de la branche « Aucune alerte » ni des chiffres.
+
+**Interface.**
+- Graphique des tendances : un point isolé devient une ellipse (`preserveAspectRatio="none"`) ; les tons « information » et « avertissement » sont sous 3:1 contre le blanc (WCAG 1.4.11) ; le message d'une liste vide avec filtre dit « No change recorded yet. » ; l'étiquette du maximum utilise le format de `series[0]` (axe partagé).
+- La page n'est pas remise à zéro quand la prop `site` change.
+- La carte des alertes des 30 derniers jours n'affiche rien pendant le chargement (pas de squelette).
+
+**Tests.**
+- Aucun test n'échoue si l'identifiant du filtre d'`EventsList` revient à la valeur par défaut : ajouter `expect( getByRole( 'combobox', { name: 'Kind of change' } ).id ).toMatch( /^msradar-events-type-/ )` dans `reports-view.test.jsx` (le test à deux `EventsList` n'est pas une vraie garde).
+- Non testés : le plancher et le plafond de la rétention (0 et 3651 désactivent « Save »), le réglage `snapshots_days` et l'isolation des purges au niveau de `History`, le fait que les requêtes de l'Historique attendent l'onglet, la date, la pagination absente en mode compact et la remise à zéro de la page au changement de filtre du composant liste, un nom avec des chevrons qui reste du texte, la lecture du journal ou du nom qui échoue pendant `scan_site` ou `on_site_deleted`.
+- `history.spec.js` : pas d'assertion avant la désinstallation que les tables `msradar` existent (le « 0 » peut passer à vide) ; la recherche d'identifiants dupliqués s'exécute avant que le graphique soit sûrement monté.
+- Alignements de forme dans `Plugin.php` et `ChangeLogTest`.

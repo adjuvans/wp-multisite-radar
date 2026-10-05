@@ -2,7 +2,7 @@
 
 Audit réseau pour WordPress Multisite (successeur de Network Plugin Utilities 1.x).
 
-Pages du menu réseau « Multisite Radar » : Vue d'ensemble, Sites, Plugins, Thèmes, Utilisateurs, Alertes, Réglages.
+Pages du menu réseau « Multisite Radar » : Vue d'ensemble, Sites, Plugins, Thèmes, Utilisateurs, Alertes, Rapports, Réglages.
 
 Règles d'alertes livrées : site sans utilisateurs, site sans administrateur, site inactif, beaucoup de médias, thème actif manquant, mises à jour en attente, adresse en http sur un réseau en https, quota d'envoi presque atteint, autoload trop lourd, masqué aux moteurs de recherche, tâches planifiées en retard. D'autres extensions peuvent en ajouter avec le filtre `msradar_alert_rules`.
 
@@ -17,7 +17,9 @@ Ligne de commande (`wp help multisite-radar` pour le détail) :
 | `wp multisite-radar export --resource=sites\|plugins\|themes [--format=csv\|json] [--output=<fichier>]` | Export, avec les filtres de la route REST |
 | `wp multisite-radar settings get [<clé>]`, `settings set <clé> <valeur>` | Réglages (clé en chemin pointé, valeur JSON) |
 
-Abilities (Abilities API de WordPress, lecture seule, droit `msradar_view`) : `multisite-radar/network-summary`, `list-sites`, `get-site`, `find-extension-usage`, `list-alerts`. Elles sont exposées en REST (`/wp-abilities/v1/abilities/<nom>/run`, en GET) et, si le réglage « Intégrations » l'autorise, aux clients MCP de l'extension MCP Adapter.
+Historique : le journal des changements (`msradar_events`) et les relevés quotidiens (`msradar_snapshots`) sont écrits par les analyses et par la tâche quotidienne `msradar_daily`, puis purgés selon la rétention des réglages. Le récapitulatif hebdomadaire part le jour réglé, un e-mail par destinataire.
+
+Abilities (Abilities API de WordPress, lecture seule, droit `msradar_view`) : `multisite-radar/network-summary`, `list-sites`, `get-site`, `find-extension-usage`, `list-alerts`, `recent-changes`. Elles sont exposées en REST (`/wp-abilities/v1/abilities/<nom>/run`, en GET) et, si le réglage « Intégrations » l'autorise, aux clients MCP de l'extension MCP Adapter.
 
 - Spec : `docs/superpowers/specs/2026-10-01-multisite-radar-v2-design.md`
 - Plans : `docs/superpowers/plans/`

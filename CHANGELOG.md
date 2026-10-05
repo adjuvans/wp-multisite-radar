@@ -1,5 +1,16 @@
 # Changelog — Multisite Radar
 
+## [2.0.0-beta.6] - 2026-10-05
+
+### Jalon M6 — Historique et rapports
+- Journal des changements du réseau : sites créés ou supprimés, extensions activées ou désactivées (sur un site ou sur le réseau), thème changé, alertes apparues ou résolues. La première analyse d'un site sert de référence.
+- Relevé quotidien des mesures de chaque site ; journal et relevés purgés au-delà de la rétention réglée (90 et 365 jours par défaut, carte « Historique » des réglages).
+- Nouvelle page « Rapports » : tendances du réseau (sites, contenus et médias, sites par alerte la plus grave), « Quoi de neuf », réglage du récapitulatif hebdomadaire par e-mail et envoi d'un e-mail de test.
+- Fiche d'un site : onglet « Historique » (tendances et derniers changements). Vue d'ensemble : derniers changements et alertes des 30 derniers jours.
+- Widget « Multisite Radar » sur le tableau de bord réseau.
+- REST : `GET /events`, `GET /reports/trends`, `POST /reports/digest/test`. Ability `multisite-radar/recent-changes`.
+- Schéma version 4 (tables `msradar_events` et `msradar_snapshots`) ; la mise à jour depuis la 2.0.0-beta.5 ne relance pas d'analyse.
+
 ## [2.0.0-beta.5] - 2026-10-03
 
 ### Jalon M5 — Intégrations
