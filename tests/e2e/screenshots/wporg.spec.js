@@ -7,20 +7,22 @@ import { expect, test } from '@wordpress/e2e-test-utils-playwright';
 
 const OUT = path.join( process.cwd(), '.wordpress-org' );
 
-test.use( { viewport: { width: 1280, height: 800 } } );
+test.use( { viewport: { width: 1440, height: 900 } } );
 test.describe.configure( { mode: 'serial' } );
 
-async function shoot( page, number ) {
-	// Les avis de WordPress (mise à jour disponible) n'ont pas leur place dans les captures.
+async function shoot( page, number, fullPage = false ) {
+	// Les avis de WordPress (mise à jour disponible) et la version du plugin n'ont pas leur place dans les captures :
+	// elles ne doivent pas vieillir à chaque publication.
 	await page.addStyleTag( {
 		content:
-			'#wpbody-content .notice, #wpbody-content .update-nag { display: none !important; }',
+			'#wpbody-content .notice, #wpbody-content .update-nag, .msradar-version, #footer-upgrade { display: none !important; }',
 	} );
 	await page.mouse.move( 0, 0 );
 	await page.screenshot( {
 		path: path.join( OUT, `screenshot-${ number }.png` ),
 		animations: 'disabled',
 		caret: 'hide',
+		fullPage,
 	} );
 }
 
@@ -37,7 +39,7 @@ test( '1. Overview', async ( { admin, page } ) => {
 	await expect(
 		page.locator( '.msradar-alerts-trend svg.msradar-trend__chart' )
 	).toBeVisible();
-	await shoot( page, 1 );
+	await shoot( page, 1, true );
 } );
 
 test( '2. Sites', async ( { admin, page } ) => {
@@ -81,7 +83,7 @@ test( '6. Reports', async ( { admin, page } ) => {
 	await expect(
 		page.locator( '.msradar-reports__trends svg.msradar-trend__chart' )
 	).toHaveCount( 3 );
-	await shoot( page, 6 );
+	await shoot( page, 6, true );
 } );
 
 test( '7. Settings, an alert rule', async ( { admin, page } ) => {
