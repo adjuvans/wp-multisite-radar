@@ -19,7 +19,7 @@ msgstr ""
 #: includes/Abilities/Registrar.php:46
 #: includes/Admin/Menu.php:57
 #: includes/Admin/Menu.php:82
-#: includes/Reports/DashboardWidget.php:36
+#: includes/Reports/DashboardWidget.php:58
 msgid "Multisite Radar"
 msgstr "Multisite Radar"
 
@@ -71,6 +71,7 @@ msgid "Comma"
 msgstr "Virgule"
 
 #. translators: period as in the character '.'
+#: build/admin/alerts.js:19
 #: build/admin/dataviews.js:5
 #: build/admin/reports.js:4
 #: build/admin/sites.js:19
@@ -181,12 +182,14 @@ msgstr "Incrémenter"
 msgid "Decrement"
 msgstr "Décrémenter"
 
+#: build/admin/alerts.js:1
 #: build/admin/dataviews.js:29
 #: build/admin/dataviews.js:32
 #: build/admin/dataviews.js:200
 #: build/admin/plugins.js:2
 #: build/admin/sites.js:1
 #: build/admin/themes.js:2
+#: build/admin/users.js:1
 msgid "Close"
 msgstr "Fermer"
 
@@ -382,8 +385,9 @@ msgstr "Ligne %d"
 msgid "%s: <groupName />"
 msgstr "%s : <groupName />"
 
-#. translators: 1: current page number. 2: total number of pages.
 #. translators: 1: current page, 2: number of pages.
+#. translators: 1: current page number. 2: total number of pages.
+#: build/admin/alerts.js:17
 #: build/admin/dataviews.js:56
 #: build/admin/overview.js:2
 #: build/admin/plugins.js:2
@@ -413,9 +417,10 @@ msgstr "Page précédente"
 msgid "Next page"
 msgstr "Page suivante"
 
-#. translators: 1: The label of the field e.g. "Date". 2: The value of the field, e.g.: "May 2022".
 #. translators: 1: series name, 2: value.
+#. translators: 1: The label of the field e.g. "Date". 2: The value of the field, e.g.: "May 2022".
 #. translators: 1: label, 2: number.
+#: build/admin/alerts.js:18
 #: build/admin/dataviews.js:62
 #: build/admin/dataviews.js:65
 #: build/admin/dataviews.js:68
@@ -868,6 +873,7 @@ msgstr "Année à ce jour"
 msgid "Custom"
 msgstr "Personnalisée"
 
+#: build/admin/alerts.js:17
 #: build/admin/dataviews.js:194
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
@@ -964,6 +970,7 @@ msgstr "Réessayer"
 #: build/admin/reports.js:5
 #: build/admin/settings.js:1
 #: build/admin/sites.js:1
+#: includes/Reports/DashboardWidget.php:102
 msgid "Error"
 msgstr "Erreur"
 
@@ -973,6 +980,7 @@ msgstr "Erreur"
 #: build/admin/reports.js:5
 #: build/admin/settings.js:1
 #: build/admin/sites.js:1
+#: includes/Reports/DashboardWidget.php:103
 msgid "Warning"
 msgstr "Avertissement"
 
@@ -980,6 +988,7 @@ msgstr "Avertissement"
 #: build/admin/overview.js:5
 #: build/admin/settings.js:1
 #: build/admin/sites.js:1
+#: includes/Reports/DashboardWidget.php:104
 msgid "Info"
 msgstr "Info"
 
@@ -1000,7 +1009,8 @@ msgid_plural "%1$s · %2$d alerts"
 msgstr[0] "%1$s · %2$d alerte"
 msgstr[1] "%1$s · %2$d alertes"
 
-#: build/admin/alerts.js:2
+#: build/admin/alerts.js:17
+#: build/admin/alerts.js:24
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
@@ -1008,35 +1018,36 @@ msgstr[1] "%1$s · %2$d alertes"
 msgid "Site"
 msgstr "Site"
 
-#: build/admin/alerts.js:2
+#: build/admin/alerts.js:24
 msgid "Rule"
 msgstr "Règle"
 
-#: build/admin/alerts.js:2
+#: build/admin/alerts.js:24
 #: build/admin/settings.js:1
 msgid "Severity"
 msgstr "Gravité"
 
-#: build/admin/alerts.js:2
+#: build/admin/alerts.js:24
 msgid "Details"
 msgstr "Détails"
 
-#: build/admin/alerts.js:2
+#: build/admin/alerts.js:24
 msgid "View the site"
 msgstr "Afficher la fiche du site"
 
-#: build/admin/alerts.js:2
+#: build/admin/alerts.js:21
+#: build/admin/alerts.js:24
 #: build/admin/sites.js:21
 #: build/admin/sites.js:25
 msgid "Site dashboard"
 msgstr "Tableau de bord du site"
 
-#: build/admin/alerts.js:2
+#: build/admin/alerts.js:24
 #: build/admin/sites.js:25
 msgid "Search sites"
 msgstr "Rechercher des sites"
 
-#: build/admin/alerts.js:2
+#: build/admin/alerts.js:24
 msgid "No alert matches this view."
 msgstr "Aucune alerte ne correspond à cette vue."
 
@@ -1084,11 +1095,12 @@ msgstr "Analyser tous les sites"
 #: build/admin/reports.js:5
 #: build/admin/themes.js:4
 #: build/admin/users.js:1
+#: build/admin/users.js:4
 #: build/blocks/sites-list/index.js:1
 #: includes/Admin/Menu.php:45
 #: includes/Export/PluginsExport.php:23
 #: includes/Export/ThemesExport.php:26
-#: includes/Reports/DashboardWidget.php:57
+#: includes/Reports/DashboardWidget.php:81
 #: includes/Reports/Digest.php:207
 msgid "Sites"
 msgstr "Sites"
@@ -1122,7 +1134,7 @@ msgid "To review"
 msgstr "À traiter"
 
 #: build/admin/overview.js:8
-#: includes/Reports/DashboardWidget.php:70
+#: includes/Reports/DashboardWidget.php:99
 msgid "No alert on the network."
 msgstr "Aucune alerte sur le réseau."
 
@@ -1301,93 +1313,111 @@ msgstr "Menu des sites du réseau"
 msgid "Save settings"
 msgstr "Enregistrer les réglages"
 
+#: build/admin/alerts.js:2
 #: build/admin/sites.js:2
 msgid "Not verified"
 msgstr "Non vérifié"
 
+#: build/admin/alerts.js:2
 #: build/admin/sites.js:2
 msgid "No alert for this site."
 msgstr "Aucune alerte pour ce site."
 
 #. translators: %s: size in bytes.
+#: build/admin/alerts.js:3
 #: build/admin/sites.js:3
 #, js-format
 msgid "%s B"
 msgstr "%s o"
 
 #. translators: %s: size in kilobytes.
+#: build/admin/alerts.js:4
 #: build/admin/sites.js:4
 #, js-format
 msgid "%s KB"
 msgstr "%s Ko"
 
 #. translators: %s: size in megabytes.
+#: build/admin/alerts.js:5
 #: build/admin/sites.js:5
 #, js-format
 msgid "%s MB"
 msgstr "%s Mo"
 
 #. translators: %s: size in gigabytes.
+#: build/admin/alerts.js:6
 #: build/admin/sites.js:6
 #, js-format
 msgid "%s GB"
 msgstr "%s Go"
 
 #. translators: %s: size in terabytes.
+#: build/admin/alerts.js:7
 #: build/admin/sites.js:7
 #, js-format
 msgid "%s TB"
 msgstr "%s To"
 
+#: build/admin/alerts.js:20
 #: build/admin/sites.js:8
 msgid "Public"
 msgstr "Public"
 
+#: build/admin/alerts.js:20
 #: build/admin/sites.js:8
 msgid "Private"
 msgstr "Privé"
 
+#: build/admin/alerts.js:20
 #: build/admin/sites.js:8
 msgid "Archived"
 msgstr "Archivé"
 
+#: build/admin/alerts.js:20
 #: build/admin/sites.js:8
 msgid "Spam"
 msgstr "Indésirable"
 
+#: build/admin/alerts.js:20
 #: build/admin/sites.js:8
 msgid "Deleted"
 msgstr "Marqué pour suppression"
 
+#: build/admin/alerts.js:8
 #: build/admin/sites.js:8
 msgid "WordPress"
 msgstr "WordPress"
 
 #. translators: %s: plugin folder name.
+#: build/admin/alerts.js:10
 #: build/admin/sites.js:10
 #, js-format
 msgid "Plugin: %s"
 msgstr "Extension : %s"
 
 #. translators: %s: must-use plugin name.
+#: build/admin/alerts.js:11
 #: build/admin/sites.js:11
 #, js-format
 msgid "Must-use plugin: %s"
 msgstr "Extension indispensable : %s"
 
 #. translators: %s: theme folder name.
+#: build/admin/alerts.js:13
 #: build/admin/sites.js:13
 #, js-format
 msgid "Theme: %s"
 msgstr "Thème : %s"
 
+#: build/admin/alerts.js:13
 #: build/admin/sites.js:13
 msgid "Unknown"
 msgstr "Inconnue"
 
+#: build/admin/alerts.js:13
+#: build/admin/alerts.js:23
 #: build/admin/sites.js:13
 #: build/admin/sites.js:23
-#: build/admin/users.js:1
 #: build/blocks/sites-list/index.js:1
 #: includes/Export/PluginsExport.php:18
 #: includes/Export/SitesColumns.php:17
@@ -1395,43 +1425,53 @@ msgstr "Inconnue"
 msgid "Name"
 msgstr "Nom"
 
+#: build/admin/alerts.js:13
 #: build/admin/sites.js:13
 msgid "Origin"
 msgstr "Origine"
 
+#: build/admin/alerts.js:13
 #: build/admin/sites.js:13
 msgid "Total"
 msgstr "Total"
 
 #. translators: %s: "Content types" or "Taxonomies".
+#: build/admin/alerts.js:14
 #: build/admin/sites.js:14
 #, js-format
 msgid "%s: none."
 msgstr "%s : aucun élément."
 
+#: build/admin/alerts.js:14
 #: build/admin/sites.js:14
 #: build/admin/sites.js:25
 msgid "Content types"
 msgstr "Types de contenu"
 
+#: build/admin/alerts.js:14
 #: build/admin/sites.js:14
 msgid "Published"
 msgstr "Publié"
 
+#: build/admin/alerts.js:14
 #: build/admin/sites.js:14
 msgid "Taxonomies"
 msgstr "Taxonomies"
 
+#: build/admin/alerts.js:14
 #: build/admin/sites.js:14
 msgid "Terms"
 msgstr "Termes"
 
+#: build/admin/alerts.js:14
 #: build/admin/plugins.js:4
 #: build/admin/sites.js:14
 #: build/admin/themes.js:5
 msgid "Not installed"
 msgstr "Introuvable"
 
+#: build/admin/alerts.js:14
+#: build/admin/alerts.js:21
 #: build/admin/sites.js:14
 #: build/admin/sites.js:21
 #: build/admin/sites.js:25
@@ -1441,20 +1481,24 @@ msgid "Theme"
 msgstr "Thème"
 
 #. translators: %s: parent theme folder name.
+#: build/admin/alerts.js:15
 #: build/admin/sites.js:15
 #, js-format
 msgid "child theme of %s"
 msgstr "thème enfant de %s"
 
+#: build/admin/alerts.js:15
 #: build/admin/sites.js:15
 msgid "Plugins active on this site only"
 msgstr "Extensions activées sur ce site uniquement"
 
+#: build/admin/alerts.js:15
 #: build/admin/sites.js:15
 msgid "None."
 msgstr "Aucune."
 
 #. translators: %d: number of network-activated plugins.
+#: build/admin/alerts.js:16
 #: build/admin/sites.js:16
 #, js-format
 msgid "%d plugin is active on the whole network."
@@ -1463,23 +1507,28 @@ msgstr[0] "%d extension est activée sur tout le réseau."
 msgstr[1] "%d extensions sont activées sur tout le réseau."
 
 #. translators: 1: date of the failed analysis, 2: error message.
+#: build/admin/alerts.js:21
 #: build/admin/sites.js:21
 #, js-format
 msgid "The last analysis failed on %1$s: %2$s"
 msgstr "La dernière analyse a échoué le %1$s : %2$s"
 
+#: build/admin/alerts.js:21
 #: build/admin/sites.js:21
 msgid "The content types of this site have not yet been read in its own context, so their labels and origins are not verified. Run \"wp multisite-radar scan --probe\" to read them now."
 msgstr "Les types de contenu de ce site n’ont pas encore été relevés dans son propre contexte : leurs libellés et leurs origines ne sont donc pas vérifiés. Lancez « wp multisite-radar scan --probe » pour les relever maintenant."
 
+#: build/admin/alerts.js:21
 #: build/admin/sites.js:21
 msgid "Address"
 msgstr "Adresse"
 
+#: build/admin/alerts.js:21
 #: build/admin/sites.js:21
 msgid "Administration"
 msgstr "Administration"
 
+#: build/admin/alerts.js:21
 #: build/admin/plugins.js:4
 #: build/admin/sites.js:21
 #: build/admin/sites.js:25
@@ -1490,6 +1539,9 @@ msgstr "Administration"
 msgid "Status"
 msgstr "État"
 
+#: build/admin/alerts.js:20
+#: build/admin/alerts.js:21
+#: build/admin/alerts.js:24
 #: build/admin/sites.js:20
 #: build/admin/sites.js:21
 #: build/admin/sites.js:24
@@ -1500,6 +1552,7 @@ msgid "Users"
 msgstr "Comptes"
 
 #. translators: 1: number of users, 2: number of administrators.
+#: build/admin/alerts.js:22
 #: build/admin/sites.js:22
 #, js-format
 msgid "%1$s, including %2$s administrator"
@@ -1507,12 +1560,17 @@ msgid_plural "%1$s, including %2$s administrators"
 msgstr[0] "%1$s, dont %2$s administrateur"
 msgstr[1] "%1$s, dont %2$s administrateurs"
 
+#: build/admin/alerts.js:22
 #: build/admin/sites.js:22
 #: build/admin/sites.js:25
+#: build/admin/users.js:1
+#: build/admin/users.js:4
 #: includes/Export/SitesColumns.php:24
 msgid "Published content"
 msgstr "Contenus publiés"
 
+#: build/admin/alerts.js:20
+#: build/admin/alerts.js:22
 #: build/admin/reports.js:5
 #: build/admin/sites.js:20
 #: build/admin/sites.js:22
@@ -1521,40 +1579,51 @@ msgstr "Contenus publiés"
 msgid "Media"
 msgstr "Médias"
 
+#: build/admin/alerts.js:23
 #: build/admin/sites.js:23
 #: build/admin/sites.js:25
 msgid "Last activity"
 msgstr "Dernière activité"
 
+#: build/admin/alerts.js:23
 #: build/admin/sites.js:23
 #: build/admin/sites.js:25
 msgid "Analysed"
 msgstr "Analysé le"
 
+#: build/admin/alerts.js:23
 #: build/admin/sites.js:23
 #: build/admin/sites.js:25
 msgid "Pending"
 msgstr "En attente"
 
+#: build/admin/alerts.js:23
 #: build/admin/sites.js:23
 #: includes/Alerts/Rules/NoUsersRule.php:49
 msgid "No user is attached to this site."
 msgstr "Aucun compte n’est rattaché à ce site."
 
+#: build/admin/alerts.js:23
 #: build/admin/sites.js:23
 #: build/admin/users.js:1
+#: build/admin/users.js:4
 msgid "Login"
 msgstr "Identifiant"
 
+#: build/admin/alerts.js:23
 #: build/admin/sites.js:23
+#: build/admin/users.js:4
 msgid "Roles"
 msgstr "Rôles"
 
+#: build/admin/alerts.js:23
 #: build/admin/sites.js:23
 #: build/admin/users.js:1
+#: build/admin/users.js:4
 msgid "Super admin"
 msgstr "Super-admin"
 
+#: build/admin/alerts.js:16
 #: build/admin/overview.js:1
 #: build/admin/plugins.js:1
 #: build/admin/reports.js:1
@@ -1563,6 +1632,7 @@ msgstr "Super-admin"
 msgid "Previous"
 msgstr "Précédent"
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/plugins.js:2
 #: build/admin/reports.js:2
@@ -1571,12 +1641,14 @@ msgstr "Précédent"
 msgid "Next"
 msgstr "Suivant"
 
+#: build/admin/alerts.js:23
 #: build/admin/sites.js:23
-#: build/admin/users.js:1
+#: build/admin/users.js:4
 msgid "Loading users…"
 msgstr "Chargement des comptes…"
 
 #. translators: %d: site ID.
+#: build/admin/alerts.js:24
 #: build/admin/sites.js:24
 #: includes/Query/EventsQuery.php:145
 #: includes/Query/SitesQuery.php:169
@@ -1585,32 +1657,41 @@ msgstr "Chargement des comptes…"
 msgid "Site #%d"
 msgstr "Site n° %d"
 
+#: build/admin/alerts.js:24
 #: build/admin/sites.js:24
 msgid "Previous site"
 msgstr "Site précédent"
 
+#: build/admin/alerts.js:24
 #: build/admin/sites.js:24
 msgid "Next site"
 msgstr "Site suivant"
 
+#: build/admin/alerts.js:24
 #: build/admin/sites.js:24
 msgid "Loading the site…"
 msgstr "Chargement du site…"
 
+#: build/admin/alerts.js:24
 #: build/admin/sites.js:24
 msgid "Summary"
 msgstr "Récapitulatif"
 
+#: build/admin/alerts.js:20
+#: build/admin/alerts.js:24
 #: build/admin/reports.js:5
 #: build/admin/sites.js:20
 #: build/admin/sites.js:24
 msgid "Content"
 msgstr "Contenu"
 
+#: build/admin/alerts.js:24
 #: build/admin/sites.js:24
 msgid "Extensions"
 msgstr "Extensions et thème"
 
+#: build/admin/alerts.js:20
+#: build/admin/alerts.js:24
 #: build/admin/sites.js:20
 #: build/admin/sites.js:24
 #: build/admin/sites.js:25
@@ -1650,12 +1731,16 @@ msgstr "Obsolète"
 msgid "Never read"
 msgstr "Jamais relevé"
 
+#: build/admin/alerts.js:20
+#: build/admin/alerts.js:22
 #: build/admin/sites.js:20
 #: build/admin/sites.js:22
 #: build/admin/sites.js:25
 msgid "Disk"
 msgstr "Disque"
 
+#: build/admin/alerts.js:20
+#: build/admin/alerts.js:22
 #: build/admin/sites.js:20
 #: build/admin/sites.js:22
 #: build/admin/sites.js:25
@@ -1724,7 +1809,7 @@ msgstr "Décroissant"
 msgid "Inline"
 msgstr "Sur une ligne"
 
-#: includes/Admin/Assets.php:145
+#: includes/Admin/Assets.php:146
 msgid "Multisite Radar: the interface files are missing. Run \"npm install && npm run build\" in the plugin folder, or install a release package."
 msgstr "Multisite Radar : les fichiers de l’interface sont absents. Lancez « npm install && npm run build » dans le dossier de l’extension, ou installez l’archive d’une version publiée."
 
@@ -1759,10 +1844,6 @@ msgstr "Réglages"
 #: includes/Admin/Menu.php:88
 msgid "Multisite Radar needs JavaScript to display this page."
 msgstr "Multisite Radar a besoin de JavaScript pour afficher cette page."
-
-#: includes/Admin/Menu.php:101
-msgid "Pre-release version"
-msgstr "Version préliminaire"
 
 #. translators: %s: alert rule identifier.
 #: includes/Alerts/RuleRegistry.php:81
@@ -1891,12 +1972,12 @@ msgstr "Analysé le (UTC)"
 msgid "Network Plugin Utilities 1.x is still loaded. Remove it: Multisite Radar replaces it and has taken over its settings."
 msgstr "Network Plugin Utilities 1.x est toujours chargée. Supprimez-la : Multisite Radar la remplace et a repris ses réglages."
 
-#: includes/Plugin.php:247
+#: includes/Plugin.php:251
 msgid "Multisite Radar requires a WordPress Multisite network. It does nothing on a single site."
 msgstr "Multisite Radar nécessite un réseau WordPress Multisite et n’a aucun effet sur un site unique."
 
 #: includes/Abilities/Ability.php:50
-#: includes/Reports/DashboardWidget.php:52
+#: includes/Reports/DashboardWidget.php:74
 #: includes/Rest/Controller.php:44
 msgid "Multisite Radar could not read its data. Try again in a moment."
 msgstr "Multisite Radar n’a pas pu lire ses données. Réessayez dans un instant."
@@ -1995,12 +2076,12 @@ msgstr "sites"
 msgid "Loading…"
 msgstr "Chargement…"
 
-#: build/admin/alerts.js:2
+#: build/admin/alerts.js:24
 msgid "Loading alerts…"
 msgstr "Chargement des alertes…"
 
 #: build/admin/overview.js:7
-#: includes/Reports/DashboardWidget.php:60
+#: includes/Reports/DashboardWidget.php:84
 msgid "Unused plugins"
 msgstr "Extensions inutilisées"
 
@@ -2133,10 +2214,12 @@ msgid "Network enabled"
 msgstr "Activé sur le réseau"
 
 #: build/admin/themes.js:5
+#: build/admin/users.js:1
 msgid "Yes"
 msgstr "Oui"
 
 #: build/admin/themes.js:5
+#: build/admin/users.js:1
 msgid "No"
 msgstr "Non"
 
@@ -2169,30 +2252,33 @@ msgid "Loading themes…"
 msgstr "Chargement des thèmes…"
 
 #: build/admin/users.js:1
+#: build/admin/users.js:4
 msgid "No site"
 msgstr "Aucun site"
 
-#: build/admin/users.js:1
+#: build/admin/users.js:4
 msgid "Several sites"
 msgstr "Plusieurs sites"
 
-#: build/admin/users.js:1
+#: build/admin/users.js:4
 msgid "Super admins only"
 msgstr "Super-admins uniquement"
 
 #: build/admin/users.js:1
+#: build/admin/users.js:4
 msgid "Registered"
 msgstr "Inscription"
 
 #: build/admin/users.js:1
+#: build/admin/users.js:4
 msgid "Edit the account"
 msgstr "Modifier le compte"
 
-#: build/admin/users.js:1
+#: build/admin/users.js:4
 msgid "Search users"
 msgstr "Rechercher des comptes"
 
-#: build/admin/users.js:1
+#: build/admin/users.js:4
 msgid "No user matches this view."
 msgstr "Aucun compte ne correspond à cette vue."
 
@@ -2269,24 +2355,29 @@ msgstr "L’enregistrement recalcule en arrière-plan les alertes de chaque site
 msgid "Loading alert rules…"
 msgstr "Chargement des règles d’alerte…"
 
+#: build/admin/alerts.js:7
 #: build/admin/sites.js:7
 #, js-format
 msgid "at least %s"
 msgstr "au moins %s"
 
+#: build/admin/alerts.js:22
 #: build/admin/sites.js:22
 msgid "Autoloaded options"
 msgstr "Options chargées automatiquement"
 
+#: build/admin/alerts.js:22
 #: build/admin/sites.js:22
 msgid "Scheduled tasks"
 msgstr "Tâches planifiées"
 
+#: build/admin/alerts.js:22
 #: build/admin/sites.js:22
 msgid "None overdue"
 msgstr "Aucune en retard"
 
 #. translators: 1: number of overdue scheduled tasks, 2: date the oldest one was due.
+#: build/admin/alerts.js:23
 #: build/admin/sites.js:23
 #, js-format
 msgid "%1$s overdue at the last analysis, due since %2$s"
@@ -2429,7 +2520,7 @@ msgid "Search engines are asked not to index this site."
 msgstr "Les moteurs de recherche sont invités à ne pas indexer ce site."
 
 #: includes/Alerts/Rules/UpdatesPendingRule.php:25
-#: includes/Reports/DashboardWidget.php:61
+#: includes/Reports/DashboardWidget.php:85
 msgid "Pending updates"
 msgstr "Mises à jour en attente"
 
@@ -2584,84 +2675,98 @@ msgstr "Vue d’ensemble de ce réseau multisite WordPress tel que Multisite Rad
 msgid "Read-only audit of the sites, plugins, themes and alerts of this multisite network."
 msgstr "Audit en lecture seule des sites, extensions, thèmes et alertes de ce réseau multisite."
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "Whole network"
 msgstr "Tout le réseau"
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "Kind of change"
 msgstr "Type de changement"
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "All changes"
 msgstr "Tous les changements"
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "Sites created"
 msgstr "Sites créés"
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "Sites deleted"
 msgstr "Sites supprimés"
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "Plugins activated"
 msgstr "Extensions activées"
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "Plugins deactivated"
 msgstr "Extensions désactivées"
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "Themes switched"
 msgstr "Thèmes changés"
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "New alerts"
 msgstr "Nouvelles alertes"
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "Resolved alerts"
 msgstr "Alertes résolues"
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "No change recorded yet."
 msgstr "Aucun changement enregistré pour l’instant."
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "Change"
 msgstr "Changement"
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "Loading the changes…"
 msgstr "Chargement des changements…"
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
@@ -2669,6 +2774,7 @@ msgid "Not enough history yet: the chart appears after two daily snapshots."
 msgstr "Pas encore assez d’historique : le graphique apparaît après deux relevés quotidiens."
 
 #. translators: 1: chart title, 2: first day, 3: last day, 4: latest values.
+#: build/admin/alerts.js:19
 #: build/admin/overview.js:4
 #: build/admin/reports.js:4
 #: build/admin/sites.js:19
@@ -2676,12 +2782,14 @@ msgstr "Pas encore assez d’historique : le graphique apparaît après deux re
 msgid "%1$s, from %2$s to %3$s. Latest: %4$s."
 msgstr "%1$s, du %2$s au %3$s. Dernières valeurs : %4$s."
 
+#: build/admin/alerts.js:19
 #: build/admin/overview.js:4
 #: build/admin/reports.js:4
 #: build/admin/sites.js:19
 msgid "Show the data"
 msgstr "Afficher les données"
 
+#: build/admin/alerts.js:19
 #: build/admin/overview.js:4
 #: build/admin/reports.js:4
 #: build/admin/sites.js:19
@@ -2804,6 +2912,7 @@ msgid "Trends"
 msgstr "Tendances"
 
 #. translators: %d: number of days.
+#: build/admin/alerts.js:20
 #: build/admin/reports.js:5
 #: build/admin/sites.js:20
 #, js-format
@@ -2812,12 +2921,14 @@ msgid_plural "Last %d days"
 msgstr[0] "%d dernier jour"
 msgstr[1] "%d derniers jours"
 
+#: build/admin/alerts.js:20
 #: build/admin/overview.js:4
 #: build/admin/reports.js:5
 #: build/admin/sites.js:20
 msgid "Loading the trends…"
 msgstr "Chargement des tendances…"
 
+#: build/admin/alerts.js:20
 #: build/admin/reports.js:5
 #: build/admin/sites.js:20
 msgid "Content and media"
@@ -2839,15 +2950,18 @@ msgstr "Conserver les relevés quotidiens pendant (jours)"
 msgid "Older daily figures, used by the trends, are deleted every day."
 msgstr "Les relevés quotidiens plus anciens, utilisés par les tendances, sont supprimés chaque jour."
 
+#: build/admin/alerts.js:24
 #: build/admin/settings.js:3
 #: build/admin/sites.js:24
 msgid "History"
 msgstr "Historique"
 
+#: build/admin/alerts.js:20
 #: build/admin/sites.js:20
 msgid "Disk and database"
 msgstr "Disque et base de données"
 
+#: build/admin/alerts.js:20
 #: build/admin/sites.js:20
 msgid "Changes"
 msgstr "Changements"
@@ -2928,21 +3042,21 @@ msgstr "Nouvelle alerte : %s."
 msgid "Alert resolved: %s."
 msgstr "Alerte résolue : %s."
 
-#: includes/Reports/DashboardWidget.php:58
+#: includes/Reports/DashboardWidget.php:82
 #: includes/Reports/Digest.php:208
 msgid "Sites with an error"
 msgstr "Sites en erreur"
 
-#: includes/Reports/DashboardWidget.php:59
+#: includes/Reports/DashboardWidget.php:83
 #: includes/Reports/Digest.php:209
 msgid "Sites with a warning"
 msgstr "Sites avec un avertissement"
 
-#: includes/Reports/DashboardWidget.php:72
+#: includes/Reports/DashboardWidget.php:106
 msgid "Main alerts"
 msgstr "Principales alertes"
 
-#: includes/Reports/DashboardWidget.php:84
+#: includes/Reports/DashboardWidget.php:121
 #: includes/Reports/Digest.php:310
 msgid "Open Multisite Radar"
 msgstr "Ouvrir Multisite Radar"
@@ -3067,12 +3181,14 @@ msgstr "L’e-mail n’a pas pu être envoyé. Vérifiez les réglages e-mail du
 msgid "Offers the read-only abilities of Multisite Radar (network summary, sites, plugin and theme usage, alerts, recent changes) to AI assistants connected with the MCP Adapter plugin. They act as the connected user, who needs the same rights as for these pages."
 msgstr "Propose les outils en lecture seule de Multisite Radar (synthèse du réseau, sites, utilisation des extensions et des thèmes, alertes, derniers changements) aux assistants IA connectés par l’extension MCP Adapter. Ils agissent au nom de l’utilisateur connecté, qui a besoin des mêmes droits que pour ces pages."
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
 msgid "No change of this kind recorded yet."
 msgstr "Aucun changement de ce type n’a encore été enregistré."
 
+#: build/admin/alerts.js:17
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
@@ -3088,10 +3204,70 @@ msgstr "Une analyse est déjà en cours. Sélectionnez de nouveau les sites une 
 msgid "Older changes are deleted every day. While the weekly e-mail summary is on, the changes of its last 7 days are always kept."
 msgstr "Les changements plus anciens sont supprimés chaque jour. Tant que le récapitulatif hebdomadaire par e-mail est activé, les changements de ses 7 derniers jours sont toujours conservés."
 
-#: includes/Admin/Privacy.php:22
-msgid "Multisite Radar is an audit tool for network administrators. It collects no data from visitors and makes no external requests. To build its inventory of the network, it keeps in the network database a copy of data that WordPress already holds: for each site, the user IDs and logins of up to 50 administrators and editors, and the number of users per role. This copy is refreshed in the background and deleted when the plugin is uninstalled. When a user account is deleted, the sites it belonged to are analysed again. It also keeps a history of the changes of the network (sites created or deleted, plugins and themes, alerts) and daily figures of each site, for the retention period set in its settings. If the weekly e-mail summary is enabled, the addresses of its recipients are kept in the plugin settings and used only to send it; the network administrators who can change these settings can read them."
-msgstr "Multisite Radar est un outil d’audit destiné aux administrateurs du réseau. Il ne collecte aucune donnée sur les visiteurs et n’effectue aucune requête externe. Pour dresser l’inventaire du réseau, il conserve dans la base de données du réseau une copie de données que WordPress détient déjà : pour chaque site, les ID et les identifiants de connexion de 50 administrateurs et éditeurs au plus, ainsi que le nombre de comptes par rôle. Cette copie est actualisée en arrière-plan et supprimée lors de la désinstallation de l’extension. Lorsqu’un compte est supprimé, les sites auxquels il appartenait sont analysés de nouveau. Il conserve aussi un historique des changements du réseau (sites créés ou supprimés, extensions et thèmes, alertes) et des relevés quotidiens de chaque site, pendant la durée de rétention définie dans ses réglages. Si le récapitulatif hebdomadaire par e-mail est activé, les adresses de ses destinataires sont conservées dans les réglages de l’extension et servent uniquement à l’envoyer ; les administrateurs du réseau qui peuvent modifier ces réglages peuvent les lire."
-
 #: includes/Rest/SitesMenuController.php:88
 msgid "The network sites menu is disabled."
 msgstr "Le menu des sites du réseau est désactivé."
+
+#: build/admin/users.js:1
+msgid "Loading the account…"
+msgstr "Chargement du compte…"
+
+#: build/admin/users.js:1
+#: build/admin/users.js:4
+msgid "First and last name"
+msgstr "Prénom et nom"
+
+#: build/admin/users.js:1
+#: build/admin/users.js:4
+msgid "Email"
+msgstr "E-mail"
+
+#. translators: %s: number of published posts.
+#: build/admin/users.js:2
+#, js-format
+msgid "%s published"
+msgid_plural "%s published"
+msgstr[0] "%s publié"
+msgstr[1] "%s publiés"
+
+#. translators: %d: number of sites not listed.
+#: build/admin/users.js:3
+#, js-format
+msgid "And %d more site."
+msgid_plural "And %d more sites."
+msgstr[0] "Et %d autre site."
+msgstr[1] "Et %d autres sites."
+
+#. translators: 1: role name, 2: number of sites.
+#: build/admin/users.js:4
+#, js-format
+msgid "%1$s on %2$d site"
+msgid_plural "%1$s on %2$d sites"
+msgstr[0] "%1$s sur %2$d site"
+msgstr[1] "%1$s sur %2$d sites"
+
+#: build/admin/users.js:4
+msgid "Public name"
+msgstr "Nom public"
+
+#: build/admin/users.js:4
+msgid "View the account"
+msgstr "Voir le compte"
+
+#: build/admin/users.js:4
+msgid "Account"
+msgstr "Compte"
+
+#. translators: %s: version number, such as 2.0.0-rc.2.
+#: includes/Admin/Menu.php:104
+#, php-format
+msgid "%s · pre-release"
+msgstr "%s · version préliminaire"
+
+#: includes/Admin/Privacy.php:22
+msgid "Multisite Radar is an audit tool for network administrators. It collects no data from visitors and makes no external requests. To build its inventory of the network, it keeps in the network database a copy of data that WordPress already holds: for each site, the user IDs and logins of up to 50 administrators and editors, and the number of users per role. It also keeps, for each site, the number of published posts of each author. This copy is refreshed in the background and deleted when the plugin is uninstalled. When a user account is deleted, the sites it belonged to are analysed again. Its Users screen shows the e-mail address of each account to the network administrators who can manage users; it is read from WordPress, never copied. It also keeps a history of the changes of the network (sites created or deleted, plugins and themes, alerts) and daily figures of each site, for the retention period set in its settings. If the weekly e-mail summary is enabled, the addresses of its recipients are kept in the plugin settings and used only to send it; the network administrators who can change these settings can read them."
+msgstr "Multisite Radar est un outil d’audit destiné aux administrateurs du réseau. Il ne collecte aucune donnée sur les visiteurs et n’effectue aucune requête externe. Pour dresser l’inventaire du réseau, il conserve dans la base de données du réseau une copie de données que WordPress détient déjà : pour chaque site, les ID et les identifiants de connexion de 50 administrateurs et éditeurs au plus, ainsi que le nombre de comptes par rôle. Il conserve aussi, pour chaque site, le nombre de contenus publiés par chaque auteur. Cette copie est actualisée en arrière-plan et supprimée lors de la désinstallation de l’extension. Lorsqu’un compte est supprimé, les sites auxquels il appartenait sont analysés de nouveau. Son écran Utilisateurs affiche l’adresse e-mail de chaque compte aux administrateurs du réseau qui peuvent gérer les utilisateurs ; elle est lue dans WordPress, jamais copiée. Il conserve aussi un historique des changements du réseau (sites créés ou supprimés, extensions et thèmes, alertes) et des relevés quotidiens de chaque site, pendant la durée de rétention définie dans ses réglages. Si le récapitulatif hebdomadaire par e-mail est activé, les adresses de ses destinataires sont conservées dans les réglages de l’extension et servent uniquement à l’envoyer ; les administrateurs du réseau qui peuvent modifier ces réglages peuvent les lire."
+
+#: includes/Rest/UsersController.php:125
+msgid "Account not found."
+msgstr "Compte introuvable."

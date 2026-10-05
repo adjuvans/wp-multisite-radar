@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-3.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Multisite Radar 2.0.0-rc.1\n"
+"Project-Id-Version: Multisite Radar 2.0.0-rc.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/multisite-radar\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-05T11:22:49+00:00\n"
+"POT-Creation-Date: 2026-10-05T18:53:52+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: multisite-radar\n"
@@ -19,7 +19,7 @@ msgstr ""
 #: includes/Abilities/Registrar.php:46
 #: includes/Admin/Menu.php:57
 #: includes/Admin/Menu.php:82
-#: includes/Reports/DashboardWidget.php:36
+#: includes/Reports/DashboardWidget.php:58
 msgid "Multisite Radar"
 msgstr ""
 
@@ -88,11 +88,23 @@ msgid "Loading…"
 msgstr ""
 
 #: build/admin/alerts.js:1
+#: build/admin/dataviews.js:29
+#: build/admin/dataviews.js:32
+#: build/admin/dataviews.js:200
+#: build/admin/plugins.js:2
+#: build/admin/sites.js:1
+#: build/admin/themes.js:2
+#: build/admin/users.js:1
+msgid "Close"
+msgstr ""
+
+#: build/admin/alerts.js:1
 #: build/admin/overview.js:4
 #: build/admin/overview.js:5
 #: build/admin/reports.js:5
 #: build/admin/settings.js:1
 #: build/admin/sites.js:1
+#: includes/Reports/DashboardWidget.php:102
 msgid "Error"
 msgstr ""
 
@@ -102,6 +114,7 @@ msgstr ""
 #: build/admin/reports.js:5
 #: build/admin/settings.js:1
 #: build/admin/sites.js:1
+#: includes/Reports/DashboardWidget.php:103
 msgid "Warning"
 msgstr ""
 
@@ -109,6 +122,7 @@ msgstr ""
 #: build/admin/overview.js:5
 #: build/admin/settings.js:1
 #: build/admin/sites.js:1
+#: includes/Reports/DashboardWidget.php:104
 msgid "Info"
 msgstr ""
 
@@ -130,6 +144,304 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: build/admin/alerts.js:2
+#: build/admin/sites.js:2
+msgid "Not verified"
+msgstr ""
+
+#: build/admin/alerts.js:2
+#: build/admin/sites.js:2
+msgid "No alert for this site."
+msgstr ""
+
+#. translators: %s: size in bytes.
+#: build/admin/alerts.js:3
+#: build/admin/sites.js:3
+#, js-format
+msgid "%s B"
+msgstr ""
+
+#. translators: %s: size in kilobytes.
+#: build/admin/alerts.js:4
+#: build/admin/sites.js:4
+#, js-format
+msgid "%s KB"
+msgstr ""
+
+#. translators: %s: size in megabytes.
+#: build/admin/alerts.js:5
+#: build/admin/sites.js:5
+#, js-format
+msgid "%s MB"
+msgstr ""
+
+#. translators: %s: size in gigabytes.
+#: build/admin/alerts.js:6
+#: build/admin/sites.js:6
+#, js-format
+msgid "%s GB"
+msgstr ""
+
+#. translators: %s: size in terabytes.
+#: build/admin/alerts.js:7
+#: build/admin/sites.js:7
+#, js-format
+msgid "%s TB"
+msgstr ""
+
+#: build/admin/alerts.js:7
+#: build/admin/sites.js:7
+#, js-format
+msgid "at least %s"
+msgstr ""
+
+#: build/admin/alerts.js:8
+#: build/admin/sites.js:8
+msgid "WordPress"
+msgstr ""
+
+#. translators: %s: plugin folder name.
+#: build/admin/alerts.js:10
+#: build/admin/sites.js:10
+#, js-format
+msgid "Plugin: %s"
+msgstr ""
+
+#. translators: %s: must-use plugin name.
+#: build/admin/alerts.js:11
+#: build/admin/sites.js:11
+#, js-format
+msgid "Must-use plugin: %s"
+msgstr ""
+
+#. translators: %s: theme folder name.
+#: build/admin/alerts.js:13
+#: build/admin/sites.js:13
+#, js-format
+msgid "Theme: %s"
+msgstr ""
+
+#: build/admin/alerts.js:13
+#: build/admin/sites.js:13
+msgid "Unknown"
+msgstr ""
+
+#: build/admin/alerts.js:13
+#: build/admin/alerts.js:23
+#: build/admin/sites.js:13
+#: build/admin/sites.js:23
+#: build/blocks/sites-list/index.js:1
+#: includes/Export/PluginsExport.php:18
+#: includes/Export/SitesColumns.php:17
+#: includes/Export/ThemesExport.php:18
+msgid "Name"
+msgstr ""
+
+#: build/admin/alerts.js:13
+#: build/admin/sites.js:13
+msgid "Origin"
+msgstr ""
+
+#: build/admin/alerts.js:13
+#: build/admin/sites.js:13
+msgid "Total"
+msgstr ""
+
+#. translators: %s: "Content types" or "Taxonomies".
+#: build/admin/alerts.js:14
+#: build/admin/sites.js:14
+#, js-format
+msgid "%s: none."
+msgstr ""
+
+#: build/admin/alerts.js:14
+#: build/admin/sites.js:14
+#: build/admin/sites.js:25
+msgid "Content types"
+msgstr ""
+
+#: build/admin/alerts.js:14
+#: build/admin/sites.js:14
+msgid "Published"
+msgstr ""
+
+#: build/admin/alerts.js:14
+#: build/admin/sites.js:14
+msgid "Taxonomies"
+msgstr ""
+
+#: build/admin/alerts.js:14
+#: build/admin/sites.js:14
+msgid "Terms"
+msgstr ""
+
+#: build/admin/alerts.js:14
+#: build/admin/plugins.js:4
+#: build/admin/sites.js:14
+#: build/admin/themes.js:5
+msgid "Not installed"
+msgstr ""
+
+#: build/admin/alerts.js:14
+#: build/admin/alerts.js:21
+#: build/admin/sites.js:14
+#: build/admin/sites.js:21
+#: build/admin/sites.js:25
+#: build/admin/themes.js:5
+#: includes/Export/SitesColumns.php:21
+msgid "Theme"
+msgstr ""
+
+#. translators: %s: parent theme folder name.
+#: build/admin/alerts.js:15
+#: build/admin/sites.js:15
+#, js-format
+msgid "child theme of %s"
+msgstr ""
+
+#: build/admin/alerts.js:15
+#: build/admin/sites.js:15
+msgid "Plugins active on this site only"
+msgstr ""
+
+#: build/admin/alerts.js:15
+#: build/admin/sites.js:15
+msgid "None."
+msgstr ""
+
+#. translators: %d: number of network-activated plugins.
+#: build/admin/alerts.js:16
+#: build/admin/sites.js:16
+#, js-format
+msgid "%d plugin is active on the whole network."
+msgid_plural "%d plugins are active on the whole network."
+msgstr[0] ""
+msgstr[1] ""
+
+#: build/admin/alerts.js:16
+#: build/admin/overview.js:1
+#: build/admin/plugins.js:1
+#: build/admin/reports.js:1
+#: build/admin/sites.js:16
+#: build/admin/themes.js:1
+msgid "Previous"
+msgstr ""
+
+#. translators: 1: current page, 2: number of pages.
+#. translators: 1: current page number. 2: total number of pages.
+#: build/admin/alerts.js:17
+#: build/admin/dataviews.js:56
+#: build/admin/overview.js:2
+#: build/admin/plugins.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+#: build/admin/themes.js:2
+#, js-format
+msgid "Page %1$d of %2$d"
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/plugins.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+#: build/admin/themes.js:2
+msgid "Next"
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "Whole network"
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "Kind of change"
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "All changes"
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "Sites created"
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "Sites deleted"
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "Plugins activated"
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "Plugins deactivated"
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "Themes switched"
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "New alerts"
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "Resolved alerts"
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "No change of this kind recorded yet."
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "No change recorded yet."
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/dataviews.js:194
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "Date"
+msgstr ""
+
+#: build/admin/alerts.js:17
+#: build/admin/alerts.js:24
 #: build/admin/overview.js:2
 #: build/admin/reports.js:2
 #: build/admin/sites.js:17
@@ -137,52 +449,403 @@ msgstr[1] ""
 msgid "Site"
 msgstr ""
 
-#: build/admin/alerts.js:2
-msgid "Rule"
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "Change"
 msgstr ""
 
-#: build/admin/alerts.js:2
-#: build/admin/settings.js:1
-msgid "Severity"
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "Loading the changes…"
 msgstr ""
 
-#: build/admin/alerts.js:2
-msgid "Details"
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "Not enough history yet: the chart appears after two daily snapshots."
 msgstr ""
 
-#: build/admin/alerts.js:2
-msgid "View the site"
+#: build/admin/alerts.js:17
+#: build/admin/overview.js:2
+#: build/admin/reports.js:2
+#: build/admin/sites.js:17
+msgid "No figures for this period."
 msgstr ""
 
-#: build/admin/alerts.js:2
+#. translators: 1: series name, 2: value.
+#. translators: 1: The label of the field e.g. "Date". 2: The value of the field, e.g.: "May 2022".
+#. translators: 1: label, 2: number.
+#: build/admin/alerts.js:18
+#: build/admin/dataviews.js:62
+#: build/admin/dataviews.js:65
+#: build/admin/dataviews.js:68
+#: build/admin/dataviews.js:71
+#: build/admin/dataviews.js:74
+#: build/admin/dataviews.js:77
+#: build/admin/overview.js:3
+#: build/admin/reports.js:3
+#: build/admin/sites.js:18
+#: includes/Reports/Digest.php:238
+#, js-format,php-format
+msgid "%1$s: %2$s"
+msgstr ""
+
+#. translators: 1: chart title, 2: first day, 3: last day, 4: latest values.
+#: build/admin/alerts.js:19
+#: build/admin/overview.js:4
+#: build/admin/reports.js:4
+#: build/admin/sites.js:19
+#, js-format
+msgid "%1$s, from %2$s to %3$s. Latest: %4$s."
+msgstr ""
+
+#: build/admin/alerts.js:19
+#: build/admin/overview.js:4
+#: build/admin/reports.js:4
+#: build/admin/sites.js:19
+msgid "Show the data"
+msgstr ""
+
+#: build/admin/alerts.js:19
+#: build/admin/overview.js:4
+#: build/admin/reports.js:4
+#: build/admin/sites.js:19
+msgid "Day"
+msgstr ""
+
+#. translators: period as in the character '.'
+#: build/admin/alerts.js:19
+#: build/admin/dataviews.js:5
+#: build/admin/reports.js:4
+#: build/admin/sites.js:19
+msgid "Period"
+msgstr ""
+
+#. translators: %d: number of days.
+#: build/admin/alerts.js:20
+#: build/admin/reports.js:5
+#: build/admin/sites.js:20
+#, js-format
+msgid "Last %d day"
+msgid_plural "Last %d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: build/admin/alerts.js:20
+#: build/admin/overview.js:4
+#: build/admin/reports.js:5
+#: build/admin/sites.js:20
+msgid "Loading the trends…"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/reports.js:5
+#: build/admin/sites.js:20
+msgid "Content and media"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/alerts.js:24
+#: build/admin/reports.js:5
+#: build/admin/sites.js:20
+#: build/admin/sites.js:24
+msgid "Content"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/alerts.js:22
+#: build/admin/reports.js:5
+#: build/admin/sites.js:20
+#: build/admin/sites.js:22
+#: build/admin/sites.js:25
+#: includes/Export/SitesColumns.php:25
+msgid "Media"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/alerts.js:21
+#: build/admin/alerts.js:24
+#: build/admin/sites.js:20
+#: build/admin/sites.js:21
+#: build/admin/sites.js:24
+#: build/admin/sites.js:25
+#: includes/Admin/Menu.php:48
+#: includes/Export/SitesColumns.php:22
+msgid "Users"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/sites.js:20
+msgid "Disk and database"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/alerts.js:22
+#: build/admin/sites.js:20
+#: build/admin/sites.js:22
+#: build/admin/sites.js:25
+msgid "Disk"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/alerts.js:22
+#: build/admin/sites.js:20
+#: build/admin/sites.js:22
+#: build/admin/sites.js:25
+msgid "Database"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/alerts.js:24
+#: build/admin/sites.js:20
+#: build/admin/sites.js:24
+#: build/admin/sites.js:25
+#: includes/Admin/Menu.php:49
+#: includes/Export/SitesColumns.php:32
+msgid "Alerts"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/sites.js:20
+msgid "Changes"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/sites.js:8
+msgid "Public"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/sites.js:8
+msgid "Private"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/sites.js:8
+msgid "Archived"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/sites.js:8
+msgid "Spam"
+msgstr ""
+
+#: build/admin/alerts.js:20
+#: build/admin/sites.js:8
+msgid "Deleted"
+msgstr ""
+
+#. translators: 1: date of the failed analysis, 2: error message.
+#: build/admin/alerts.js:21
+#: build/admin/sites.js:21
+#, js-format
+msgid "The last analysis failed on %1$s: %2$s"
+msgstr ""
+
+#: build/admin/alerts.js:21
+#: build/admin/sites.js:21
+msgid "The content types of this site have not yet been read in its own context, so their labels and origins are not verified. Run \"wp multisite-radar scan --probe\" to read them now."
+msgstr ""
+
+#: build/admin/alerts.js:21
+#: build/admin/sites.js:21
+msgid "Address"
+msgstr ""
+
+#: build/admin/alerts.js:21
+#: build/admin/sites.js:21
+msgid "Administration"
+msgstr ""
+
+#: build/admin/alerts.js:21
+#: build/admin/alerts.js:24
 #: build/admin/sites.js:21
 #: build/admin/sites.js:25
 msgid "Site dashboard"
 msgstr ""
 
-#: build/admin/alerts.js:2
+#: build/admin/alerts.js:21
+#: build/admin/plugins.js:4
+#: build/admin/sites.js:21
+#: build/admin/sites.js:25
+#: build/admin/themes.js:5
+#: includes/Export/PluginsExport.php:21
+#: includes/Export/SitesColumns.php:20
+#: includes/Export/ThemesExport.php:23
+msgid "Status"
+msgstr ""
+
+#. translators: 1: number of users, 2: number of administrators.
+#: build/admin/alerts.js:22
+#: build/admin/sites.js:22
+#, js-format
+msgid "%1$s, including %2$s administrator"
+msgid_plural "%1$s, including %2$s administrators"
+msgstr[0] ""
+msgstr[1] ""
+
+#: build/admin/alerts.js:22
+#: build/admin/sites.js:22
+#: build/admin/sites.js:25
+#: build/admin/users.js:1
+#: build/admin/users.js:4
+#: includes/Export/SitesColumns.php:24
+msgid "Published content"
+msgstr ""
+
+#: build/admin/alerts.js:22
+#: build/admin/sites.js:22
+msgid "Autoloaded options"
+msgstr ""
+
+#: build/admin/alerts.js:22
+#: build/admin/sites.js:22
+msgid "Scheduled tasks"
+msgstr ""
+
+#: build/admin/alerts.js:22
+#: build/admin/sites.js:22
+msgid "None overdue"
+msgstr ""
+
+#. translators: 1: number of overdue scheduled tasks, 2: date the oldest one was due.
+#: build/admin/alerts.js:23
+#: build/admin/sites.js:23
+#, js-format
+msgid "%1$s overdue at the last analysis, due since %2$s"
+msgid_plural "%1$s overdue at the last analysis, the oldest due since %2$s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: build/admin/alerts.js:23
+#: build/admin/sites.js:23
+#: build/admin/sites.js:25
+msgid "Last activity"
+msgstr ""
+
+#: build/admin/alerts.js:23
+#: build/admin/sites.js:23
+#: build/admin/sites.js:25
+msgid "Analysed"
+msgstr ""
+
+#: build/admin/alerts.js:23
+#: build/admin/sites.js:23
+#: build/admin/sites.js:25
+msgid "Pending"
+msgstr ""
+
+#: build/admin/alerts.js:23
+#: build/admin/sites.js:23
+#: includes/Alerts/Rules/NoUsersRule.php:49
+msgid "No user is attached to this site."
+msgstr ""
+
+#: build/admin/alerts.js:23
+#: build/admin/sites.js:23
+#: build/admin/users.js:1
+#: build/admin/users.js:4
+msgid "Login"
+msgstr ""
+
+#: build/admin/alerts.js:23
+#: build/admin/sites.js:23
+#: build/admin/users.js:4
+msgid "Roles"
+msgstr ""
+
+#: build/admin/alerts.js:23
+#: build/admin/sites.js:23
+#: build/admin/users.js:1
+#: build/admin/users.js:4
+msgid "Super admin"
+msgstr ""
+
+#: build/admin/alerts.js:23
+#: build/admin/sites.js:23
+#: build/admin/users.js:4
+msgid "Loading users…"
+msgstr ""
+
+#. translators: %d: site ID.
+#: build/admin/alerts.js:24
+#: build/admin/sites.js:24
+#: includes/Query/EventsQuery.php:145
+#: includes/Query/SitesQuery.php:169
+#: includes/SitesMenu/Renderer.php:56
+#, js-format,php-format
+msgid "Site #%d"
+msgstr ""
+
+#: build/admin/alerts.js:24
+#: build/admin/sites.js:24
+msgid "Previous site"
+msgstr ""
+
+#: build/admin/alerts.js:24
+#: build/admin/sites.js:24
+msgid "Next site"
+msgstr ""
+
+#: build/admin/alerts.js:24
+#: build/admin/sites.js:24
+msgid "Loading the site…"
+msgstr ""
+
+#: build/admin/alerts.js:24
+#: build/admin/sites.js:24
+msgid "Summary"
+msgstr ""
+
+#: build/admin/alerts.js:24
+#: build/admin/sites.js:24
+msgid "Extensions"
+msgstr ""
+
+#: build/admin/alerts.js:24
+#: build/admin/settings.js:3
+#: build/admin/sites.js:24
+msgid "History"
+msgstr ""
+
+#: build/admin/alerts.js:24
+msgid "Rule"
+msgstr ""
+
+#: build/admin/alerts.js:24
+#: build/admin/settings.js:1
+msgid "Severity"
+msgstr ""
+
+#: build/admin/alerts.js:24
+msgid "Details"
+msgstr ""
+
+#: build/admin/alerts.js:24
+msgid "View the site"
+msgstr ""
+
+#: build/admin/alerts.js:24
 #: build/admin/sites.js:25
 msgid "Search sites"
 msgstr ""
 
-#: build/admin/alerts.js:2
+#: build/admin/alerts.js:24
 msgid "Loading alerts…"
 msgstr ""
 
-#: build/admin/alerts.js:2
+#: build/admin/alerts.js:24
 msgid "No alert matches this view."
 msgstr ""
 
 #. translators: comma as in the character ','
 #: build/admin/dataviews.js:3
 msgid "Comma"
-msgstr ""
-
-#. translators: period as in the character '.'
-#: build/admin/dataviews.js:5
-#: build/admin/reports.js:4
-#: build/admin/sites.js:19
-msgid "Period"
 msgstr ""
 
 #. translators: backtick as in the character '`'
@@ -287,15 +950,6 @@ msgstr ""
 
 #: build/admin/dataviews.js:29
 msgid "Decrement"
-msgstr ""
-
-#: build/admin/dataviews.js:29
-#: build/admin/dataviews.js:32
-#: build/admin/dataviews.js:200
-#: build/admin/plugins.js:2
-#: build/admin/sites.js:1
-#: build/admin/themes.js:2
-msgid "Close"
 msgstr ""
 
 #: build/admin/dataviews.js:29
@@ -490,18 +1144,6 @@ msgstr ""
 msgid "%s: <groupName />"
 msgstr ""
 
-#. translators: 1: current page number. 2: total number of pages.
-#. translators: 1: current page, 2: number of pages.
-#: build/admin/dataviews.js:56
-#: build/admin/overview.js:2
-#: build/admin/plugins.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-#: build/admin/themes.js:2
-#, js-format
-msgid "Page %1$d of %2$d"
-msgstr ""
-
 #. translators: 1: Current page number, 2: Total number of pages.
 #: build/admin/dataviews.js:59
 #, js-format
@@ -519,23 +1161,6 @@ msgstr ""
 
 #: build/admin/dataviews.js:59
 msgid "Next page"
-msgstr ""
-
-#. translators: 1: The label of the field e.g. "Date". 2: The value of the field, e.g.: "May 2022".
-#. translators: 1: series name, 2: value.
-#. translators: 1: label, 2: number.
-#: build/admin/dataviews.js:62
-#: build/admin/dataviews.js:65
-#: build/admin/dataviews.js:68
-#: build/admin/dataviews.js:71
-#: build/admin/dataviews.js:74
-#: build/admin/dataviews.js:77
-#: build/admin/overview.js:3
-#: build/admin/reports.js:3
-#: build/admin/sites.js:18
-#: includes/Reports/Digest.php:238
-#, js-format,php-format
-msgid "%1$s: %2$s"
 msgstr ""
 
 #: build/admin/dataviews.js:65
@@ -977,13 +1602,6 @@ msgid "Custom"
 msgstr ""
 
 #: build/admin/dataviews.js:194
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "Date"
-msgstr ""
-
-#: build/admin/dataviews.js:194
 msgid "From"
 msgstr ""
 
@@ -1133,138 +1751,6 @@ msgstr[1] ""
 msgid "More details"
 msgstr ""
 
-#: build/admin/overview.js:1
-#: build/admin/plugins.js:1
-#: build/admin/reports.js:1
-#: build/admin/sites.js:16
-#: build/admin/themes.js:1
-msgid "Previous"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/plugins.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-#: build/admin/themes.js:2
-msgid "Next"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "Whole network"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "Kind of change"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "All changes"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "Sites created"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "Sites deleted"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "Plugins activated"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "Plugins deactivated"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "Themes switched"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "New alerts"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "Resolved alerts"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "No change of this kind recorded yet."
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "No change recorded yet."
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "Change"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "Loading the changes…"
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "Not enough history yet: the chart appears after two daily snapshots."
-msgstr ""
-
-#: build/admin/overview.js:2
-#: build/admin/reports.js:2
-#: build/admin/sites.js:17
-msgid "No figures for this period."
-msgstr ""
-
-#. translators: 1: chart title, 2: first day, 3: last day, 4: latest values.
-#: build/admin/overview.js:4
-#: build/admin/reports.js:4
-#: build/admin/sites.js:19
-#, js-format
-msgid "%1$s, from %2$s to %3$s. Latest: %4$s."
-msgstr ""
-
-#: build/admin/overview.js:4
-#: build/admin/reports.js:4
-#: build/admin/sites.js:19
-msgid "Show the data"
-msgstr ""
-
-#: build/admin/overview.js:4
-#: build/admin/reports.js:4
-#: build/admin/sites.js:19
-msgid "Day"
-msgstr ""
-
 #: build/admin/overview.js:4
 #: includes/Abilities/RecentChangesAbility.php:26
 msgid "Recent changes"
@@ -1276,12 +1762,6 @@ msgstr ""
 
 #: build/admin/overview.js:4
 msgid "Alerts, last 30 days"
-msgstr ""
-
-#: build/admin/overview.js:4
-#: build/admin/reports.js:5
-#: build/admin/sites.js:20
-msgid "Loading the trends…"
 msgstr ""
 
 #: build/admin/overview.js:4
@@ -1338,11 +1818,12 @@ msgstr ""
 #: build/admin/reports.js:5
 #: build/admin/themes.js:4
 #: build/admin/users.js:1
+#: build/admin/users.js:4
 #: build/blocks/sites-list/index.js:1
 #: includes/Admin/Menu.php:45
 #: includes/Export/PluginsExport.php:23
 #: includes/Export/ThemesExport.php:26
-#: includes/Reports/DashboardWidget.php:57
+#: includes/Reports/DashboardWidget.php:81
 #: includes/Reports/Digest.php:207
 msgid "Sites"
 msgstr ""
@@ -1372,7 +1853,7 @@ msgid "Sites with information"
 msgstr ""
 
 #: build/admin/overview.js:7
-#: includes/Reports/DashboardWidget.php:60
+#: includes/Reports/DashboardWidget.php:84
 msgid "Unused plugins"
 msgstr ""
 
@@ -1395,7 +1876,7 @@ msgid "To review"
 msgstr ""
 
 #: build/admin/overview.js:8
-#: includes/Reports/DashboardWidget.php:70
+#: includes/Reports/DashboardWidget.php:99
 msgid "No alert on the network."
 msgstr ""
 
@@ -1543,22 +2024,6 @@ msgid "Unused"
 msgstr ""
 
 #: build/admin/plugins.js:4
-#: build/admin/sites.js:14
-#: build/admin/themes.js:5
-msgid "Not installed"
-msgstr ""
-
-#: build/admin/plugins.js:4
-#: build/admin/sites.js:21
-#: build/admin/sites.js:25
-#: build/admin/themes.js:5
-#: includes/Export/PluginsExport.php:21
-#: includes/Export/SitesColumns.php:20
-#: includes/Export/ThemesExport.php:23
-msgid "Status"
-msgstr ""
-
-#: build/admin/plugins.js:4
 #: build/admin/themes.js:6
 msgid "Update"
 msgstr ""
@@ -1691,34 +2156,6 @@ msgstr ""
 msgid "Trends"
 msgstr ""
 
-#. translators: %d: number of days.
-#: build/admin/reports.js:5
-#: build/admin/sites.js:20
-#, js-format
-msgid "Last %d day"
-msgid_plural "Last %d days"
-msgstr[0] ""
-msgstr[1] ""
-
-#: build/admin/reports.js:5
-#: build/admin/sites.js:20
-msgid "Content and media"
-msgstr ""
-
-#: build/admin/reports.js:5
-#: build/admin/sites.js:20
-#: build/admin/sites.js:24
-msgid "Content"
-msgstr ""
-
-#: build/admin/reports.js:5
-#: build/admin/sites.js:20
-#: build/admin/sites.js:22
-#: build/admin/sites.js:25
-#: includes/Export/SitesColumns.php:25
-msgid "Media"
-msgstr ""
-
 #: build/admin/reports.js:5
 msgid "What's new"
 msgstr ""
@@ -1825,329 +2262,7 @@ msgid "Integrations"
 msgstr ""
 
 #: build/admin/settings.js:3
-#: build/admin/sites.js:24
-msgid "History"
-msgstr ""
-
-#: build/admin/settings.js:3
 msgid "Save settings"
-msgstr ""
-
-#: build/admin/sites.js:2
-msgid "Not verified"
-msgstr ""
-
-#: build/admin/sites.js:2
-msgid "No alert for this site."
-msgstr ""
-
-#. translators: %s: size in bytes.
-#: build/admin/sites.js:3
-#, js-format
-msgid "%s B"
-msgstr ""
-
-#. translators: %s: size in kilobytes.
-#: build/admin/sites.js:4
-#, js-format
-msgid "%s KB"
-msgstr ""
-
-#. translators: %s: size in megabytes.
-#: build/admin/sites.js:5
-#, js-format
-msgid "%s MB"
-msgstr ""
-
-#. translators: %s: size in gigabytes.
-#: build/admin/sites.js:6
-#, js-format
-msgid "%s GB"
-msgstr ""
-
-#. translators: %s: size in terabytes.
-#: build/admin/sites.js:7
-#, js-format
-msgid "%s TB"
-msgstr ""
-
-#: build/admin/sites.js:7
-#, js-format
-msgid "at least %s"
-msgstr ""
-
-#: build/admin/sites.js:8
-msgid "Public"
-msgstr ""
-
-#: build/admin/sites.js:8
-msgid "Private"
-msgstr ""
-
-#: build/admin/sites.js:8
-msgid "Archived"
-msgstr ""
-
-#: build/admin/sites.js:8
-msgid "Spam"
-msgstr ""
-
-#: build/admin/sites.js:8
-msgid "Deleted"
-msgstr ""
-
-#: build/admin/sites.js:8
-msgid "WordPress"
-msgstr ""
-
-#. translators: %s: plugin folder name.
-#: build/admin/sites.js:10
-#, js-format
-msgid "Plugin: %s"
-msgstr ""
-
-#. translators: %s: must-use plugin name.
-#: build/admin/sites.js:11
-#, js-format
-msgid "Must-use plugin: %s"
-msgstr ""
-
-#. translators: %s: theme folder name.
-#: build/admin/sites.js:13
-#, js-format
-msgid "Theme: %s"
-msgstr ""
-
-#: build/admin/sites.js:13
-msgid "Unknown"
-msgstr ""
-
-#: build/admin/sites.js:13
-#: build/admin/sites.js:23
-#: build/admin/users.js:1
-#: build/blocks/sites-list/index.js:1
-#: includes/Export/PluginsExport.php:18
-#: includes/Export/SitesColumns.php:17
-#: includes/Export/ThemesExport.php:18
-msgid "Name"
-msgstr ""
-
-#: build/admin/sites.js:13
-msgid "Origin"
-msgstr ""
-
-#: build/admin/sites.js:13
-msgid "Total"
-msgstr ""
-
-#. translators: %s: "Content types" or "Taxonomies".
-#: build/admin/sites.js:14
-#, js-format
-msgid "%s: none."
-msgstr ""
-
-#: build/admin/sites.js:14
-#: build/admin/sites.js:25
-msgid "Content types"
-msgstr ""
-
-#: build/admin/sites.js:14
-msgid "Published"
-msgstr ""
-
-#: build/admin/sites.js:14
-msgid "Taxonomies"
-msgstr ""
-
-#: build/admin/sites.js:14
-msgid "Terms"
-msgstr ""
-
-#: build/admin/sites.js:14
-#: build/admin/sites.js:21
-#: build/admin/sites.js:25
-#: build/admin/themes.js:5
-#: includes/Export/SitesColumns.php:21
-msgid "Theme"
-msgstr ""
-
-#. translators: %s: parent theme folder name.
-#: build/admin/sites.js:15
-#, js-format
-msgid "child theme of %s"
-msgstr ""
-
-#: build/admin/sites.js:15
-msgid "Plugins active on this site only"
-msgstr ""
-
-#: build/admin/sites.js:15
-msgid "None."
-msgstr ""
-
-#. translators: %d: number of network-activated plugins.
-#: build/admin/sites.js:16
-#, js-format
-msgid "%d plugin is active on the whole network."
-msgid_plural "%d plugins are active on the whole network."
-msgstr[0] ""
-msgstr[1] ""
-
-#: build/admin/sites.js:20
-#: build/admin/sites.js:21
-#: build/admin/sites.js:24
-#: build/admin/sites.js:25
-#: includes/Admin/Menu.php:48
-#: includes/Export/SitesColumns.php:22
-msgid "Users"
-msgstr ""
-
-#: build/admin/sites.js:20
-msgid "Disk and database"
-msgstr ""
-
-#: build/admin/sites.js:20
-#: build/admin/sites.js:22
-#: build/admin/sites.js:25
-msgid "Disk"
-msgstr ""
-
-#: build/admin/sites.js:20
-#: build/admin/sites.js:22
-#: build/admin/sites.js:25
-msgid "Database"
-msgstr ""
-
-#: build/admin/sites.js:20
-#: build/admin/sites.js:24
-#: build/admin/sites.js:25
-#: includes/Admin/Menu.php:49
-#: includes/Export/SitesColumns.php:32
-msgid "Alerts"
-msgstr ""
-
-#: build/admin/sites.js:20
-msgid "Changes"
-msgstr ""
-
-#. translators: 1: date of the failed analysis, 2: error message.
-#: build/admin/sites.js:21
-#, js-format
-msgid "The last analysis failed on %1$s: %2$s"
-msgstr ""
-
-#: build/admin/sites.js:21
-msgid "The content types of this site have not yet been read in its own context, so their labels and origins are not verified. Run \"wp multisite-radar scan --probe\" to read them now."
-msgstr ""
-
-#: build/admin/sites.js:21
-msgid "Address"
-msgstr ""
-
-#: build/admin/sites.js:21
-msgid "Administration"
-msgstr ""
-
-#. translators: 1: number of users, 2: number of administrators.
-#: build/admin/sites.js:22
-#, js-format
-msgid "%1$s, including %2$s administrator"
-msgid_plural "%1$s, including %2$s administrators"
-msgstr[0] ""
-msgstr[1] ""
-
-#: build/admin/sites.js:22
-#: build/admin/sites.js:25
-#: includes/Export/SitesColumns.php:24
-msgid "Published content"
-msgstr ""
-
-#: build/admin/sites.js:22
-msgid "Autoloaded options"
-msgstr ""
-
-#: build/admin/sites.js:22
-msgid "Scheduled tasks"
-msgstr ""
-
-#: build/admin/sites.js:22
-msgid "None overdue"
-msgstr ""
-
-#. translators: 1: number of overdue scheduled tasks, 2: date the oldest one was due.
-#: build/admin/sites.js:23
-#, js-format
-msgid "%1$s overdue at the last analysis, due since %2$s"
-msgid_plural "%1$s overdue at the last analysis, the oldest due since %2$s"
-msgstr[0] ""
-msgstr[1] ""
-
-#: build/admin/sites.js:23
-#: build/admin/sites.js:25
-msgid "Last activity"
-msgstr ""
-
-#: build/admin/sites.js:23
-#: build/admin/sites.js:25
-msgid "Analysed"
-msgstr ""
-
-#: build/admin/sites.js:23
-#: build/admin/sites.js:25
-msgid "Pending"
-msgstr ""
-
-#: build/admin/sites.js:23
-#: includes/Alerts/Rules/NoUsersRule.php:49
-msgid "No user is attached to this site."
-msgstr ""
-
-#: build/admin/sites.js:23
-#: build/admin/users.js:1
-msgid "Login"
-msgstr ""
-
-#: build/admin/sites.js:23
-msgid "Roles"
-msgstr ""
-
-#: build/admin/sites.js:23
-#: build/admin/users.js:1
-msgid "Super admin"
-msgstr ""
-
-#: build/admin/sites.js:23
-#: build/admin/users.js:1
-msgid "Loading users…"
-msgstr ""
-
-#. translators: %d: site ID.
-#: build/admin/sites.js:24
-#: includes/Query/EventsQuery.php:145
-#: includes/Query/SitesQuery.php:169
-#: includes/SitesMenu/Renderer.php:56
-#, js-format,php-format
-msgid "Site #%d"
-msgstr ""
-
-#: build/admin/sites.js:24
-msgid "Previous site"
-msgstr ""
-
-#: build/admin/sites.js:24
-msgid "Next site"
-msgstr ""
-
-#: build/admin/sites.js:24
-msgid "Loading the site…"
-msgstr ""
-
-#: build/admin/sites.js:24
-msgid "Summary"
-msgstr ""
-
-#: build/admin/sites.js:24
-msgid "Extensions"
 msgstr ""
 
 #: build/admin/sites.js:25
@@ -2205,10 +2320,12 @@ msgid "Network enabled"
 msgstr ""
 
 #: build/admin/themes.js:5
+#: build/admin/users.js:1
 msgid "Yes"
 msgstr ""
 
 #: build/admin/themes.js:5
+#: build/admin/users.js:1
 msgid "No"
 msgstr ""
 
@@ -2241,31 +2358,84 @@ msgid "Loading themes…"
 msgstr ""
 
 #: build/admin/users.js:1
-msgid "No site"
-msgstr ""
-
-#: build/admin/users.js:1
-msgid "Several sites"
-msgstr ""
-
-#: build/admin/users.js:1
-msgid "Super admins only"
-msgstr ""
-
-#: build/admin/users.js:1
-msgid "Registered"
-msgstr ""
-
-#: build/admin/users.js:1
+#: build/admin/users.js:4
 msgid "Edit the account"
 msgstr ""
 
 #: build/admin/users.js:1
-msgid "Search users"
+msgid "Loading the account…"
 msgstr ""
 
 #: build/admin/users.js:1
+#: build/admin/users.js:4
+msgid "First and last name"
+msgstr ""
+
+#: build/admin/users.js:1
+#: build/admin/users.js:4
+msgid "Email"
+msgstr ""
+
+#: build/admin/users.js:1
+#: build/admin/users.js:4
+msgid "Registered"
+msgstr ""
+
+#: build/admin/users.js:1
+#: build/admin/users.js:4
+msgid "No site"
+msgstr ""
+
+#. translators: %s: number of published posts.
+#: build/admin/users.js:2
+#, js-format
+msgid "%s published"
+msgid_plural "%s published"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of sites not listed.
+#: build/admin/users.js:3
+#, js-format
+msgid "And %d more site."
+msgid_plural "And %d more sites."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: role name, 2: number of sites.
+#: build/admin/users.js:4
+#, js-format
+msgid "%1$s on %2$d site"
+msgid_plural "%1$s on %2$d sites"
+msgstr[0] ""
+msgstr[1] ""
+
+#: build/admin/users.js:4
+msgid "Several sites"
+msgstr ""
+
+#: build/admin/users.js:4
+msgid "Public name"
+msgstr ""
+
+#: build/admin/users.js:4
+msgid "Super admins only"
+msgstr ""
+
+#: build/admin/users.js:4
+msgid "View the account"
+msgstr ""
+
+#: build/admin/users.js:4
+msgid "Search users"
+msgstr ""
+
+#: build/admin/users.js:4
 msgid "No user matches this view."
+msgstr ""
+
+#: build/admin/users.js:4
+msgid "Account"
 msgstr ""
 
 #: build/blocks/sites-list/index.js:1
@@ -2305,7 +2475,7 @@ msgid "Inline"
 msgstr ""
 
 #: includes/Abilities/Ability.php:50
-#: includes/Reports/DashboardWidget.php:52
+#: includes/Reports/DashboardWidget.php:74
 #: includes/Rest/Controller.php:44
 msgid "Multisite Radar could not read its data. Try again in a moment."
 msgstr ""
@@ -2440,7 +2610,7 @@ msgstr ""
 msgid "Read-only audit of the sites, plugins, themes and alerts of this multisite network."
 msgstr ""
 
-#: includes/Admin/Assets.php:145
+#: includes/Admin/Assets.php:146
 msgid "Multisite Radar: the interface files are missing. Run \"npm install && npm run build\" in the plugin folder, or install a release package."
 msgstr ""
 
@@ -2488,12 +2658,14 @@ msgstr ""
 msgid "Multisite Radar needs JavaScript to display this page."
 msgstr ""
 
-#: includes/Admin/Menu.php:101
-msgid "Pre-release version"
+#. translators: %s: version number, such as 2.0.0-rc.2.
+#: includes/Admin/Menu.php:104
+#, php-format
+msgid "%s · pre-release"
 msgstr ""
 
 #: includes/Admin/Privacy.php:22
-msgid "Multisite Radar is an audit tool for network administrators. It collects no data from visitors and makes no external requests. To build its inventory of the network, it keeps in the network database a copy of data that WordPress already holds: for each site, the user IDs and logins of up to 50 administrators and editors, and the number of users per role. This copy is refreshed in the background and deleted when the plugin is uninstalled. When a user account is deleted, the sites it belonged to are analysed again. It also keeps a history of the changes of the network (sites created or deleted, plugins and themes, alerts) and daily figures of each site, for the retention period set in its settings. If the weekly e-mail summary is enabled, the addresses of its recipients are kept in the plugin settings and used only to send it; the network administrators who can change these settings can read them."
+msgid "Multisite Radar is an audit tool for network administrators. It collects no data from visitors and makes no external requests. To build its inventory of the network, it keeps in the network database a copy of data that WordPress already holds: for each site, the user IDs and logins of up to 50 administrators and editors, and the number of users per role. It also keeps, for each site, the number of published posts of each author. This copy is refreshed in the background and deleted when the plugin is uninstalled. When a user account is deleted, the sites it belonged to are analysed again. Its Users screen shows the e-mail address of each account to the network administrators who can manage users; it is read from WordPress, never copied. It also keeps a history of the changes of the network (sites created or deleted, plugins and themes, alerts) and daily figures of each site, for the retention period set in its settings. If the weekly e-mail summary is enabled, the addresses of its recipients are kept in the plugin settings and used only to send it; the network administrators who can change these settings can read them."
 msgstr ""
 
 #. translators: %s: alert rule identifier.
@@ -2685,7 +2857,7 @@ msgid "Search engines are asked not to index this site."
 msgstr ""
 
 #: includes/Alerts/Rules/UpdatesPendingRule.php:25
-#: includes/Reports/DashboardWidget.php:61
+#: includes/Reports/DashboardWidget.php:85
 msgid "Pending updates"
 msgstr ""
 
@@ -2813,7 +2985,7 @@ msgstr ""
 msgid "Network Plugin Utilities 1.x is still loaded. Remove it: Multisite Radar replaces it and has taken over its settings."
 msgstr ""
 
-#: includes/Plugin.php:247
+#: includes/Plugin.php:251
 msgid "Multisite Radar requires a WordPress Multisite network. It does nothing on a single site."
 msgstr ""
 
@@ -2873,21 +3045,21 @@ msgstr ""
 msgid "Alert resolved: %s."
 msgstr ""
 
-#: includes/Reports/DashboardWidget.php:58
+#: includes/Reports/DashboardWidget.php:82
 #: includes/Reports/Digest.php:208
 msgid "Sites with an error"
 msgstr ""
 
-#: includes/Reports/DashboardWidget.php:59
+#: includes/Reports/DashboardWidget.php:83
 #: includes/Reports/Digest.php:209
 msgid "Sites with a warning"
 msgstr ""
 
-#: includes/Reports/DashboardWidget.php:72
+#: includes/Reports/DashboardWidget.php:106
 msgid "Main alerts"
 msgstr ""
 
-#: includes/Reports/DashboardWidget.php:84
+#: includes/Reports/DashboardWidget.php:121
 #: includes/Reports/Digest.php:310
 msgid "Open Multisite Radar"
 msgstr ""
@@ -3031,6 +3203,10 @@ msgstr ""
 
 #: includes/Rest/ThemesController.php:87
 msgid "This theme is neither installed nor used by any site."
+msgstr ""
+
+#: includes/Rest/UsersController.php:125
+msgid "Account not found."
 msgstr ""
 
 #: includes/Scan/Queue.php:72

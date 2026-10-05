@@ -4,7 +4,7 @@ Tags: multisite, network, audit, inventory, admin
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.0-rc.1
+Stable tag: 2.0.0-rc.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -109,6 +109,14 @@ Deleting the plugin in Network Admin > Plugins removes its tables, its network o
 7. Settings: switch an alert rule off, change its severity or its threshold.
 
 == Changelog ==
+
+= 2.0.0-rc.2 =
+* A click anywhere in a table row opens its detail, on every screen; the Alerts screen opens the site panel in place.
+* Bulk actions appear above the table as soon as a row is selected.
+* Plugins and themes sort by state, version and update, with a colour for each state; the state filter stays in view.
+* Users: e-mail (for administrators who can manage users), first and last name, roles, published posts, and an account panel.
+* The network dashboard widget shows its figures as tiles, and each main alert with its severity.
+* The export button is labelled, and pre-release versions are spelled out next to the title.
 
 = 2.0.0-rc.1 =
 * Release candidate of 2.0.0, ready for WordPress.org.

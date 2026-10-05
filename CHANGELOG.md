@@ -1,5 +1,15 @@
 # Changelog — Multisite Radar
 
+## [2.0.0-rc.2] - 2026-10-05
+
+### Remarques de la recette de la rc.1
+- Un clic n'importe où sur une ligne ouvre le détail, sur tous les écrans ; Alertes ouvre le panneau du site sans quitter l'écran. L'action de détail passe dans le menu « ⋮ » : la colonne d'actions ne cache plus de colonnes.
+- Les actions groupées s'affichent au-dessus du tableau dès qu'une ligne est cochée.
+- Extensions et Thèmes : tri par état, version et mise à jour, couleur par état, filtre d'état toujours visible (comme la gravité dans Alertes et le niveau d'alerte dans Sites).
+- Comptes : e-mail (pour qui peut gérer les utilisateurs du réseau), prénom et nom, rôles, contenus publiés, et un panneau du compte (`GET /users/{id}`). Les contenus publiés par auteur sont relevés pendant l'analyse (table `msradar_site_authors`, schéma 5).
+- Widget du tableau de bord : tuiles cliquables, pastille de gravité pour chaque alerte principale.
+- Bouton d'export libellé ; badge de version préliminaire en clair.
+
 ## [2.0.0-rc.1] - 2026-10-05
 
 ### Jalon M7 — Publication
