@@ -114,9 +114,16 @@
 	{
 		"name": "users: invalid values are ignored",
 		"view": "users",
-		"query": { "orderby": "email", "membership": "many", "super_admin": "yes" },
+		"query": { "orderby": "bogus", "membership": "many", "super_admin": "yes" },
 		"prefs": {},
 		"args": { "page": 1, "per_page": 20, "orderby": "login", "order": "asc" }
+	},
+	{
+		"name": "users: sorted by e-mail or published content",
+		"view": "users",
+		"query": { "orderby": "published", "order": "desc" },
+		"prefs": {},
+		"args": { "page": 1, "per_page": 20, "orderby": "published", "order": "desc" }
 	},
 	{
 		"name": "plugins: sorted by state",

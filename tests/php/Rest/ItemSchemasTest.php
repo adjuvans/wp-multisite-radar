@@ -90,6 +90,7 @@ final class ItemSchemasTest extends RestTestCase {
 			"/sites/{$site_id}/users"    => true,
 			'/plugins/alpha/alpha/sites' => true,
 			'/themes/msradar-parent/sites' => true,
+			'/users/1'                   => false,
 		];
 		foreach ( $cases as $route => $is_list ) {
 			$response = $this->request( 'GET', $route );

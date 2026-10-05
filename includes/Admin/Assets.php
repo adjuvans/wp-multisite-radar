@@ -125,12 +125,13 @@ final class Assets {
 		// et la recherche ne sert qu'à une requête préparée.
 		$query  = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- read-only view state, validated by ViewQuery.
 		$config = [
-			'view'        => $view,
-			'pages'       => $pages,
-			'canManage'   => current_user_can( Capabilities::MANAGE ),
-			'exportUrl'   => admin_url( 'admin-post.php' ),
-			'exportNonce' => wp_create_nonce( ExportHandler::ACTION ),
-			'preload'     => Preload::run( Preload::paths( $view, $query, $this->preferences->get( get_current_user_id() ) ) ),
+			'view'         => $view,
+			'pages'        => $pages,
+			'canManage'    => current_user_can( Capabilities::MANAGE ),
+			'canSeeEmails' => current_user_can( 'manage_network_users' ),
+			'exportUrl'    => admin_url( 'admin-post.php' ),
+			'exportNonce'  => wp_create_nonce( ExportHandler::ACTION ),
+			'preload'      => Preload::run( Preload::paths( $view, $query, $this->preferences->get( get_current_user_id() ) ) ),
 		];
 		if ( 'settings' === $view ) {
 			$config['postTypes'] = self::post_types();

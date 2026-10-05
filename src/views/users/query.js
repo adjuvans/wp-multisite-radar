@@ -15,7 +15,9 @@ import {
 export const USER_ORDERBY = [
 	'login',
 	'display_name',
+	'email',
 	'sites_count',
+	'published',
 	'registered',
 ];
 export const MEMBERSHIPS = [ 'none', 'several' ];

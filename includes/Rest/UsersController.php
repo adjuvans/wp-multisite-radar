@@ -11,7 +11,8 @@ use WP_REST_Server;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * GET /users : comptes de l'installation, nombre de sites, super-admins, sans adresse e-mail.
+ * GET /users : comptes de l'installation, nombre de sites, rôles, noms, contenus publiés ; GET /users/{id} : fiche
+ * d'un compte. L'e-mail n'est renvoyé qu'à un compte qui a le droit manage_network_users (écart E1 du plan rc.2).
  */
 final class UsersController extends Controller {
 
@@ -38,6 +39,24 @@ final class UsersController extends Controller {
 					'args'                => $this->get_collection_params(),
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
+			]
+		);
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)',
+			[
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_item' ],
+					'permission_callback' => [ $this, 'can_view' ],
+					'args'                => [
+						'id' => [
+							'type'    => 'integer',
+							'minimum' => 1,
+						],
+					],
+				],
+				'schema' => [ $this, 'get_detail_schema' ],
 			]
 		);
 	}
@@ -86,6 +105,7 @@ final class UsersController extends Controller {
 						'super_admin' => (bool) $request['super_admin'],
 						'orderby'     => (string) $request['orderby'],
 						'order'       => (string) $request['order'],
+						'with_email'  => self::can_see_emails(),
 					]
 				);
 				return $this->paginated( $result['items'], $result['total'], $per_page );
@@ -93,7 +113,34 @@ final class UsersController extends Controller {
 		);
 	}
 
+	/**
+	 * @param WP_REST_Request $request Requête.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_item( $request ) {
+		return $this->guard(
+			function () use ( $request ) {
+				$item = $this->users->get( (int) $request['id'], self::can_see_emails() );
+				if ( null === $item ) {
+					return new WP_Error( 'msradar_user_not_found', __( 'Account not found.', 'multisite-radar' ), [ 'status' => 404 ] );
+				}
+				return new WP_REST_Response( $item );
+			}
+		);
+	}
+
 	public function get_item_schema(): array {
 		return Schemas::for_rest( 'msradar-user', Schemas::user() );
+	}
+
+	public function get_detail_schema(): array {
+		return Schemas::for_rest( 'msradar-user-detail', Schemas::user_detail() );
+	}
+
+	/**
+	 * Le droit de WordPress qui montre déjà les e-mails dans Réseau > Utilisateurs.
+	 */
+	private static function can_see_emails(): bool {
+		return current_user_can( 'manage_network_users' );
 	}
 }

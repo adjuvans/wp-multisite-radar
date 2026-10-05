@@ -93,4 +93,21 @@ final class PreferencesTest extends TestCase {
 		$this->assertSame( Preferences::defaults()['sites'], $prefs['sites'] );
 		$this->assertSame( 100, $prefs['alerts']['per_page'] );
 	}
+
+	public function test_the_upgrade_to_version_5_adds_the_new_users_columns_once(): void {
+		$chose = self::factory()->user->create();
+		$kept  = self::factory()->user->create();
+		$prefs = $this->plugin()->preferences();
+		$prefs->update( $chose, [ 'users' => [ 'fields' => [ 'sites_count', 'registered_gmt' ] ] ] );
+		$prefs->update( $kept, [ 'sites' => [ 'fields' => [ 'theme' ] ] ] );
+
+		$prefs->on_upgraded( 5, 4 );
+
+		$this->assertSame( [ 'display_name', 'email', 'sites_count', 'registered_gmt' ], $prefs->get( $chose )['users']['fields'] );
+		$this->assertSame( [], $prefs->get( $kept )['users']['fields'] );
+
+		$prefs->update( $chose, [ 'users' => [ 'fields' => [ 'sites_count' ] ] ] );
+		$prefs->on_upgraded( 5, 5 );
+		$this->assertSame( [ 'sites_count' ], $prefs->get( $chose )['users']['fields'] );
+	}
 }

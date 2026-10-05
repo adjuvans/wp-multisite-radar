@@ -4,6 +4,7 @@ const DEFAULTS = {
 	view: 'overview',
 	pages: {},
 	canManage: false,
+	canSeeEmails: false,
 	exportUrl: '',
 	exportNonce: '',
 	preload: {},

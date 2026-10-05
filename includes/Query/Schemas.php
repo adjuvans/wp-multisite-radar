@@ -143,7 +143,8 @@ final class Schemas {
 	}
 
 	/**
-	 * Un compte du réseau (UsersQuery::list()). Jamais d'adresse e-mail.
+	 * Un compte du réseau (UsersQuery::list()). L'e-mail n'est renvoyé qu'à un compte qui a le droit
+	 * manage_network_users (écart E1 du plan rc.2).
 	 */
 	public static function user(): array {
 		return self::object(
@@ -151,12 +152,53 @@ final class Schemas {
 				'id'             => self::type( 'integer' ),
 				'login'          => self::type( 'string' ),
 				'display_name'   => self::type( 'string' ),
+				'email'          => self::type( 'string' ),
+				'first_name'     => self::type( 'string' ),
+				'last_name'      => self::type( 'string' ),
+				'roles'          => self::list_of(
+					self::object(
+						[
+							'role'  => self::type( 'string' ),
+							'label' => self::type( 'string' ),
+							'sites' => self::type( 'integer' ),
+						]
+					)
+				),
+				'published'      => self::type( [ 'integer', 'null' ] ),
 				'super_admin'    => self::type( 'boolean' ),
 				'sites_count'    => self::type( 'integer' ),
 				'registered_gmt' => self::date(),
 				'edit_url'       => self::type( 'string' ),
 			]
 		);
+	}
+
+	/**
+	 * Fiche d'un compte (UsersQuery::get()) : l'identité de user(), sans résumé des rôles, avec ses sites.
+	 */
+	public static function user_detail(): array {
+		$detail = self::user();
+		unset( $detail['properties']['roles'], $detail['properties']['sites_count'] );
+		$detail['properties']['sites']       = self::list_of(
+			self::object(
+				[
+					'id'        => self::type( 'integer' ),
+					'name'      => self::type( 'string' ),
+					'admin_url' => self::type( 'string' ),
+					'roles'     => self::list_of(
+						self::object(
+							[
+								'role'  => self::type( 'string' ),
+								'label' => self::type( 'string' ),
+							]
+						)
+					),
+					'published' => self::type( [ 'integer', 'null' ] ),
+				]
+			)
+		);
+		$detail['properties']['sites_total'] = self::type( 'integer' );
+		return $detail;
 	}
 
 	/**

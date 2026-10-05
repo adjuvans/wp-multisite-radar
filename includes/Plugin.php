@@ -177,6 +177,7 @@ final class Plugin {
 
 		Capabilities::register();
 		add_action( 'admin_init', [ Installer::class, 'maybe_upgrade' ] );
+		add_action( 'msradar_upgraded', [ $this->preferences(), 'on_upgraded' ], 10, 2 );
 		$this->probe()->register();
 		$this->queue()->register();
 		$this->invalidation()->register();
@@ -427,7 +428,7 @@ final class Plugin {
 	}
 
 	public function users_query(): UsersQuery {
-		return $this->users_query ??= new UsersQuery( $this->users_repository() );
+		return $this->users_query ??= new UsersQuery( $this->users_repository(), $this->authors() );
 	}
 
 	public function preferences(): Preferences {

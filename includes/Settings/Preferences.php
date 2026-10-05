@@ -105,6 +105,48 @@ final class Preferences {
 	}
 
 	/**
+	 * Mise à niveau du schéma : une colonne ajoutée aux valeurs par défaut d'une vue apparaît aussi chez ceux qui ont
+	 * déjà choisi leurs colonnes. 5 : nom public et e-mail dans Comptes (écart E3 du plan rc.2).
+	 *
+	 * @param int|string $version  Nouvelle version du schéma.
+	 * @param int|string $previous Version précédente (0 : première installation, sans préférences).
+	 */
+	public function on_upgraded( $version = 0, $previous = 0 ): void {
+		if ( (int) $previous > 0 && (int) $previous < 5 ) {
+			$this->add_fields( 'users', [ 'display_name', 'email' ] );
+		}
+	}
+
+	/**
+	 * Ajoute des colonnes, en tête et sans doublon, à la liste enregistrée d'une vue, pour chaque compte qui en a
+	 * choisi une. Une liste vide (valeurs par défaut) ne change pas.
+	 *
+	 * @param string[] $fields
+	 */
+	public function add_fields( string $view, array $fields ): void {
+		$users = get_users(
+			[
+				'blog_id'  => 0,
+				'meta_key' => self::META, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- One-off schema upgrade over the few accounts that saved display preferences.
+				'fields'   => 'ID',
+				'number'   => -1,
+			]
+		);
+		foreach ( $users as $user_id ) {
+			$stored = get_user_meta( (int) $user_id, self::META, true );
+			if ( ! is_array( $stored ) || ! isset( $stored[ $view ]['fields'] ) || ! is_array( $stored[ $view ]['fields'] ) || [] === $stored[ $view ]['fields'] ) {
+				continue;
+			}
+			$missing = array_values( array_diff( $fields, $stored[ $view ]['fields'] ) );
+			if ( [] === $missing ) {
+				continue;
+			}
+			$stored[ $view ]['fields'] = array_values( array_merge( $missing, $stored[ $view ]['fields'] ) );
+			update_user_meta( (int) $user_id, self::META, $stored );
+		}
+	}
+
+	/**
 	 * Vues valides d'une valeur enregistrée : une vue corrompue retombe sur ses valeurs par défaut, sans toucher aux autres.
 	 */
 	private static function valid_views( array $stored ): array {

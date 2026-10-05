@@ -59,6 +59,7 @@ final class AssetsTest extends RestTestCase {
 		$config = $this->config_of( 'msradar-sites' );
 		$this->assertSame( 'sites', $config['view'] );
 		$this->assertTrue( $config['canManage'] );
+		$this->assertTrue( $config['canSeeEmails'] );
 		$this->assertSame( admin_url( 'admin-post.php' ), $config['exportUrl'] );
 		$this->assertSame( 1, wp_verify_nonce( $config['exportNonce'], ExportHandler::ACTION ) );
 		$this->assertSame( Menu::url( 'sites' ), $config['pages']['sites'] );
