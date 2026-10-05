@@ -39,6 +39,48 @@ final class Digest {
 	public function register(): void {
 		// Après History::daily() (priorité 20), qui a purgé les événements trop anciens.
 		add_action( Queue::HOOK_DAILY, [ $this, 'maybe_send' ], 30 );
+		// Les réglages sont une seule option de réseau : on y observe l'arrêt du récapitulatif et le changement de jour.
+		add_action( 'update_site_option_' . Settings::OPTION, [ $this, 'on_settings_updated' ], 10, 3 );
+		add_action( 'add_site_option_' . Settings::OPTION, [ $this, 'on_settings_added' ], 10, 2 );
+	}
+
+	/**
+	 * Oublie le dernier envoi quand le récapitulatif est éteint ou que son jour change : le prochain attend alors le jour
+	 * réglé, comme un récapitulatif jamais envoyé (écart E8 : le rattrapage ne vaut que pour un envoi manqué).
+	 *
+	 * @param string $option Nom de l'option (inutilisé).
+	 * @param mixed  $value  Nouvelle valeur.
+	 * @param mixed  $old    Ancienne valeur.
+	 */
+	public function on_settings_updated( $option, $value, $old = [] ): void {
+		unset( $option );
+		$new_digest = self::digest_settings( $value );
+		$old_digest = self::digest_settings( $old );
+		if ( ( $old_digest['enabled'] && ! $new_digest['enabled'] ) || $old_digest['day'] !== $new_digest['day'] ) {
+			delete_site_option( self::SENT_OPTION );
+		}
+	}
+
+	/**
+	 * Première écriture des réglages : comparée aux valeurs par défaut.
+	 *
+	 * @param string $option Nom de l'option (inutilisé).
+	 * @param mixed  $value  Valeur écrite.
+	 */
+	public function on_settings_added( $option, $value ): void {
+		$this->on_settings_updated( $option, $value, [] );
+	}
+
+	/**
+	 * @param mixed $settings Valeur brute de l'option (les valeurs par défaut n'y sont pas toutes).
+	 * @return array{enabled: bool, day: int}
+	 */
+	private static function digest_settings( $settings ): array {
+		$reports = is_array( $settings ) && is_array( $settings['reports'] ?? null ) ? $settings['reports'] : [];
+		return [
+			'enabled' => (bool) ( $reports['digest_enabled'] ?? false ),
+			'day'     => (int) ( $reports['digest_day'] ?? 1 ),
+		];
 	}
 
 	/**

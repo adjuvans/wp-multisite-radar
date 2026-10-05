@@ -111,6 +111,42 @@ final class DigestTest extends TestCase {
 		$this->assertSame( '2026-09-23', get_site_option( Digest::SENT_OPTION ) );
 	}
 
+	public function test_a_digest_switched_off_then_on_again_waits_for_its_day(): void {
+		$this->enable();
+		update_site_option( Digest::SENT_OPTION, '2026-08-19' ); // Il y a des semaines.
+
+		$this->plugin()->settings()->update( [ 'reports' => [ 'digest_enabled' => false ] ] );
+		$this->assertFalse( get_site_option( Digest::SENT_OPTION ), 'The last send is forgotten when the digest is switched off.' );
+
+		$this->plugin()->settings()->update( [ 'reports' => [ 'digest_enabled' => true ] ] );
+		$this->plugin()->digest()->maybe_send( self::NOW + DAY_IN_SECONDS ); // Jeudi.
+		$this->assertSame( [], $this->sent(), 'Nothing goes out before the chosen day.' );
+
+		$this->plugin()->digest()->maybe_send( self::NOW + 7 * DAY_IN_SECONDS ); // Mercredi suivant.
+		$this->assertCount( 2, $this->sent() );
+	}
+
+	public function test_a_day_changed_to_an_earlier_weekday_waits_for_the_new_day(): void {
+		$this->enable(); // Mercredi.
+		update_site_option( Digest::SENT_OPTION, '2026-09-09' );
+
+		$this->plugin()->settings()->update( [ 'reports' => [ 'digest_day' => 1 ] ] ); // Lundi.
+		$this->plugin()->digest()->maybe_send( self::NOW ); // Mercredi 16 : après le lundi 14.
+		$this->assertSame( [], $this->sent(), 'No catch-up for a day that has just been chosen.' );
+
+		$this->plugin()->digest()->maybe_send( self::NOW + 5 * DAY_IN_SECONDS ); // Lundi 21.
+		$this->assertCount( 2, $this->sent() );
+		$this->assertSame( '2026-09-21', get_site_option( Digest::SENT_OPTION ) );
+	}
+
+	public function test_saving_other_settings_keeps_the_last_send(): void {
+		$this->enable();
+		update_site_option( Digest::SENT_OPTION, '2026-09-09' );
+
+		$this->plugin()->settings()->update( [ 'reports' => [ 'digest_enabled' => true, 'digest_day' => 3 ] ] );
+		$this->assertSame( '2026-09-09', get_site_option( Digest::SENT_OPTION ) );
+	}
+
 	public function test_due_day_follows_the_chosen_day(): void {
 		$this->enable();
 
