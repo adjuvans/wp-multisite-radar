@@ -11,19 +11,27 @@ test.use( { viewport: { width: 1440, height: 900 } } );
 test.describe.configure( { mode: 'serial' } );
 
 async function shoot( page, number, fullPage = false ) {
+	const size = page.viewportSize();
 	// Les avis de WordPress (mise à jour disponible) et la version du plugin n'ont pas leur place dans les captures :
 	// elles ne doivent pas vieillir à chaque publication.
 	await page.addStyleTag( {
 		content:
 			'#wpbody-content .notice, #wpbody-content .update-nag, .msradar-version, #footer-upgrade { display: none !important; }',
 	} );
+	if ( fullPage ) {
+		// Le menu d'administration est fixe : on agrandit la fenêtre à la hauteur du document (fullPage le couperait).
+		const height = await page.evaluate(
+			() => document.documentElement.scrollHeight
+		);
+		await page.setViewportSize( { width: size.width, height } );
+	}
 	await page.mouse.move( 0, 0 );
 	await page.screenshot( {
 		path: path.join( OUT, `screenshot-${ number }.png` ),
 		animations: 'disabled',
 		caret: 'hide',
-		fullPage,
 	} );
+	await page.setViewportSize( size );
 }
 
 async function open( admin, page, query ) {
@@ -43,6 +51,8 @@ test( '1. Overview', async ( { admin, page } ) => {
 } );
 
 test( '2. Sites', async ( { admin, page } ) => {
+	// Assez haut pour que les dix lignes et le pied « 10 Items » tiennent sans défilement interne.
+	await page.setViewportSize( { width: 1440, height: 1000 } );
 	await open( admin, page, 'page=multisite-radar-sites' );
 	await expect(
 		page.locator( '#msradar-app .dataviews-view-table tbody tr' )
