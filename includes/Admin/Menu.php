@@ -90,16 +90,21 @@ final class Menu {
 	}
 
 	/**
-	 * Pastille de version affichée à côté du titre ; une version préliminaire (« -beta.1 », « -rc.2 »…) est signalée.
+	 * Pastille de version affichée à côté du titre ; une version préliminaire (« -beta.1 », « -rc.2 »…) le dit en clair.
 	 */
 	public static function version_badge( string $version ): string {
 		if ( false === strpos( $version, '-' ) ) {
 			return sprintf( '<span class="msradar-version">%s</span>', esc_html( $version ) );
 		}
 		return sprintf(
-			'<span class="msradar-version is-prerelease" title="%1$s">%2$s</span>',
-			esc_attr__( 'Pre-release version', 'multisite-radar' ),
-			esc_html( $version )
+			'<span class="msradar-version is-prerelease">%s</span>',
+			esc_html(
+				sprintf(
+					/* translators: %s: version number, such as 2.0.0-rc.2. */
+					__( '%s · pre-release', 'multisite-radar' ),
+					$version
+				)
+			)
 		);
 	}
 }

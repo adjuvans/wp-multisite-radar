@@ -67,8 +67,9 @@ final class MenuTest extends TestCase {
 
 	public function test_the_version_badge_flags_pre_releases(): void {
 		$this->assertSame( '<span class="msradar-version">2.0.0</span>', Menu::version_badge( '2.0.0' ) );
-		$this->assertSame( '<span class="msradar-version is-prerelease" title="Pre-release version">2.0.0-beta.1</span>', Menu::version_badge( '2.0.0-beta.1' ) );
+		$this->assertSame( '<span class="msradar-version is-prerelease">2.0.0-rc.2 · pre-release</span>', Menu::version_badge( '2.0.0-rc.2' ) );
 		$this->assertSame( '<span class="msradar-version">&lt;b&gt;</span>', Menu::version_badge( '<b>' ) );
+		$this->assertSame( '<span class="msradar-version is-prerelease">&lt;b&gt;-1 · pre-release</span>', Menu::version_badge( '<b>-1' ) );
 	}
 
 	public function test_urls_point_to_the_network_admin(): void {

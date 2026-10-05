@@ -193,6 +193,13 @@ test( 'ExportMenu offers CSV and JSON', () => {
 	expect( window.location.hash ).toBe( '#export-json' );
 } );
 
+test( 'ExportMenu shows its label next to the icon', () => {
+	render( <ExportMenu href={ () => '#' } /> );
+	expect(
+		screen.getByRole( 'button', { name: 'Export' } )
+	).toHaveTextContent( 'Export' );
+} );
+
 test( 'Pager keeps a disabled Next focusable and inert', () => {
 	const onChange = vi.fn();
 	render( <Pager page={ 2 } pages={ 2 } onChange={ onChange } /> );
