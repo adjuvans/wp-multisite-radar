@@ -20,7 +20,8 @@ function plainValue( field, item ) {
 
 /**
  * DataViews du plugin (spec rc.2 § 2) : l'assemblage libre de DataViews 19.1.0, avec
- * - la barre des actions groupées au-dessus du tableau, seulement quand une ligne est cochée ;
+ * - la barre des actions groupées au-dessus du tableau, seulement quand une ligne affichée est cochée (une ligne
+ *   cochée sur une autre page ou écartée par un filtre ne compte pas) ;
  * - un clic n'importe où sur une ligne du tableau qui ouvre le détail (row-click.js), sauf sur du texte que
  *   l'utilisateur vient d'y sélectionner, titre compris ;
  * - en bas, la pagination seule.
@@ -144,7 +145,7 @@ export default function DataViews( props ) {
 				</div>
 			</div>
 			<PackageDataViews.FiltersToggled className="dataviews-filters__container" />
-			{ selection.length > 0 && (
+			{ selection.some( ( id ) => byId.has( String( id ) ) ) && (
 				<div className="msradar-dataviews__bulk">
 					<PackageDataViews.BulkActionToolbar />
 				</div>

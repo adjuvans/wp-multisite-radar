@@ -167,6 +167,23 @@ test( 'the bulk actions bar appears above the table once a row is checked', () =
 	expect( onClickItem ).not.toHaveBeenCalled();
 } );
 
+test( 'the bulk actions bar hides once the checked rows leave the data', () => {
+	const actions = [
+		{ id: 'go', label: 'Go', supportsBulk: true, callback: vi.fn() },
+	];
+	const { container, rerender } = renderViews( { actions } );
+	fireEvent.click(
+		container.querySelectorAll( 'tbody input[type="checkbox"]' )[ 0 ]
+	);
+	expect(
+		container.querySelector( '.msradar-dataviews__bulk' )
+	).not.toBeNull();
+
+	rerender( views( { actions, data: [ DATA[ 1 ] ] } ) );
+
+	expect( container.querySelector( '.msradar-dataviews__bulk' ) ).toBeNull();
+} );
+
 test( 'the search, the header and the pagination stay in place', () => {
 	const { container, unmount } = renderViews( {
 		searchLabel: 'Search things',
