@@ -16,9 +16,9 @@ Procédure de publication sur WordPress.org (slug `multisite-radar`, compte prin
 2. Banc de performance : `make bench` (1 000 sites) ; avant une version majeure, aussi `BENCH_SITES=5000`. Ajouter les résultats à `docs/benchmarks.md`.
 3. « Tested up to » : la dernière version majeure publiée de WordPress (`https://api.wordpress.org/core/version-check/1.7/`). La CI (Plugin Check en mode strict) échoue quand une nouvelle majeure sort et que le readme n'a pas suivi.
 4. Traductions : `make i18n`, puis traduire les nouvelles chaînes dans `languages/multisite-radar-fr_FR.po` et relancer `make i18n`.
-5. Captures, à chaque version : `npm run screenshots:seed && npm run screenshots`. La capture de l'écran des extensions affiche la version du plugin dans sa ligne, elle change donc à chaque version, même sans retouche de l'interface. Si l'identité visuelle a changé (icône, bannière) : `npm run wporg:assets`.
-6. Version : `make version VERSION=x.y.z`. Puis `CHANGELOG.md` (en français), et dans `readme.txt` l'entrée du journal et, si la mise à jour demande une action, l'« Upgrade Notice ».
-7. Commit, tag annoté `vx.y.z`, push de `main` puis du tag. Attendre la CI verte.
+5. Version : `make version VERSION=x.y.z`. Puis `CHANGELOG.md` (en français), et dans `readme.txt` l'entrée du journal et, si la mise à jour demande une action, l'« Upgrade Notice ».
+6. Captures, à chaque version, **après** la version : `npm run screenshots:seed && npm run screenshots`. La capture de l'écran des extensions affiche la version du plugin dans sa ligne ; prise avant `make version`, elle montrerait la version précédente. Si l'identité visuelle a changé (icône, bannière) : `npm run wporg:assets`.
+7. Commit, tag annoté `vx.y.z`, push de `main` puis du tag. Attendre la CI verte sur `main` (elle ne tourne pas sur les tags).
 8. Paquet : `make dist` produit `dist/multisite-radar-x.y.z.zip`.
 
 ## Première soumission (une seule fois)
@@ -28,6 +28,16 @@ Procédure de publication sur WordPress.org (slug `multisite-radar`, compte prin
 3. Une fois le plugin accepté :
    - le dépôt SVN `https://plugins.svn.wordpress.org/multisite-radar/` est ouvert au compte `adjuvans` ;
    - ajouter `cyrilledegourcy` comme committer (page du plugin, onglet « Advanced », section « Committers »).
+
+### Note pour l'équipe de revue
+
+À coller dans le formulaire de soumission ou dans la première réponse :
+
+> Notes for the review team:
+> - The 1.x aliases (`rdc_network_sites_menu()` and the `[network_sites_menu]` shortcode) are registered only after a migration from Network Plugin Utilities 1.x, and kept for backward compatibility.
+> - `Menu::ICON` is the base64 encoding of `bin/wporg-assets/menu-icon.svg`, readable in the public repository.
+> - `load_plugin_textdomain()` is intentional: the plugin ships its compiled translations in `languages/` until WordPress.org language packs exist.
+> - Direct database queries are limited to a few files and each one is justified in place with a `phpcs:ignore` comment.
 
 ## Publier une version dans le SVN
 

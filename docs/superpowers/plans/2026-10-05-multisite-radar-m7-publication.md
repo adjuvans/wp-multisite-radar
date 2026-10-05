@@ -3781,12 +3781,13 @@ Cette section n'est pas une tâche du plan. Le contrôleur l'exécute sur demand
 
 1. Corriger ce que la recette a relevé (un plan court si besoin).
 2. `make version VERSION=2.0.0`.
-3. `readme.txt` : remplacer toutes les entrées du journal, de `2.0.0-rc.1` à `2.0.0-alpha.1`, par une seule entrée `= 2.0.0 =`, qui résume le plugin pour un nouveau lecteur de WordPress.org :
+3. Régénérer les captures, wp-env démarré (`npm run screenshots:seed && npm run screenshots`) et les regarder : la capture des extensions affiche la version du plugin, qui vient de changer.
+4. `readme.txt` : remplacer toutes les entrées du journal, de `2.0.0-rc.1` à `2.0.0-alpha.1`, par une seule entrée `= 2.0.0 =`, qui résume le plugin pour un nouveau lecteur de WordPress.org :
    - première version publique ;
    - réécriture complète de Network Plugin Utilities 1.x ;
    - principales fonctions.
 
    `CHANGELOG.md` garde, lui, tout l'historique.
-4. Vérifier « Tested up to » (dernière majeure publiée) ; `npm run readme:check` ; `make check`, `make e2e`, `make plugin-check`, `make dist`.
-5. Commit `chore: release 2.0.0`. Puis, après accord de l'utilisateur : tag annoté `v2.0.0`, push de `main`, push du tag, suivi de la CI.
-6. L'utilisateur soumet `dist/multisite-radar-2.0.0.zip` sur WordPress.org (`docs/release.md`, « Première soumission »).
+5. Vérifier « Tested up to » (dernière majeure publiée) ; `npm run readme:check` ; `make check`, `make e2e`, `make plugin-check`, `make dist`.
+6. Commit `chore: release 2.0.0`. Puis, après accord de l'utilisateur : tag annoté `v2.0.0`, push de `main`, push du tag, suivi de la CI.
+7. L'utilisateur soumet `dist/multisite-radar-2.0.0.zip` sur WordPress.org (`docs/release.md`, « Première soumission »).
