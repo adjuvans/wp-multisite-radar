@@ -511,4 +511,41 @@ final class SiteCollectorTest extends TestCase {
 		$this->assertSame( 50, $record->data['options']['upload_space_mb'] );
 		$this->assertNull( $this->collect( self::factory()->blog->create() )->data['options']['upload_space_mb'], 'A site without its own quota follows the network.' );
 	}
+
+	public function test_counts_the_published_content_of_each_author_like_the_content_column(): void {
+		$site_id = self::factory()->blog->create();
+		$author  = self::factory()->user->create();
+		switch_to_blog( $site_id );
+		self::factory()->post->create_many( 2, [ 'post_author' => $author ] );
+		self::factory()->post->create(
+			[
+				'post_author' => $author,
+				'post_type'   => 'page',
+			]
+		);
+		self::factory()->post->create(
+			[
+				'post_author' => $author,
+				'post_status' => 'draft',
+			]
+		);
+		self::factory()->post->create(
+			[
+				'post_author' => $author,
+				'post_type'   => 'wp_block',
+			]
+		);
+		self::factory()->post->create(
+			[
+				'post_author' => $author,
+				'post_type'   => 'attachment',
+				'post_status' => 'publish',
+			]
+		);
+		restore_current_blog();
+
+		$record = $this->plugin()->collector()->collect( $site_id );
+
+		$this->assertSame( 3, $record->authors[ $author ] );
+	}
 }

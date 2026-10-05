@@ -33,8 +33,8 @@ final class SchemaTest extends TestCase {
 
 		$this->assertTrue( Schema::install() );
 
-		$this->assertSame( 4, Schema::VERSION );
-		$this->assertSame( 4, (int) get_site_option( Schema::OPTION ) );
+		$this->assertSame( 5, Schema::VERSION );
+		$this->assertSame( 5, (int) get_site_option( Schema::OPTION ) );
 		$this->assertNotNull( $wpdb->get_var( $wpdb->prepare( 'SHOW COLUMNS FROM %i LIKE %s', Schema::sites_table(), 'siteurl' ) ) );
 	}
 
@@ -51,5 +51,15 @@ final class SchemaTest extends TestCase {
 		);
 		$this->assertContains( Schema::events_table(), Schema::tables() );
 		$this->assertContains( Schema::snapshots_table(), Schema::tables() );
+	}
+
+	public function test_version_5_adds_the_authors_table(): void {
+		global $wpdb;
+
+		$this->assertSame(
+			[ 'site_id', 'user_id', 'published' ],
+			$wpdb->get_col( $wpdb->prepare( 'SHOW COLUMNS FROM %i', Schema::authors_table() ) )
+		);
+		$this->assertContains( Schema::authors_table(), Schema::tables() );
 	}
 }

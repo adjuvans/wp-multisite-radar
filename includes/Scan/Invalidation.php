@@ -3,6 +3,7 @@ namespace MultisiteRadar\Scan;
 
 use MultisiteRadar\Install\Schema;
 use MultisiteRadar\Settings\Settings;
+use MultisiteRadar\Storage\AuthorsRepository;
 use MultisiteRadar\Storage\ExtensionsRepository;
 use MultisiteRadar\Storage\SitesRepository;
 use WP_Post;
@@ -18,12 +19,15 @@ final class Invalidation {
 
 	private SitesRepository $sites;
 	private ExtensionsRepository $extensions;
+
+	private AuthorsRepository $authors;
 	private Settings $settings;
 	private ChangeLog $changes;
 
-	public function __construct( SitesRepository $sites, ExtensionsRepository $extensions, Settings $settings, ChangeLog $changes ) {
+	public function __construct( SitesRepository $sites, ExtensionsRepository $extensions, Settings $settings, ChangeLog $changes, AuthorsRepository $authors ) {
 		$this->sites      = $sites;
 		$this->extensions = $extensions;
+		$this->authors    = $authors;
 		$this->settings   = $settings;
 		$this->changes    = $changes;
 	}
@@ -145,6 +149,7 @@ final class Invalidation {
 			function () use ( $site ): void {
 				$this->sites->delete( (int) $site->blog_id );
 				$this->extensions->delete_for_site( (int) $site->blog_id );
+				$this->authors->delete_for_site( (int) $site->blog_id );
 			}
 		);
 		$this->changes->record( (int) $site->site_id, (int) $site->blog_id, 'site_deleted', $site->domain . $site->path, [ 'name' => $name ] );

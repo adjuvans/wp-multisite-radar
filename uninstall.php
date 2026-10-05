@@ -15,7 +15,7 @@ if ( ! is_multisite() ) {
 
 global $wpdb;
 
-foreach ( [ 'msradar_sites', 'msradar_site_extensions', 'msradar_events', 'msradar_snapshots' ] as $msradar_table ) {
+foreach ( [ 'msradar_sites', 'msradar_site_extensions', 'msradar_events', 'msradar_snapshots', 'msradar_site_authors' ] as $msradar_table ) {
 	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->base_prefix . $msradar_table ) );
 }
 

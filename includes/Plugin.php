@@ -65,6 +65,7 @@ use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Settings\SettingsUpdater;
 use MultisiteRadar\SitesMenu\Module as SitesMenuModule;
 use MultisiteRadar\SitesMenu\SitesListCache;
+use MultisiteRadar\Storage\AuthorsRepository;
 use MultisiteRadar\Storage\EventsRepository;
 use MultisiteRadar\Storage\ExtensionsRepository;
 use MultisiteRadar\Storage\SitesRepository;
@@ -89,6 +90,8 @@ final class Plugin {
 	private ?SitesRepository $sites = null;
 
 	private ?ExtensionsRepository $extensions = null;
+
+	private ?AuthorsRepository $authors = null;
 
 	private ?EventsRepository $events = null;
 	private ?ChangeLog $change_log    = null;
@@ -293,11 +296,15 @@ final class Plugin {
 	}
 
 	public function runner(): BatchRunner {
-		return $this->runner ??= new BatchRunner( $this->sites(), $this->extensions(), $this->collector(), $this->evaluator(), $this->lock(), $this->change_log() );
+		return $this->runner ??= new BatchRunner( $this->sites(), $this->extensions(), $this->collector(), $this->evaluator(), $this->lock(), $this->change_log(), $this->authors() );
 	}
 
 	public function extensions(): ExtensionsRepository {
 		return $this->extensions ??= new ExtensionsRepository();
+	}
+
+	public function authors(): AuthorsRepository {
+		return $this->authors ??= new AuthorsRepository();
 	}
 
 	public function change_log(): ChangeLog {
@@ -343,7 +350,7 @@ final class Plugin {
 	}
 
 	public function invalidation(): Invalidation {
-		return $this->invalidation ??= new Invalidation( $this->sites(), $this->extensions(), $this->settings(), $this->change_log() );
+		return $this->invalidation ??= new Invalidation( $this->sites(), $this->extensions(), $this->settings(), $this->change_log(), $this->authors() );
 	}
 
 	public function state_watcher(): NetworkStateWatcher {

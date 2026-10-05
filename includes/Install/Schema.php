@@ -12,9 +12,10 @@ final class Schema {
 
 	/**
 	 * 1 : tables de M1 ; 2 : colonne siteurl (M2) ; 3 : mesures de M4, remplies par une analyse complète ;
-	 * 4 : tables msradar_events et msradar_snapshots (M6), sans nouvelle analyse (écart E2 du plan M6).
+	 * 4 : tables msradar_events et msradar_snapshots (M6), sans nouvelle analyse (écart E2 du plan M6) ;
+	 * 5 : table msradar_site_authors (rc.2), remplie par une analyse complète.
 	 */
-	public const VERSION = 4;
+	public const VERSION = 5;
 	public const OPTION  = 'msradar_db_version';
 
 	public static function sites_table(): string {
@@ -37,11 +38,16 @@ final class Schema {
 		return $wpdb->base_prefix . 'msradar_snapshots';
 	}
 
+	public static function authors_table(): string {
+		global $wpdb;
+		return $wpdb->base_prefix . 'msradar_site_authors';
+	}
+
 	/**
 	 * @return string[]
 	 */
 	public static function tables(): array {
-		return [ self::sites_table(), self::extensions_table(), self::events_table(), self::snapshots_table() ];
+		return [ self::sites_table(), self::extensions_table(), self::events_table(), self::snapshots_table(), self::authors_table() ];
 	}
 
 	/**
@@ -56,6 +62,7 @@ final class Schema {
 		$extensions      = self::extensions_table();
 		$events          = self::events_table();
 		$snapshots       = self::snapshots_table();
+		$authors         = self::authors_table();
 
 		dbDelta(
 			"CREATE TABLE {$sites} (
@@ -138,6 +145,16 @@ alert_level tinyint(3) unsigned NOT NULL DEFAULT 0,
 alerts_count smallint(5) unsigned NOT NULL DEFAULT 0,
 PRIMARY KEY  (site_id,day),
 KEY network_day (network_id,day)
+) {$charset_collate};"
+		);
+
+		dbDelta(
+			"CREATE TABLE {$authors} (
+site_id bigint(20) unsigned NOT NULL,
+user_id bigint(20) unsigned NOT NULL,
+published int(10) unsigned NOT NULL DEFAULT 0,
+PRIMARY KEY  (site_id,user_id),
+KEY user_id (user_id)
 ) {$charset_collate};"
 		);
 

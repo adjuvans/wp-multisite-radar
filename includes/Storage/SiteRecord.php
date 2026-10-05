@@ -52,9 +52,17 @@ final class SiteRecord {
 	public string $alert_rules        = '';
 	public string $registry_status    = 'missing';
 	public array $data                = [];
-	public bool $dirty                = true;
-	public ?string $dirty_since       = null;
-	public ?string $scanned_at        = null;
+
+	/**
+	 * Contenus publiés par auteur (identifiant => nombre), relevés par SiteCollector et rangés par AuthorsRepository :
+	 * jamais écrits dans la table des sites.
+	 *
+	 * @var array<int, int>
+	 */
+	public array $authors       = [];
+	public bool $dirty          = true;
+	public ?string $dirty_since = null;
+	public ?string $scanned_at  = null;
 
 	/**
 	 * Vrai pour une ligne lue par une liste (sans la colonne data) : elle ne doit jamais être réécrite.

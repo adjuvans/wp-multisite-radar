@@ -39,10 +39,13 @@ final class InvalidationTest extends TestCase {
 	public function test_a_deleted_site_loses_its_rows(): void {
 		$this->plugin()->extensions()->replace_for_site( $this->site_id, [ 'acme/acme.php' ], 'theme', 'theme' );
 
+		$this->plugin()->authors()->replace_for_site( $this->site_id, [ 7 => 2 ] );
+
 		wp_delete_site( $this->site_id );
 
 		$this->assertNull( $this->plugin()->sites()->find( $this->site_id ) );
 		$this->assertSame( [], $this->plugin()->extensions()->for_site( $this->site_id ) );
+		$this->assertFalse( $this->plugin()->authors()->is_analysed( $this->site_id ) );
 	}
 
 	public function test_a_local_plugin_change_marks_only_the_current_site(): void {

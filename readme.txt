@@ -48,7 +48,7 @@ An optional "Network sites" block, shortcode and navigation menu items list the 
 
 = Privacy =
 
-Multisite Radar makes no external request and collects nothing from visitors. To build its inventory, it keeps in the network database a copy of data that WordPress already holds, such as the user IDs and logins of administrators and editors, and a history of the changes of the network for the retention period set in its settings. A text for your privacy policy is suggested in the privacy policy guide. Deleting the plugin deletes all its data.
+Multisite Radar makes no external request and collects nothing from visitors. To build its inventory, it keeps in the network database a copy of data that WordPress already holds, such as the user IDs and logins of administrators and editors, the number of published posts of each author on each site, and a history of the changes of the network for the retention period set in its settings. The Users screen shows the e-mail address of each account to the network administrators who can manage users, without copying it. A text for your privacy policy is suggested in the privacy policy guide. Deleting the plugin deletes all its data.
 
 = Source code =
 

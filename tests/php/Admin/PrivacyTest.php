@@ -30,4 +30,9 @@ final class PrivacyTest extends TestCase {
 		$this->assertStringContainsString( 'logins', $texts['Multisite Radar'] );
 		$this->assertStringContainsString( 'recipients', $texts['Multisite Radar'] );
 	}
+
+	public function test_the_text_names_the_published_posts_and_the_emails(): void {
+		$this->assertStringContainsString( 'number of published posts of each author', Privacy::text() );
+		$this->assertStringContainsString( 'e-mail address of each account', Privacy::text() );
+	}
 }

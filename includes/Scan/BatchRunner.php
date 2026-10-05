@@ -3,6 +3,7 @@ namespace MultisiteRadar\Scan;
 
 use MultisiteRadar\Alerts\AlertEvaluator;
 use MultisiteRadar\Collector\SiteCollector;
+use MultisiteRadar\Storage\AuthorsRepository;
 use MultisiteRadar\Storage\ExtensionsRepository;
 use MultisiteRadar\Storage\SiteRecord;
 use MultisiteRadar\Storage\SitesRepository;
@@ -20,14 +21,17 @@ final class BatchRunner {
 
 	private SitesRepository $sites;
 	private ExtensionsRepository $extensions;
+
+	private AuthorsRepository $authors;
 	private SiteCollector $collector;
 	private AlertEvaluator $evaluator;
 	private Lock $lock;
 	private ChangeLog $changes;
 
-	public function __construct( SitesRepository $sites, ExtensionsRepository $extensions, SiteCollector $collector, AlertEvaluator $evaluator, Lock $lock, ChangeLog $changes ) {
+	public function __construct( SitesRepository $sites, ExtensionsRepository $extensions, SiteCollector $collector, AlertEvaluator $evaluator, Lock $lock, ChangeLog $changes, AuthorsRepository $authors ) {
 		$this->sites      = $sites;
 		$this->extensions = $extensions;
+		$this->authors    = $authors;
 		$this->collector  = $collector;
 		$this->evaluator  = $evaluator;
 		$this->lock       = $lock;
@@ -140,6 +144,7 @@ final class BatchRunner {
 			if ( null === $record ) {
 				$this->sites->delete( $site_id );
 				$this->extensions->delete_for_site( $site_id );
+				$this->authors->delete_for_site( $site_id );
 				return false;
 			}
 
@@ -150,12 +155,14 @@ final class BatchRunner {
 				$record->theme_stylesheet,
 				$record->theme_template
 			);
+			$this->authors->replace_for_site( $site_id, $record->authors );
 			$this->sites->save( $record );
 		} catch ( Throwable $error ) {
 			try {
 				if ( null === get_site( $site_id ) ) {
 					$this->sites->delete( $site_id );
 					$this->extensions->delete_for_site( $site_id );
+					$this->authors->delete_for_site( $site_id );
 					return false;
 				}
 				$this->record_failure( $site_id, $error->getMessage() );

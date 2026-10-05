@@ -336,4 +336,18 @@ final class BatchRunnerTest extends TestCase {
 		)['items'];
 		$this->assertSame( [ 'akismet/akismet.php' ], array_column( $items, 'subject' ) );
 	}
+
+	public function test_the_scan_stores_the_published_content_of_each_author(): void {
+		$site_id = self::factory()->blog->create();
+		$author  = self::factory()->user->create();
+		switch_to_blog( $site_id );
+		self::factory()->post->create_many( 2, [ 'post_author' => $author ] );
+		restore_current_blog();
+		$this->plugin()->sites()->seed_from_blogs( get_current_network_id() );
+
+		$this->assertTrue( $this->plugin()->runner()->scan_site( $site_id ) );
+
+		$this->assertSame( [ $site_id => 2 ], $this->plugin()->authors()->for_user( $author ) );
+		$this->assertTrue( $this->plugin()->authors()->is_analysed( $site_id ) );
+	}
 }

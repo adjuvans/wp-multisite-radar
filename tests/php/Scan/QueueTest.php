@@ -474,14 +474,14 @@ final class QueueTest extends TestCase {
 		$this->assertSame( 0, $this->plugin()->sites()->count_dirty( $network ), 'Saving the same value again is not a change.' );
 	}
 
-	public function test_an_upgrade_from_version_3_adds_the_history_tables_without_a_new_analysis(): void {
+	public function test_an_upgrade_from_version_3_requests_a_full_scan(): void {
 		$network = get_current_network_id();
 		$this->plugin()->sites()->seed_from_blogs( $network );
 		$this->mark_all_clean();
 
-		do_action( 'msradar_upgraded', 4, 3 );
+		do_action( 'msradar_upgraded', 5, 3 );
 
-		$this->assertSame( 0, $this->plugin()->sites()->count_dirty( $network ) );
+		$this->assertSame( $this->plugin()->sites()->count_all( $network ), $this->plugin()->sites()->count_dirty( $network ) );
 	}
 
 	public function test_the_alert_recompute_records_raised_and_resolved_alerts(): void {
@@ -559,5 +559,25 @@ final class QueueTest extends TestCase {
 			]
 		)['items'];
 		$this->assertSame( [], $items, 'No alert is recorded while the alert write fails.' );
+	}
+
+	public function test_upgrading_to_version_5_requests_a_full_scan(): void {
+		$site_id = self::factory()->blog->create();
+		$this->plugin()->sites()->seed_from_blogs( get_current_network_id() );
+		$this->mark_all_clean();
+
+		$this->queue->on_upgraded( 5, 4 );
+
+		$this->assertTrue( $this->plugin()->sites()->find( $site_id )->dirty );
+	}
+
+	public function test_an_up_to_date_schema_requests_no_full_scan(): void {
+		$site_id = self::factory()->blog->create();
+		$this->plugin()->sites()->seed_from_blogs( get_current_network_id() );
+		$this->mark_all_clean();
+
+		$this->queue->on_upgraded( 5, 5 );
+
+		$this->assertFalse( $this->plugin()->sites()->find( $site_id )->dirty );
 	}
 }

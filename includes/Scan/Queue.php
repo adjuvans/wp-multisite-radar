@@ -266,14 +266,15 @@ final class Queue {
 
 	/**
 	 * Les colonnes ajoutées jusqu'à la version 3 du schéma ne se remplissent qu'à l'analyse : tout le réseau courant
-	 * est alors marqué. La version 4 n'ajoute que les tables de l'historique : rien à réanalyser (écart E2 du plan M6).
+	 * est alors marqué. La version 4 n'ajoute que les tables de l'historique (écart E2 du plan M6) ; la version 5 relève les contenus par auteur.
 	 *
 	 * @param mixed $version  Version de schéma installée.
 	 * @param mixed $previous Version avant la mise à niveau (0 : inconnue ou première installation).
 	 */
 	public function on_upgraded( $version = 0, $previous = 0 ): void {
 		$this->schedule();
-		if ( (int) $previous < 3 ) {
+		// 3 : mesures de M4 ; 5 : contenus publiés par auteur (rc.2). Une analyse complète les remplit.
+		if ( (int) $previous < 5 ) {
 			$this->request_full_scan( get_current_network_id() );
 		}
 	}

@@ -55,6 +55,7 @@ final class SiteCollector {
 		try {
 			$options  = $this->read_options( $prefix );
 			$counts   = $this->read_post_counts( $prefix );
+			$authors  = $this->read_authors( $prefix );
 			$terms    = $this->read_term_counts( $prefix );
 			$last     = $this->read_last_content( $prefix );
 			$users    = $this->read_users( $prefix, $this->role_names( $options[ $prefix . 'user_roles' ] ?? null ) );
@@ -86,6 +87,7 @@ final class SiteCollector {
 
 		$record                    = new SiteRecord();
 		$record->site_id           = $site_id;
+		$record->authors           = $authors;
 		$record->network_id        = $network_id;
 		$record->name              = PlainText::from_html( self::string_option( $options, 'blogname' ) );
 		$record->siteurl           = $siteurl;
@@ -289,6 +291,31 @@ final class SiteCollector {
 			$counts[ (string) $row['post_type'] ][ (string) $row['post_status'] ] = (int) $row['total'];
 		}
 		return $counts;
+	}
+
+	/**
+	 * Contenus publiés par auteur, avec la définition de la colonne « Contenus » : statut publish, ni média ni type
+	 * exclu (filtre msradar_excluded_post_types).
+	 *
+	 * @return array<int, int> Identifiant de l'auteur => nombre.
+	 */
+	private function read_authors( string $prefix ): array {
+		global $wpdb;
+		$excluded = array_values( array_unique( array_merge( array_map( 'strval', (array) apply_filters( 'msradar_excluded_post_types', self::EXCLUDED_POST_TYPES ) ), [ 'attachment' ] ) ) );
+		$rows     = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT post_author, COUNT(*) AS total FROM %i WHERE post_status = 'publish' AND post_author > 0 AND post_type NOT IN (" . implode( ',', array_fill( 0, count( $excluded ), '%s' ) ) . ') GROUP BY post_author',
+				array_merge( [ $prefix . 'posts' ], $excluded )
+			),
+			ARRAY_A
+		);
+		$this->guard();
+
+		$authors = [];
+		foreach ( (array) $rows as $row ) {
+			$authors[ (int) $row['post_author'] ] = (int) $row['total'];
+		}
+		return $authors;
 	}
 
 	/**
