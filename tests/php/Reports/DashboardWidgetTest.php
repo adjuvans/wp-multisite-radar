@@ -25,6 +25,8 @@ final class DashboardWidgetTest extends TestCase {
 	public function tear_down(): void {
 		$GLOBALS['wp_meta_boxes'] = [];
 		set_current_screen( 'front' );
+		wp_dequeue_style( DashboardWidget::STYLE_HANDLE );
+		wp_deregister_style( DashboardWidget::STYLE_HANDLE );
 		parent::tear_down();
 	}
 
@@ -59,7 +61,33 @@ final class DashboardWidgetTest extends TestCase {
 	public function test_the_links_inside_a_sentence_are_underlined(): void {
 		$html = $this->render();
 
-		$this->assertMatchesRegularExpression( '/<li><a href="[^"]*site=5201[^"]*" style="text-decoration: underline;">/', $html );
+		$this->assertMatchesRegularExpression( '/<a href="[^"]*site=5201[^"]*" style="text-decoration: underline;">/', $html );
+	}
+
+	public function test_each_tile_leads_to_the_filtered_screen(): void {
+		$html = $this->render();
+
+		$this->assertSame( 5, substr_count( $html, 'class="msradar-widget__tile"' ) );
+		foreach ( [ 'alert_level=error', 'alert_level=warning', 'status=unused', 'has_update=1', 'page=multisite-radar-sites' ] as $fragment ) {
+			$this->assertStringContainsString( $fragment, $html );
+		}
+	}
+
+	public function test_main_alerts_carry_their_severity(): void {
+		$html = $this->render();
+
+		$this->assertMatchesRegularExpression( '/<span class="msradar-widget__severity msradar-widget__severity--(error|warning|info)">[^<]+<\/span>/', $html );
+	}
+
+	public function test_its_style_is_loaded_with_the_widget_only(): void {
+		$user = self::factory()->user->create();
+		grant_super_admin( $user );
+		wp_set_current_user( $user );
+
+		$this->plugin()->dashboard_widget()->add();
+
+		$this->assertTrue( wp_style_is( DashboardWidget::STYLE_HANDLE, 'enqueued' ) );
+		$this->assertStringContainsString( '.msradar-widget__tiles', implode( '', (array) wp_styles()->get_data( DashboardWidget::STYLE_HANDLE, 'after' ) ) );
 	}
 
 	public function test_a_failed_read_shows_a_message_instead_of_breaking_the_dashboard(): void {
