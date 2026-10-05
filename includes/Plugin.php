@@ -38,6 +38,7 @@ use MultisiteRadar\Query\SitesQuery;
 use MultisiteRadar\Query\ThemesQuery;
 use MultisiteRadar\Query\TrendsQuery;
 use MultisiteRadar\Query\UsersQuery;
+use MultisiteRadar\Reports\DashboardWidget;
 use MultisiteRadar\Reports\Digest;
 use MultisiteRadar\Rest\AlertRulesController;
 use MultisiteRadar\Rest\AlertsController;
@@ -116,6 +117,8 @@ final class Plugin {
 	private ?History $history                   = null;
 	private ?Digest $digest                     = null;
 
+	private ?DashboardWidget $dashboard_widget = null;
+
 	private ?SitesQuery $sites_query = null;
 
 	private ?EventsQuery $events_query = null;
@@ -176,6 +179,7 @@ final class Plugin {
 		$this->state_watcher()->register();
 		$this->history()->register();
 		$this->digest()->register();
+		$this->dashboard_widget()->register();
 		$this->sites_menu()->register();
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 		add_action( 'wp_abilities_api_categories_init', [ $this, 'register_ability_category' ] );
@@ -354,6 +358,10 @@ final class Plugin {
 
 	public function digest(): Digest {
 		return $this->digest ??= new Digest( $this->settings(), $this->events_query(), $this->alerts_query() );
+	}
+
+	public function dashboard_widget(): DashboardWidget {
+		return $this->dashboard_widget ??= new DashboardWidget( $this->alerts_query(), $this->inventory_query() );
 	}
 
 	public function trends_query(): TrendsQuery {
