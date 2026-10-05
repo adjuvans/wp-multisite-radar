@@ -24,6 +24,12 @@ Abilities (Abilities API de WordPress, lecture seule, droit `msradar_view`) : `m
 - Spec : `docs/superpowers/specs/2026-10-01-multisite-radar-v2-design.md`
 - Plans : `docs/superpowers/plans/`
 
+## Publication sur WordPress.org
+
+- `readme.txt` est la page du plugin sur WordPress.org ; `npm run readme:check` le vérifie (CI et `make lint`).
+- `.wordpress-org/` contient l'icône, la bannière et les captures, publiées dans le dossier `assets` du SVN et jamais dans le zip. `npm run wporg:assets` régénère l'icône et la bannière depuis `bin/wporg-assets/`. `npm run screenshots:seed` puis `npm run screenshots` (wp-env démarré) régénèrent les captures.
+- Procédure complète : `docs/release.md`.
+
 ## Développement
 
 Le `Makefile` regroupe les commandes ci-dessous (`make` seul affiche l'aide) :

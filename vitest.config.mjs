@@ -8,7 +8,7 @@ export default defineConfig( {
 		environment: 'jsdom',
 		globals: false,
 		restoreMocks: true,
-		include: [ 'src/**/test/*.test.{js,jsx}' ],
+		include: [ 'src/**/test/*.test.{js,jsx}', 'bin/test/*.test.mjs' ],
 		setupFiles: [ './tests/js/setup.mjs' ],
 	},
 } );

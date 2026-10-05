@@ -76,6 +76,7 @@ lint: node_modules vendor ## PHPCS, PHPStan, ESLint, Stylelint et cohérence des
 	npm run lint:js
 	npm run lint:css
 	npm run version:check
+	npm run readme:check
 
 test: node_modules vendor ## Tests PHPUnit (base locale) et Vitest
 	bin/test.sh
