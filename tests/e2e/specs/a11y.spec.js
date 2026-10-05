@@ -12,13 +12,15 @@ const PAGES = [
 	'page=multisite-radar-settings',
 ];
 
-async function seriousViolations( page ) {
+async function seriousViolations( page, area = '.msradar-wrap' ) {
 	const results = await new AxeBuilder( { page } )
-		.include( '.msradar-wrap' )
+		.include( area )
 		// @wordpress/dataviews 19.1 ajoute à un FormTokenField validé (page Réglages) un champ texte invisible
 		// (opacity 0, tabindex -1) sans libellé, que la règle « label » signale. Ce nœud n'est pas dans notre code :
-		// on n'exclut que lui, sur toutes les pages auditées, jamais la règle. À revoir à chaque montée de version de
-		// DataViews (spec §14).
+		// on n'exclut que lui, sur toutes les pages auditées, jamais la règle. Défaut amont :
+		// https://github.com/WordPress/gutenberg/issues/76741 (correctif proposé :
+		// https://github.com/WordPress/gutenberg/pull/81305). Retirer l'exclusion dès qu'une version de DataViews
+		// corrigée est épinglée (spec §14).
 		.exclude( '.dataviews-validated-control__error-delegate' )
 		.withTags( [ 'wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa' ] )
 		.analyze();
@@ -45,7 +47,7 @@ test.describe( 'Accessibility, WCAG 2.2 AA (spec 1.4, criterion 5)', () => {
 		} );
 	}
 
-	test( 'no serious or critical violation with the site panel open', async ( {
+	test( 'no serious or critical violation on any tab of the site panel', async ( {
 		admin,
 		page,
 	} ) => {
@@ -57,9 +59,27 @@ test.describe( 'Accessibility, WCAG 2.2 AA (spec 1.4, criterion 5)', () => {
 			.locator( '#msradar-app' )
 			.getByText( 'Blog RH', { exact: true } )
 			.click();
-		await expect( page.getByRole( 'dialog' ) ).toBeVisible();
+		const dialog = page.getByRole( 'dialog' );
+		await expect( dialog ).toBeVisible();
 
-		expect( await seriousViolations( page ) ).toEqual( [] );
+		for ( const name of [
+			'Summary',
+			'Content',
+			'Users',
+			'Extensions',
+			'Alerts',
+			'History',
+		] ) {
+			const tab = dialog.getByRole( 'tab', { name } );
+			await tab.click();
+			await expect( tab ).toHaveAttribute( 'aria-selected', 'true' );
+			await expect( dialog.locator( '.msradar-skeleton' ) ).toHaveCount(
+				0
+			);
+			expect( await seriousViolations( page ), `tab ${ name }` ).toEqual(
+				[]
+			);
+		}
 	} );
 
 	test( 'no serious or critical violation with the sites of a plugin open', async ( {
@@ -96,5 +116,17 @@ test.describe( 'Accessibility, WCAG 2.2 AA (spec 1.4, criterion 5)', () => {
 		).toBeVisible();
 
 		expect( await seriousViolations( page ) ).toEqual( [] );
+	} );
+
+	test( 'no serious or critical violation in the network dashboard widget', async ( {
+		admin,
+		page,
+	} ) => {
+		await admin.visitAdminPage( 'network/index.php' );
+		await expect( page.locator( '#msradar_summary' ) ).toBeVisible();
+
+		expect( await seriousViolations( page, '#msradar_summary' ) ).toEqual(
+			[]
+		);
 	} );
 } );

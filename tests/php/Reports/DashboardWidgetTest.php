@@ -56,6 +56,12 @@ final class DashboardWidgetTest extends TestCase {
 		$this->assertStringContainsString( 'page=multisite-radar', $html );
 	}
 
+	public function test_the_links_inside_a_sentence_are_underlined(): void {
+		$html = $this->render();
+
+		$this->assertMatchesRegularExpression( '/<li><a href="[^"]*site=5201[^"]*" style="text-decoration: underline;">/', $html );
+	}
+
 	public function test_a_failed_read_shows_a_message_instead_of_breaking_the_dashboard(): void {
 		global $wpdb;
 		$break    = static function ( string $query ): string {

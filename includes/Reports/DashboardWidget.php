@@ -71,8 +71,9 @@ final class DashboardWidget {
 		} else {
 			echo '<h3>' . esc_html__( 'Main alerts', 'multisite-radar' ) . '</h3><ul>';
 			foreach ( $top['items'] as $alert ) {
+				// Lien souligné : au milieu d'un texte, la couleur seule ne le distingue pas (WCAG 1.4.1).
 				printf(
-					'<li><a href="%1$s">%2$s</a> — %3$s</li>',
+					'<li><a href="%1$s" style="text-decoration: underline;">%2$s</a> — %3$s</li>',
 					esc_url( Menu::url( 'sites', [ 'site' => (int) $alert['site']['id'] ] ) ),
 					esc_html( $alert['site']['name'] ),
 					esc_html( $alert['message'] )
