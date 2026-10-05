@@ -209,6 +209,21 @@ final class UsersQueryTest extends TestCase {
 		$this->assertSame( [], $this->find( 'radar_nobody' )['roles'] );
 	}
 
+	public function test_a_list_read_in_one_locale_is_not_served_in_another(): void {
+		$this->assertSame( 'Author', $this->find( 'radar_multi' )['roles'][0]['label'] );
+
+		$locale    = static fn (): string => 'fr_FR';
+		$translate = static fn ( string $translation, string $text, string $context ): string => 'Author' === $text && 'User role' === $context ? 'Auteur' : $translation;
+		add_filter( 'determine_locale', $locale );
+		add_filter( 'gettext_with_context', $translate, 10, 3 );
+		try {
+			$this->assertSame( 'Auteur', $this->find( 'radar_multi' )['roles'][0]['label'] );
+		} finally {
+			remove_filter( 'determine_locale', $locale );
+			remove_filter( 'gettext_with_context', $translate, 10 );
+		}
+	}
+
 	public function test_published_content_is_null_until_a_site_is_analysed_then_counted(): void {
 		global $wpdb;
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i', \MultisiteRadar\Install\Schema::authors_table() ) );

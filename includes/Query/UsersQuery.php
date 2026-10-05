@@ -11,7 +11,8 @@ defined( 'ABSPATH' ) || exit;
  * (écart E3 du plan M3). L'e-mail n'est renvoyé que sur demande (with_email, droit manage_network_users vérifié par
  * la route). Les résultats restent 10 minutes en cache objet ; la clé change dès qu'un compte ou une appartenance
  * change (last_changed « users »), qu'un site est créé ou supprimé (« sites »), qu'une analyse relève les auteurs
- * (« msradar_authors »), ou que la liste des super-admins change.
+ * (« msradar_authors »), ou que la liste des super-admins change. La clé dépend aussi de la locale (noms des rôles
+ * traduits).
  */
 final class UsersQuery {
 
@@ -69,7 +70,8 @@ final class UsersQuery {
 			'per_page'   => min( 100, max( 1, (int) $args['per_page'] ) ),
 		];
 
-		$key    = 'users:' . md5( (string) wp_json_encode( [ $query, $supers ] ) ) . ':' . wp_cache_get_last_changed( 'users' ) . ':' . wp_cache_get_last_changed( 'sites' ) . ':' . wp_cache_get_last_changed( AuthorsRepository::CACHE_GROUP );
+		// Les noms des rôles sont traduits dans la langue de qui lit la liste : la locale entre dans la clé.
+		$key    = 'users:' . md5( (string) wp_json_encode( [ $query, $supers, determine_locale() ] ) ) . ':' . wp_cache_get_last_changed( 'users' ) . ':' . wp_cache_get_last_changed( 'sites' ) . ':' . wp_cache_get_last_changed( AuthorsRepository::CACHE_GROUP );
 		$cached = wp_cache_get( $key, self::CACHE_GROUP );
 		if ( is_array( $cached ) ) {
 			return $cached;
