@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import cases from '../../../../tests/fixtures/view-queries.json';
 import {
+	alertSites,
 	alertsPath,
 	alertsPrefsFromView,
 	alertsRestArgs,
@@ -71,6 +72,7 @@ describe( 'alerts view state', () => {
 			order: 'desc',
 			severity: [],
 			rule: [ 'inactive' ],
+			site: 0,
 		} );
 		expect( alertsPrefsFromView( view ) ).toEqual( {
 			fields: [ 'message' ],
@@ -78,4 +80,28 @@ describe( 'alerts view state', () => {
 		} );
 		expect( serializeAlertsState( parseAlertsQuery( {} ) ) ).toEqual( {} );
 	} );
+} );
+
+test( 'the site of the open panel lives in the address', () => {
+	expect( parseAlertsQuery( { site: '12' } ).site ).toBe( 12 );
+	for ( const value of [ '0', '-3', 'x', '' ] ) {
+		expect( parseAlertsQuery( { site: value } ).site ).toBe( 0 );
+	}
+	expect(
+		serializeAlertsState( { ...parseAlertsQuery( {} ), site: 12 } ).site
+	).toBe( '12' );
+	expect(
+		serializeAlertsState( parseAlertsQuery( {} ) ).site
+	).toBeUndefined();
+} );
+
+test( 'alertSites lists each site of the page once, in order', () => {
+	const alerts = [
+		{ id: 'a', site: { id: 4, name: 'Blog RH' } },
+		{ id: 'b', site: { id: 2, name: 'Atelier' } },
+		{ id: 'c', site: { id: 4, name: 'Blog RH' } },
+	];
+	expect( alertSites( alerts ).map( ( site ) => site.id ) ).toEqual( [
+		4, 2,
+	] );
 } );

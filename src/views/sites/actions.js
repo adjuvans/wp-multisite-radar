@@ -3,6 +3,7 @@ import { download, external, info, update, wordpress } from '@wordpress/icons';
 
 /**
  * Actions de ligne et actions groupées de la liste des sites. « Analyse again » n'existe que pour msradar_manage.
+ * Aucune action n'est principale : le clic sur la ligne ouvre la fiche (spec rc.2 § 2.2).
  *
  * @param {Object}                    options
  * @param {boolean}                   options.canManage  Droit de lancer une analyse.
@@ -23,7 +24,6 @@ export function getSitesActions( {
 			id: 'open',
 			label: __( 'View details', 'multisite-radar' ),
 			icon: info,
-			isPrimary: true,
 			callback: ( [ item ] ) => onOpen( item ),
 		},
 		{

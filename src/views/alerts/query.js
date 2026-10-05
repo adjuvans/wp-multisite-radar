@@ -41,6 +41,7 @@ function ruleList( values ) {
 
 export function parseAlertsQuery( query ) {
 	const orderby = text( query, 'orderby' );
+	const site = text( query, 'site' );
 	return {
 		search: trimAscii( text( query, 's' ) ),
 		page: page( query ),
@@ -48,6 +49,7 @@ export function parseAlertsQuery( query ) {
 		order: text( query, 'order' ) === 'desc' ? 'desc' : 'asc',
 		severity: subset( query, 'severity', SEVERITIES ),
 		rule: ruleList( text( query, 'rule' ).split( ',' ) ),
+		site: /^\d+$/.test( site ) && Number( site ) > 0 ? Number( site ) : 0,
 	};
 }
 
@@ -93,6 +95,9 @@ export function serializeAlertsState( state ) {
 	}
 	if ( state.rule.length > 0 ) {
 		out.rule = state.rule.join( ',' );
+	}
+	if ( state.site ) {
+		out.site = String( state.site );
 	}
 	return out;
 }
@@ -143,4 +148,19 @@ export function fromAlertsView( view, current ) {
 
 export function alertsPrefsFromView( view ) {
 	return { fields: view.fields || [], per_page: perPage( view.perPage ) };
+}
+
+/**
+ * Sites des alertes de la page, une fois chacun, dans l'ordre : « précédent » et « suivant » du panneau du site.
+ *
+ * @param {Array} alerts Alertes de la page (chacune avec son site).
+ */
+export function alertSites( alerts ) {
+	const sites = new Map();
+	for ( const alert of alerts ) {
+		if ( ! sites.has( alert.site.id ) ) {
+			sites.set( alert.site.id, alert.site );
+		}
+	}
+	return [ ...sites.values() ];
 }

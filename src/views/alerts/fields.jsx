@@ -36,7 +36,7 @@ export function getAlertsFields( rules = [] ) {
 				value,
 				label: severities[ value ],
 			} ) ),
-			filterBy: { operators: [ 'isAny' ] },
+			filterBy: { operators: [ 'isAny' ], isPrimary: true },
 			render: ( { item } ) => <SeverityBadge level={ item.severity } />,
 		},
 		{

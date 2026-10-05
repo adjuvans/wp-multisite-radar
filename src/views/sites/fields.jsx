@@ -110,7 +110,7 @@ export function getSitesFields( rules = [] ) {
 					label: severities[ value ],
 				} )
 			),
-			filterBy: { operators: [ 'isAny' ] },
+			filterBy: { operators: [ 'isAny' ], isPrimary: true },
 			render: ( { item } ) => (
 				<SeverityBadge
 					level={ item.alert_level }

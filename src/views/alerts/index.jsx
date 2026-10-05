@@ -1,7 +1,6 @@
-import { useMemo, useState } from '@wordpress/element';
+import { useCallback, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { info, wordpress } from '@wordpress/icons';
-import { pageUrl } from '../../admin/config';
 import { DataViews } from '../../components/data-views';
 import ErrorNotice from '../../components/error-notice';
 import Skeleton from '../../components/skeleton';
@@ -10,8 +9,10 @@ import { useResource } from '../../hooks/use-resource';
 import { useUrlState } from '../../hooks/use-url-state';
 import { buildPath } from '../../store/paths';
 import { samePrefs } from '../../utils/view-query';
+import SitePanel from '../site-panel';
 import { getAlertsFields } from './fields';
 import {
+	alertSites,
 	alertsPath,
 	alertsPrefsFromView,
 	fromAlertsView,
@@ -20,17 +21,13 @@ import {
 	toAlertsView,
 } from './query';
 
-function actions() {
+function actions( onOpen ) {
 	return [
 		{
 			id: 'open',
 			label: __( 'View the site', 'multisite-radar' ),
 			icon: info,
-			isPrimary: true,
-			callback: ( [ item ] ) =>
-				window.location.assign(
-					pageUrl( 'sites', { site: item.site.id } )
-				),
+			callback: ( [ item ] ) => onOpen( item ),
 		},
 		{
 			id: 'admin',
@@ -63,7 +60,13 @@ export default function AlertsView() {
 		() => toAlertsView( state, alertsPrefs ),
 		[ state, alertsPrefs ]
 	);
-	const rowActions = useMemo( () => actions(), [] );
+	const openSite = useCallback(
+		( item ) =>
+			setState( ( current ) => ( { ...current, site: item.site.id } ) ),
+		[ setState ]
+	);
+	const rowActions = useMemo( () => actions( openSite ), [ openSite ] );
+	const sites = useMemo( () => alertSites( list.data || [] ), [ list.data ] );
 
 	const onChangeView = ( next ) => {
 		setState( ( current ) => fromAlertsView( next, current ) );
@@ -83,6 +86,7 @@ export default function AlertsView() {
 				view={ view }
 				onChangeView={ onChangeView }
 				actions={ rowActions }
+				onClickItem={ openSite }
 				defaultLayouts={ { table: {} } }
 				paginationInfo={ {
 					totalItems: list.total || 0,
@@ -107,6 +111,18 @@ export default function AlertsView() {
 					)
 				}
 			/>
+			{ state.site > 0 && (
+				<SitePanel
+					siteId={ state.site }
+					items={ sites }
+					onNavigate={ ( id ) =>
+						setState( ( current ) => ( { ...current, site: id } ) )
+					}
+					onClose={ () =>
+						setState( ( current ) => ( { ...current, site: 0 } ) )
+					}
+				/>
+			) }
 		</div>
 	);
 }
