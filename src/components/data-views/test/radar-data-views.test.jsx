@@ -21,8 +21,9 @@ const VIEW = {
 
 afterEach( () => vi.restoreAllMocks() );
 
-function renderViews( props = {} ) {
-	return render(
+// Comme les écrans, une fonction getItemId nouvelle à chaque rendu.
+function views( props = {} ) {
+	return (
 		<DataViews
 			data={ DATA }
 			fields={ FIELDS }
@@ -34,6 +35,24 @@ function renderViews( props = {} ) {
 			{ ...props }
 		/>
 	);
+}
+
+function renderViews( props = {} ) {
+	return render( views( props ) );
+}
+
+/**
+ * Sélection de texte simulée, de `node` jusqu'à la fin de son texte.
+ *
+ * @param {Node} node Nœud texte où commence et finit la sélection.
+ */
+function selectTextIn( node ) {
+	vi.spyOn( window, 'getSelection' ).mockReturnValue( {
+		isCollapsed: false,
+		toString: () => node.textContent,
+		anchorNode: node,
+		focusNode: node,
+	} );
 }
 
 test( 'a click anywhere in a row opens its item, once', () => {
@@ -65,6 +84,44 @@ test( 'a Ctrl-click, a text selection or an item that is not clickable opens not
 	fireEvent.click( screen.getByText( '5' ) );
 
 	expect( onClickItem ).not.toHaveBeenCalled();
+} );
+
+test( 'the title of a row is the same node after the screen renders again', () => {
+	const { rerender } = renderViews( { onClickItem: vi.fn() } );
+	const title = screen.getByText( 'Alpha' );
+
+	rerender( views( { onClickItem: vi.fn() } ) );
+
+	expect( screen.getByText( 'Alpha' ) ).toBe( title );
+} );
+
+test( 'a click on the title keeps a text selection made in its row', () => {
+	const onClickItem = vi.fn();
+	const onChangeSelection = vi.fn();
+	renderViews( {
+		onClickItem,
+		selection: [],
+		onChangeSelection,
+		actions: [
+			{ id: 'go', label: 'Go', supportsBulk: true, callback: vi.fn() },
+		],
+	} );
+	const alpha = screen.getByText( 'Alpha' );
+
+	selectTextIn( alpha.firstChild );
+	fireEvent.click( alpha );
+	expect( onClickItem ).not.toHaveBeenCalled();
+
+	// Ctrl-clic : le geste de sélection de DataViews reste le sien.
+	fireEvent.click( alpha, { ctrlKey: true } );
+	expect( onChangeSelection ).toHaveBeenCalledWith( [ '1' ] );
+	expect( onClickItem ).not.toHaveBeenCalled();
+
+	// Une sélection dans une autre ligne n'empêche pas d'ouvrir celle-ci.
+	selectTextIn( screen.getByText( 'Beta' ).firstChild );
+	fireEvent.click( alpha );
+	expect( onClickItem ).toHaveBeenCalledTimes( 1 );
+	expect( onClickItem ).toHaveBeenCalledWith( DATA[ 0 ] );
 } );
 
 test( 'rows are marked clickable only with onClickItem', () => {

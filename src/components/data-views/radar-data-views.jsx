@@ -1,6 +1,6 @@
-import { useMemo, useState } from '@wordpress/element';
+import { useMemo, useRef, useState } from '@wordpress/element';
 import { DataViews as PackageDataViews } from '@wordpress/dataviews/wp';
-import { ITEM_ATTRIBUTE, rowItemId } from './row-click';
+import { ITEM_ATTRIBUTE, keepsTextSelection, rowItemId } from './row-click';
 
 const defaultGetItemId = ( item ) => item.id;
 const alwaysClickable = () => true;
@@ -21,7 +21,8 @@ function plainValue( field, item ) {
 /**
  * DataViews du plugin (spec rc.2 § 2) : l'assemblage libre de DataViews 19.1.0, avec
  * - la barre des actions groupées au-dessus du tableau, seulement quand une ligne est cochée ;
- * - un clic n'importe où sur une ligne du tableau qui ouvre le détail (row-click.js) ;
+ * - un clic n'importe où sur une ligne du tableau qui ouvre le détail (row-click.js), sauf sur du texte que
+ *   l'utilisateur vient d'y sélectionner, titre compris ;
  * - en bas, la pagination seule.
  * Mêmes props que le DataViews du paquet ; la sélection est gérée ici quand l'écran ne la fournit pas.
  *
@@ -51,6 +52,11 @@ export default function DataViews( props ) {
 		? givenOnChangeSelection
 		: setOwnSelection;
 
+	// Les écrans passent getItemId en fonction déclarée dans leur rendu : lue ici par une référence, elle ne change
+	// pas le rendu du titre, que DataViews monte comme un composant (un nouveau rendu remonterait le titre de chaque
+	// ligne et effacerait la sélection de texte qu'il contient).
+	const getItemIdRef = useRef( getItemId );
+	getItemIdRef.current = getItemId;
 	const titleField = view.titleField;
 	const markedFields = useMemo(
 		() =>
@@ -63,7 +69,9 @@ export default function DataViews( props ) {
 								<span
 									{ ...{
 										[ ITEM_ATTRIBUTE ]: String(
-											getItemId( renderProps.item )
+											getItemIdRef.current(
+												renderProps.item
+											)
 										),
 									} }
 								>
@@ -77,7 +85,7 @@ export default function DataViews( props ) {
 							),
 						}
 			),
-		[ fields, titleField, getItemId ]
+		[ fields, titleField ]
 	);
 
 	const byId = useMemo(
@@ -91,6 +99,11 @@ export default function DataViews( props ) {
 		[ data, getItemId ]
 	);
 	const clickable = !! onClickItem && view.type === 'table';
+	const onLayoutClickCapture = ( event ) => {
+		if ( keepsTextSelection( event ) ) {
+			event.stopPropagation();
+		}
+	};
 	const onLayoutClick = ( event ) => {
 		if ( ! clickable ) {
 			return;
@@ -144,6 +157,7 @@ export default function DataViews( props ) {
 						? 'msradar-dataviews__layout is-clickable'
 						: 'msradar-dataviews__layout'
 				}
+				onClickCapture={ clickable ? onLayoutClickCapture : undefined }
 				onClick={ onLayoutClick }
 			>
 				<PackageDataViews.Layout />
