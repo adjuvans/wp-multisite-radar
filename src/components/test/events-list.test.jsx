@@ -137,3 +137,69 @@ test( 'several lists keep their own, reachable, type filters', () => {
 	expect( filters ).toHaveLength( 2 );
 	expect( filters[ 0 ].id ).not.toBe( filters[ 1 ].id );
 } );
+
+test( 'with a filter and no change, the list says that none of this kind was recorded', async () => {
+	const registry = createRegistry();
+	registry.register(
+		createCoreStore( {
+			'/multisite-radar/v1/events?page=1&per_page=20': {
+				body: EVENTS,
+				headers: { 'X-WP-Total': '2', 'X-WP-TotalPages': '1' },
+			},
+			'/multisite-radar/v1/events?page=1&per_page=20&type=site_deleted': {
+				body: [],
+				headers: { 'X-WP-Total': '0', 'X-WP-TotalPages': '0' },
+			},
+		} )
+	);
+	render(
+		<RegistryProvider value={ registry }>
+			<EventsList />
+		</RegistryProvider>
+	);
+
+	fireEvent.change(
+		screen.getByRole( 'combobox', { name: 'Kind of change' } ),
+		{ target: { value: 'site_deleted' } }
+	);
+
+	expect(
+		await screen.findByText( 'No change of this kind recorded yet.' )
+	).toBeInTheDocument();
+} );
+
+test( 'the list of another site starts again from the first page', async () => {
+	const registry = createRegistry();
+	registry.register(
+		createCoreStore( {
+			'/multisite-radar/v1/events?page=1&per_page=20&site=5': {
+				body: EVENTS.slice( 1 ),
+				headers: { 'X-WP-Total': '30', 'X-WP-TotalPages': '2' },
+			},
+		} )
+	);
+	const view = ( site ) => (
+		<RegistryProvider value={ registry }>
+			<EventsList site={ site } />
+		</RegistryProvider>
+	);
+	const { rerender } = render( view( 5 ) );
+
+	fireEvent.click( screen.getByRole( 'button', { name: 'Next' } ) );
+	await waitFor( () => {
+		expect( apiFetch ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				path: '/multisite-radar/v1/events?page=2&per_page=20&site=5',
+			} )
+		);
+	} );
+
+	rerender( view( 6 ) );
+	await waitFor( () => {
+		expect( apiFetch ).toHaveBeenLastCalledWith(
+			expect.objectContaining( {
+				path: '/multisite-radar/v1/events?page=1&per_page=20&site=6',
+			} )
+		);
+	} );
+} );

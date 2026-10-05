@@ -82,6 +82,7 @@ function renderView( {
 	data = summary(),
 	stock = inventory(),
 	preloadInventory = true,
+	preloadTrends = true,
 } = {} ) {
 	const preload = {
 		'/multisite-radar/v1/preferences': { body: {}, headers: {} },
@@ -109,6 +110,9 @@ function renderView( {
 	};
 	if ( ! preloadInventory ) {
 		delete preload[ '/multisite-radar/v1/inventory/summary' ];
+	}
+	if ( ! preloadTrends ) {
+		delete preload[ '/multisite-radar/v1/reports/trends?days=30' ];
 	}
 	window.msradarAdmin = {
 		view: 'overview',
@@ -279,4 +283,10 @@ test( 'the overview shows the recent changes and the alerts of the last 30 days'
 		screen.getByRole( 'heading', { name: 'Alerts, last 30 days' } )
 	).toBeInTheDocument();
 	expect( screen.getByText( 'No change recorded yet.' ) ).toBeInTheDocument();
+} );
+
+test( 'the alerts of the last 30 days show a skeleton while they load', () => {
+	renderView( { preloadTrends: false } );
+
+	expect( screen.getByText( 'Loading the trends…' ) ).toBeInTheDocument();
 } );

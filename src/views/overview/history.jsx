@@ -3,6 +3,7 @@ import { __ } from '@wordpress/i18n';
 import { pageUrl } from '../../admin/config';
 import ErrorNotice from '../../components/error-notice';
 import EventsList from '../../components/events-list';
+import Skeleton from '../../components/skeleton';
 import TrendChart from '../../components/trend-chart';
 import { useResource } from '../../hooks/use-resource';
 import { buildPath } from '../../store/paths';
@@ -41,6 +42,12 @@ export function AlertsTrend() {
 			</CardHeader>
 			<CardBody>
 				<ErrorNotice error={ trends.error } onRetry={ trends.retry } />
+				{ ! trends.data && ! trends.error && (
+					<Skeleton
+						lines={ 4 }
+						label={ __( 'Loading the trends…', 'multisite-radar' ) }
+					/>
+				) }
 				{ trends.data && (
 					<TrendChart
 						title={ __(

@@ -46,6 +46,15 @@ function segments( points, key ) {
 	return parts;
 }
 
+function EmptyChart( { title, message } ) {
+	return (
+		<figure className="msradar-trend">
+			<figcaption className="msradar-trend__title">{ title }</figcaption>
+			<p className="msradar-trend__empty">{ message }</p>
+		</figure>
+	);
+}
+
 /**
  * Courbes SVG internes (spec §6.3) : une ligne par série ; l'axe x suit les dates, l'axe y va de 0 au maximum.
  * Un résumé textuel (aria-label) et le tableau des valeurs en sont l'équivalent accessible.
@@ -58,17 +67,31 @@ function segments( points, key ) {
 export default function TrendChart( { title, points, series } ) {
 	if ( points.length < 2 ) {
 		return (
-			<figure className="msradar-trend">
-				<figcaption className="msradar-trend__title">
-					{ title }
-				</figcaption>
-				<p className="msradar-trend__empty">
-					{ __(
-						'Not enough history yet: the chart appears after two daily snapshots.',
-						'multisite-radar'
-					) }
-				</p>
-			</figure>
+			<EmptyChart
+				title={ title }
+				message={ __(
+					'Not enough history yet: the chart appears after two daily snapshots.',
+					'multisite-radar'
+				) }
+			/>
+		);
+	}
+	// Mesure désactivée (disque) ou jamais relevée : pas de courbe à tracer.
+	const hasValue = points.some( ( point ) =>
+		series.some(
+			( item ) =>
+				point[ item.key ] !== null && point[ item.key ] !== undefined
+		)
+	);
+	if ( ! hasValue ) {
+		return (
+			<EmptyChart
+				title={ title }
+				message={ __(
+					'No figures for this period.',
+					'multisite-radar'
+				) }
+			/>
 		);
 	}
 
@@ -128,12 +151,13 @@ export default function TrendChart( { title, points, series } ) {
 						return segments( points, item.key ).map(
 							( part, index ) =>
 								part.length === 1 ? (
-									<circle
+									<path
 										key={ `${ item.key }-${ index }` }
-										className={ `msradar-trend__dot msradar-trend__dot--${ tone }` }
-										cx={ x( part[ 0 ].t ) }
-										cy={ y( part[ 0 ].value ) }
-										r="3"
+										className={ `msradar-trend__point msradar-trend__point--${ tone }` }
+										d={ `M${ x( part[ 0 ].t ) } ${ y(
+											part[ 0 ].value
+										) }h0` }
+										vectorEffect="non-scaling-stroke"
 									/>
 								) : (
 									<polyline
@@ -160,12 +184,24 @@ export default function TrendChart( { title, points, series } ) {
 			<ul className="msradar-trend__legend">
 				{ series.map( ( item ) => (
 					<li key={ item.key }>
-						<span
-							className={ `msradar-trend__swatch msradar-trend__swatch--${
-								item.tone || 'accent'
-							}` }
+						<svg
+							className="msradar-trend__swatch"
+							width="24"
+							height="8"
+							viewBox="0 0 24 8"
 							aria-hidden="true"
-						/>
+							focusable="false"
+						>
+							<line
+								className={ `msradar-trend__line msradar-trend__line--${
+									item.tone || 'accent'
+								}` }
+								x1="0"
+								y1="4"
+								x2="24"
+								y2="4"
+							/>
+						</svg>
 						{ item.label }{ ' ' }
 						<strong>{ format( item, latest[ item.key ] ) }</strong>
 					</li>

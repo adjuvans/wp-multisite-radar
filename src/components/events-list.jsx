@@ -71,7 +71,10 @@ export default function EventsList( {
 	compact = false,
 } ) {
 	const typeId = useInstanceId( EventsList, 'msradar-events-type' );
-	const [ page, setPage ] = useState( 1 );
+	// La page suit le site affiché : un autre site repart de la première page, sans lire la page de l'ancien.
+	const [ paging, setPaging ] = useState( { site, page: 1 } );
+	const page = paging.site === site ? paging.page : 1;
+	const setPage = ( next ) => setPaging( { site, page: next } );
 	const [ type, setType ] = useState( '' );
 	const events = useResource(
 		buildPath( '/events', {
@@ -108,7 +111,16 @@ export default function EventsList( {
 			/>
 		);
 	} else if ( events.data.length === 0 ) {
-		body = <p>{ __( 'No change recorded yet.', 'multisite-radar' ) }</p>;
+		body = (
+			<p>
+				{ type
+					? __(
+							'No change of this kind recorded yet.',
+							'multisite-radar'
+						)
+					: __( 'No change recorded yet.', 'multisite-radar' ) }
+			</p>
+		);
 	} else {
 		body = (
 			<>

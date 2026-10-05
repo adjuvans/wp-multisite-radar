@@ -381,7 +381,15 @@
 }
 
 .msradar-trend__line {
+	fill: none;
 	stroke-width: 2;
+}
+
+// Un point isolé : chemin de longueur nulle à bouts ronds, qui reste rond
+// malgré preserveAspectRatio="none".
+.msradar-trend__point {
+	stroke-width: 6;
+	stroke-linecap: round;
 }
 
 .msradar-trend__legend {
@@ -393,29 +401,36 @@
 
 .msradar-trend__swatch {
 	display: inline-block;
-	width: 12px;
-	height: 12px;
 	margin-right: 4px;
-	border-radius: 2px;
 	vertical-align: middle;
 }
 
+// Tons des séries : contraste d'au moins 3:1 sur blanc (WCAG 1.4.11, vérifié
+// par src/components/test/trend-tones.test.js) et un motif de trait par ton,
+// pour que la couleur ne soit pas le seul moyen de distinguer les séries
+// (WCAG 1.4.1).
 $msradar-tones: (
 	accent: var(--wp-admin-theme-color),
-	info: #72aee6,
-	warning: #dba617,
+	info: #3582c4,
+	warning: #996800,
 	error: #d63638,
 );
 
+$msradar-dashes: (
+	info: 6 4,
+	warning: 2 3,
+);
+
 @each $tone, $color in $msradar-tones {
-	.msradar-trend__line--#{$tone} {
+	.msradar-trend__line--#{$tone},
+	.msradar-trend__point--#{$tone} {
 		stroke: $color;
 	}
+}
 
-	.msradar-trend__dot--#{$tone},
-	.msradar-trend__swatch--#{$tone} {
-		fill: $color;
-		background: $color;
+@each $tone, $dash in $msradar-dashes {
+	.msradar-trend__line--#{$tone} {
+		stroke-dasharray: $dash;
 	}
 }
 
