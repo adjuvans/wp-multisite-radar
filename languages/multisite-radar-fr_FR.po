@@ -425,7 +425,7 @@ msgstr "Page suivante"
 #: build/admin/overview.js:3
 #: build/admin/reports.js:3
 #: build/admin/sites.js:18
-#: includes/Reports/Digest.php:196
+#: includes/Reports/Digest.php:238
 #, js-format,php-format
 msgid "%1$s: %2$s"
 msgstr "%1$s : %2$s"
@@ -1089,7 +1089,7 @@ msgstr "Analyser tous les sites"
 #: includes/Export/PluginsExport.php:23
 #: includes/Export/ThemesExport.php:26
 #: includes/Reports/DashboardWidget.php:57
-#: includes/Reports/Digest.php:165
+#: includes/Reports/Digest.php:207
 msgid "Sites"
 msgstr "Sites"
 
@@ -2929,12 +2929,12 @@ msgid "Alert resolved: %s."
 msgstr "Alerte résolue : %s."
 
 #: includes/Reports/DashboardWidget.php:58
-#: includes/Reports/Digest.php:166
+#: includes/Reports/Digest.php:208
 msgid "Sites with an error"
 msgstr "Sites en erreur"
 
 #: includes/Reports/DashboardWidget.php:59
-#: includes/Reports/Digest.php:167
+#: includes/Reports/Digest.php:209
 msgid "Sites with a warning"
 msgstr "Sites avec un avertissement"
 
@@ -2943,23 +2943,23 @@ msgid "Main alerts"
 msgstr "Principales alertes"
 
 #: includes/Reports/DashboardWidget.php:84
-#: includes/Reports/Digest.php:268
+#: includes/Reports/Digest.php:310
 msgid "Open Multisite Radar"
 msgstr "Ouvrir Multisite Radar"
 
 #. translators: %s: network name.
-#: includes/Reports/Digest.php:160
+#: includes/Reports/Digest.php:202
 #, php-format
 msgid "Multisite Radar summary for %s"
 msgstr "Récapitulatif Multisite Radar pour %s"
 
-#: includes/Reports/Digest.php:163
-#: includes/Reports/Digest.php:207
+#: includes/Reports/Digest.php:205
+#: includes/Reports/Digest.php:249
 msgid "Network"
 msgstr "Réseau"
 
 #. translators: %s: number of new alerts.
-#: includes/Reports/Digest.php:172
+#: includes/Reports/Digest.php:214
 #, php-format
 msgid "%s new alert"
 msgid_plural "%s new alerts"
@@ -2967,25 +2967,25 @@ msgstr[0] "%s nouvelle alerte"
 msgstr[1] "%s nouvelles alertes"
 
 #. translators: %s: number of resolved alerts.
-#: includes/Reports/Digest.php:177
+#: includes/Reports/Digest.php:219
 #, php-format
 msgid "%s resolved alert"
 msgid_plural "%s resolved alerts"
 msgstr[0] "%s alerte résolue"
 msgstr[1] "%s alertes résolues"
 
-#: includes/Reports/Digest.php:181
+#: includes/Reports/Digest.php:223
 msgid "Other changes"
 msgstr "Autres changements"
 
 #. translators: %s: network name.
-#: includes/Reports/Digest.php:188
+#: includes/Reports/Digest.php:230
 #, php-format
 msgid "[%s] Weekly summary from Multisite Radar"
 msgstr "[%s] Récapitulatif hebdomadaire de Multisite Radar"
 
 #. translators: %s: number of further alerts.
-#: includes/Reports/Digest.php:213
+#: includes/Reports/Digest.php:255
 #, php-format
 msgid "and %s more"
 msgid_plural "and %s more"
@@ -2993,7 +2993,7 @@ msgstr[0] "et %s de plus"
 msgstr[1] "et %s de plus"
 
 #. translators: %s: number of sites.
-#: includes/Reports/Digest.php:229
+#: includes/Reports/Digest.php:271
 #, php-format
 msgid "%s site created"
 msgid_plural "%s sites created"
@@ -3001,7 +3001,7 @@ msgstr[0] "%s site créé"
 msgstr[1] "%s sites créés"
 
 #. translators: %s: number of sites.
-#: includes/Reports/Digest.php:231
+#: includes/Reports/Digest.php:273
 #, php-format
 msgid "%s site deleted"
 msgid_plural "%s sites deleted"
@@ -3009,7 +3009,7 @@ msgstr[0] "%s site supprimé"
 msgstr[1] "%s sites supprimés"
 
 #. translators: %s: number of plugins.
-#: includes/Reports/Digest.php:233
+#: includes/Reports/Digest.php:275
 #, php-format
 msgid "%s plugin activated"
 msgid_plural "%s plugins activated"
@@ -3017,7 +3017,7 @@ msgstr[0] "%s extension activée"
 msgstr[1] "%s extensions activées"
 
 #. translators: %s: number of plugins.
-#: includes/Reports/Digest.php:235
+#: includes/Reports/Digest.php:277
 #, php-format
 msgid "%s plugin deactivated"
 msgid_plural "%s plugins deactivated"
@@ -3025,20 +3025,20 @@ msgstr[0] "%s extension désactivée"
 msgstr[1] "%s extensions désactivées"
 
 #. translators: %s: number of themes.
-#: includes/Reports/Digest.php:237
+#: includes/Reports/Digest.php:279
 #, php-format
 msgid "%s theme switched"
 msgid_plural "%s themes switched"
 msgstr[0] "%s thème changé"
 msgstr[1] "%s thèmes changés"
 
-#: includes/Reports/Digest.php:245
+#: includes/Reports/Digest.php:287
 msgid "No other change."
 msgstr "Aucun autre changement."
 
 #. translators: %d: number of days.
-#: includes/Reports/Digest.php:256
-#: includes/Reports/Digest.php:277
+#: includes/Reports/Digest.php:298
+#: includes/Reports/Digest.php:319
 #, php-format
 msgid "Changes of the last %d day."
 msgid_plural "Changes of the last %d days."
@@ -3046,7 +3046,7 @@ msgstr[0] "Changements du dernier jour (%d)."
 msgstr[1] "Changements des %d derniers jours."
 
 #. translators: %s: address of the Multisite Radar overview page.
-#: includes/Reports/Digest.php:285
+#: includes/Reports/Digest.php:327
 #, php-format
 msgid "Open Multisite Radar: %s"
 msgstr "Ouvrir Multisite Radar : %s"
