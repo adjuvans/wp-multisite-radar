@@ -29,7 +29,9 @@
 		"version:check": "node bin/version.mjs check",
 		"version:set": "node bin/version.mjs set",
 		"plugin-zip": "make dist",
-		"wporg:assets": "node bin/wporg-assets/render.mjs"
+		"wporg:assets": "node bin/wporg-assets/render.mjs",
+		"screenshots:seed": "wp-env run tests-cli sh wp-content/plugins/multisite-radar/tests/e2e/screenshots/seed.sh",
+		"screenshots": "WP_BASE_URL=http://localhost:${WP_ENV_TESTS_PORT:-8889} wp-scripts test-playwright --config playwright.screenshots.config.js"
 	},
 	"dependencies": {
 		"@wordpress/a11y": "4.56.0",

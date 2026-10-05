@@ -24,6 +24,7 @@
 /vitest.config.mjs
 /eslint.config.cjs
 /playwright.config.js
+/playwright.screenshots.config.js
 /.wp-env.json
 /artifacts
 /CHANGELOG.md
