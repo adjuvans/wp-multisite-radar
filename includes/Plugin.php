@@ -50,6 +50,7 @@ use MultisiteRadar\Rest\ReportsController;
 use MultisiteRadar\Rest\ScanController;
 use MultisiteRadar\Rest\SettingsController;
 use MultisiteRadar\Rest\SitesController;
+use MultisiteRadar\Rest\SitesMenuController;
 use MultisiteRadar\Rest\ThemesController;
 use MultisiteRadar\Rest\UsersController;
 use MultisiteRadar\Scan\BatchRunner;
@@ -211,6 +212,7 @@ final class Plugin {
 		Installer::maybe_upgrade();
 		$controllers = [
 			new SitesController( $this->sites_query(), $this->site_users_query() ),
+			new SitesMenuController( $this->sites_menu(), $this->sites_list_cache() ),
 			new PluginsController( $this->plugins_query(), $this->sites_query() ),
 			new ThemesController( $this->themes_query(), $this->sites_query() ),
 			new UsersController( $this->users_query() ),

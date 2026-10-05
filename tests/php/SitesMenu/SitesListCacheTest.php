@@ -112,4 +112,30 @@ final class SitesListCacheTest extends TestCase {
 		$this->assertFalse( get_site_transient( SitesListCache::name( $network ) ), 'A failed build is not cached.' );
 		$this->assertContains( $site, wp_list_pluck( $cache->get(), 'id' ) );
 	}
+
+	public function test_sites_are_read_in_chunks_of_the_given_size(): void {
+		$titles = [ 'Chunk A', 'Chunk B', 'Chunk C', 'Chunk D', 'Chunk E' ];
+		foreach ( $titles as $title ) {
+			self::factory()->blog->create( [ 'title' => $title ] );
+		}
+		$queries = 0;
+		$count   = static function ( string $query ) use ( &$queries ): string {
+			if ( false !== strpos( $query, "option_name IN ('blogname', 'home')" ) ) {
+				++$queries;
+			}
+			return $query;
+		};
+		add_filter( 'query', $count );
+		try {
+			$sites = ( new SitesListCache( 2 ) )->build( get_current_network_id() );
+		} finally {
+			remove_filter( 'query', $count );
+		}
+
+		$this->assertSame( (int) ceil( count( $sites ) / 2 ), $queries, 'One query per chunk of 2 sites.' );
+		$this->assertSame( ( new SitesListCache() )->build( get_current_network_id() ), $sites );
+		foreach ( $titles as $title ) {
+			$this->assertContains( $title, wp_list_pluck( $sites, 'name' ) );
+		}
+	}
 }

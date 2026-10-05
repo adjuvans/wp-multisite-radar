@@ -21,6 +21,15 @@ final class SitesListCache {
 
 	private const CHUNK = 100;
 
+	private int $chunk;
+
+	/**
+	 * @param int $chunk Sites lus par requête (100 ; les tests en passent moins).
+	 */
+	public function __construct( int $chunk = self::CHUNK ) {
+		$this->chunk = max( 1, $chunk );
+	}
+
 	public static function name( int $network_id ): string {
 		return self::PREFIX . $network_id;
 	}
@@ -75,7 +84,7 @@ final class SitesListCache {
 		$blogs = (array) $blogs;
 
 		$sites = [];
-		foreach ( array_chunk( $blogs, self::CHUNK ) as $chunk ) {
+		foreach ( array_chunk( $blogs, $this->chunk ) as $chunk ) {
 			$options = $this->read_options( $chunk );
 			foreach ( $chunk as $blog ) {
 				$id = (int) $blog['blog_id'];

@@ -16,7 +16,6 @@ final class Block {
 
 	private SitesListCache $cache;
 	private string $dir;
-	private ?WP_Block_Type $type = null;
 
 	public function __construct( SitesListCache $cache, string $dir ) {
 		$this->cache = $cache;
@@ -34,31 +33,10 @@ final class Block {
 		if ( ! $type instanceof WP_Block_Type ) {
 			return false;
 		}
-		$this->type = $type;
 		foreach ( (array) $type->editor_script_handles as $handle ) {
 			wp_set_script_translations( $handle, 'multisite-radar', MSRADAR_DIR . 'languages' );
 		}
-		add_action( 'enqueue_block_editor_assets', [ $this, 'editor_data' ] );
 		return true;
-	}
-
-	/**
-	 * Sites proposés dans les réglages du bloc : identifiant et nom des sites publics, déjà visibles de tous.
-	 */
-	public function editor_data(): void {
-		if ( null === $this->type ) {
-			return;
-		}
-		$sites = array_map(
-			static fn ( array $site ): array => [
-				'id'   => (int) $site['id'],
-				'name' => Renderer::label( $site ),
-			],
-			$this->cache->get()
-		);
-		foreach ( (array) $this->type->editor_script_handles as $handle ) {
-			wp_add_inline_script( $handle, 'window.msradarSitesList = ' . wp_json_encode( $sites, JSON_HEX_TAG | JSON_HEX_AMP ) . ';', 'before' );
-		}
 	}
 
 	/**
