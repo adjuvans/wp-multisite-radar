@@ -55,6 +55,35 @@ final class AuthorsRepositoryTest extends TestCase {
 		$this->assertFalse( $this->authors()->is_empty() );
 	}
 
+	public function test_a_failed_write_leaves_the_site_not_analysed_and_throws(): void {
+		global $wpdb;
+		$site = self::factory()->blog->create();
+		$this->authors()->replace_for_site( $site, [ 7 => 1 ] );
+		// Seule l'écriture d'un auteur (user_id > 0) échoue ; la ligne témoin passerait.
+		$pattern = '/^INSERT INTO `' . preg_quote( Schema::authors_table(), '/' ) . '` .* VALUES \\(\\d+, [1-9]/';
+		$break   = static function ( string $query ) use ( $pattern ): string {
+			return 1 === preg_match( $pattern, $query ) ? 'INSERT INTO msradar_missing_table VALUES (1)' : $query;
+		};
+		$before  = wp_cache_get_last_changed( AuthorsRepository::CACHE_GROUP );
+		usleep( 2 );
+
+		$suppress = $wpdb->suppress_errors( true );
+		add_filter( 'query', $break );
+		$thrown = null;
+		try {
+			$this->authors()->replace_for_site( $site, [ 7 => 3 ] );
+		} catch ( \RuntimeException $error ) {
+			$thrown = $error;
+		} finally {
+			remove_filter( 'query', $break );
+			$wpdb->suppress_errors( $suppress );
+		}
+
+		$this->assertInstanceOf( \RuntimeException::class, $thrown );
+		$this->assertFalse( $this->authors()->is_analysed( $site ), 'A site whose counts are partial is not analysed.' );
+		$this->assertNotSame( $before, wp_cache_get_last_changed( AuthorsRepository::CACHE_GROUP ), 'The lists built before the failure are not served again.' );
+	}
+
 	public function test_every_write_renews_the_cache_generation(): void {
 		$site   = self::factory()->blog->create();
 		$before = wp_cache_get_last_changed( AuthorsRepository::CACHE_GROUP );

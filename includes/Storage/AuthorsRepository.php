@@ -5,7 +5,7 @@ use MultisiteRadar\Install\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Multisite Radar's own network table: no WordPress API reads or writes it, and the users query caches what it needs.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Multisite Radar's own network table: no WordPress API reads or writes it; UsersQuery caches the lists built from it.
 
 /**
  * Contenus publiés par auteur, site par site (table msradar_site_authors), relevés à chaque analyse.
@@ -20,39 +20,54 @@ final class AuthorsRepository {
 	public const CACHE_GROUP = 'msradar_authors';
 
 	/**
+	 * Les auteurs d'abord, la ligne témoin en dernier : si une écriture échoue, le site reste « pas encore relevé »
+	 * plutôt que de passer pour relevé avec des nombres partiels. La génération du cache change même en cas d'échec,
+	 * les anciennes lignes ayant déjà été supprimées.
+	 *
 	 * @param array<int, int> $authors Identifiant de l'auteur => nombre de contenus publiés.
+	 * @throws \RuntimeException Si une écriture échoue.
 	 */
 	public function replace_for_site( int $site_id, array $authors ): void {
 		global $wpdb;
 		$table = Schema::authors_table();
-		self::check( $wpdb->delete( $table, [ 'site_id' => $site_id ], [ '%d' ] ) );
+		try {
+			self::check( $wpdb->delete( $table, [ 'site_id' => $site_id ], [ '%d' ] ) );
 
-		$rows = [ 0 => 0 ];
-		foreach ( $authors as $user_id => $published ) {
-			if ( (int) $user_id > 0 && (int) $published > 0 ) {
-				$rows[ (int) $user_id ] = (int) $published;
+			$rows = [];
+			foreach ( $authors as $user_id => $published ) {
+				if ( (int) $user_id > 0 && (int) $published > 0 ) {
+					$rows[ (int) $user_id ] = (int) $published;
+				}
 			}
+			$rows[0] = 0;
+			foreach ( $rows as $user_id => $published ) {
+				self::check(
+					$wpdb->insert(
+						$table,
+						[
+							'site_id'   => $site_id,
+							'user_id'   => $user_id,
+							'published' => $published,
+						],
+						[ '%d', '%d', '%d' ]
+					)
+				);
+			}
+		} finally {
+			wp_cache_set_last_changed( self::CACHE_GROUP );
 		}
-		foreach ( $rows as $user_id => $published ) {
-			self::check(
-				$wpdb->insert(
-					$table,
-					[
-						'site_id'   => $site_id,
-						'user_id'   => $user_id,
-						'published' => $published,
-					],
-					[ '%d', '%d', '%d' ]
-				)
-			);
-		}
-		wp_cache_set_last_changed( self::CACHE_GROUP );
 	}
 
+	/**
+	 * @throws \RuntimeException Si la suppression échoue.
+	 */
 	public function delete_for_site( int $site_id ): void {
 		global $wpdb;
-		self::check( $wpdb->delete( Schema::authors_table(), [ 'site_id' => $site_id ], [ '%d' ] ) );
-		wp_cache_set_last_changed( self::CACHE_GROUP );
+		try {
+			self::check( $wpdb->delete( Schema::authors_table(), [ 'site_id' => $site_id ], [ '%d' ] ) );
+		} finally {
+			wp_cache_set_last_changed( self::CACHE_GROUP );
+		}
 	}
 
 	/**
