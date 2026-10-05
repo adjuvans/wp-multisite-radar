@@ -85,6 +85,55 @@ final class EventsQueryTest extends TestCase {
 		$this->assertSame( 'Site deleted.', $item['message'] );
 	}
 
+	public function test_the_other_events_of_a_deleted_site_show_the_identity_noted_at_its_deletion(): void {
+		$this->insert( 'alert_raised', 4698, 'no_users', [], '2026-09-10 10:00:00' );
+		$this->insert( 'plugin_activated', 4698, 'alpha/alpha.php', [], '2026-09-10 10:00:01' );
+		$this->insert( 'site_deleted', 4698, 'example.org/rh/', [ 'name' => 'Blog RH' ], '2026-09-10 10:00:02' );
+
+		$items = $this->plugin()->events_query()->list( [ 'site' => 4698 ] )['items'];
+
+		$this->assertCount( 3, $items );
+		foreach ( $items as $item ) {
+			$this->assertSame( 4698, $item['site']['id'] );
+			$this->assertSame( 'Blog RH', $item['site']['name'] );
+			$this->assertSame( 'http://example.org/rh/', $item['site']['url'] );
+			$this->assertSame( '', $item['site']['admin_url'] );
+		}
+	}
+
+	public function test_a_site_deleted_before_its_first_analysis_keeps_the_name_of_its_creation(): void {
+		$this->insert( 'site_created', 4697, 'example.org/old/', [ 'name' => 'Old' ], '2026-09-10 10:00:00' );
+		$this->insert( 'plugin_activated', 4697, 'alpha/alpha.php', [], '2026-09-10 10:00:01' );
+		$this->insert( 'site_deleted', 4697, 'example.org/old/', [ 'name' => '' ], '2026-09-10 10:00:02' );
+
+		$items = $this->plugin()->events_query()->list( [ 'site' => 4697 ] )['items'];
+
+		$this->assertCount( 3, $items );
+		$this->assertSame( [ 'Old', 'Old', 'Old' ], array_column( array_column( $items, 'site' ), 'name' ) );
+		$this->assertSame( 'Old', $items[0]['label'], 'The deletion names the site as its label too.' );
+	}
+
+	public function test_the_identity_of_another_network_is_not_used(): void {
+		$this->insert( 'alert_raised', 4696, 'no_users' );
+		$this->plugin()->events()->insert(
+			[
+				[
+					'network_id' => 2,
+					'site_id'    => 4696,
+					'type'       => 'site_deleted',
+					'subject'    => 'other.example.org/',
+					'meta'       => [ 'name' => 'Other network' ],
+					'created_at' => '2026-09-10 00:00:00',
+				],
+			]
+		);
+
+		$site = $this->plugin()->events_query()->list( [ 'site' => 4696 ] )['items'][0]['site'];
+
+		$this->assertSame( 'Site #4696', $site['name'] );
+		$this->assertSame( '', $site['url'] );
+	}
+
 	public function test_theme_and_alert_events_read_as_sentences(): void {
 		$this->insert( 'theme_switched', 4601, 'msradar-missing-child', [ 'from' => 'msradar-missing-parent' ], '2026-09-10 10:00:01' );
 		$this->insert( 'alert_raised', 4601, 'no_users', [ 'severity' => 'error' ], '2026-09-10 10:00:02' );

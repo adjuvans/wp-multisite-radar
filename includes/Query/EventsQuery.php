@@ -48,8 +48,8 @@ final class EventsQuery {
 	 * @throws \RuntimeException Si la lecture échoue.
 	 */
 	public function list( array $args ): array {
-		$args    = array_merge( self::defaults(), $args );
-		$result  = $this->events->query(
+		$args       = array_merge( self::defaults(), $args );
+		$result     = $this->events->query(
 			[
 				'network_id' => get_current_network_id(),
 				'since'      => null === $args['since'] ? null : (string) $args['since'],
@@ -59,11 +59,14 @@ final class EventsQuery {
 				'per_page'   => min( 100, max( 1, (int) $args['per_page'] ) ),
 			]
 		);
-		$records = $this->sites->find_many( array_values( array_unique( array_filter( array_column( $result['items'], 'site_id' ) ) ) ) );
+		$site_ids   = array_values( array_unique( array_filter( array_column( $result['items'], 'site_id' ) ) ) );
+		$records    = $this->sites->find_many( $site_ids );
+		$gone       = array_values( array_diff( $site_ids, array_keys( $records ) ) );
+		$identities = $this->events->identities( get_current_network_id(), $gone );
 		return [
 			'items' => array_map(
-				function ( array $event ) use ( $records ): array {
-					return $this->format( $event, $records[ $event['site_id'] ] ?? null );
+				function ( array $event ) use ( $records, $identities ): array {
+					return $this->format( $event, $records[ $event['site_id'] ] ?? null, $identities[ $event['site_id'] ] ?? null );
 				},
 				$result['items']
 			),
@@ -80,10 +83,14 @@ final class EventsQuery {
 	}
 
 	/**
-	 * @param array $event Élément de EventsRepository::query().
+	 * @param array                                    $event    Élément de EventsRepository::query().
+	 * @param array{name: string, subject: string}|null $identity Identité d'un site supprimé, relevée sur ses autres événements.
 	 * @return array{id: int, type: string, site: array|null, subject: string, label: string, message: string, created_gmt: string}
 	 */
-	public function format( array $event, ?SiteRecord $record ): array {
+	public function format( array $event, ?SiteRecord $record, ?array $identity = null ): array {
+		if ( null !== $identity && null === $record ) {
+			$event = self::with_identity( $event, $identity );
+		}
 		$label = $this->label( $event );
 		return [
 			'id'          => (int) $event['id'],
@@ -97,6 +104,28 @@ final class EventsQuery {
 	}
 
 	/**
+	 * Complète un événement d'un site supprimé avec le nom et l'adresse notés par ses événements de création ou de
+	 * suppression. Le sujet des événements de site est déjà l'adresse : on ne le remplace que s'il est vide.
+	 *
+	 * @param array                                    $event    Événement.
+	 * @param array{name: string, subject: string} $identity Identité du site.
+	 */
+	private static function with_identity( array $event, array $identity ): array {
+		$is_site_event = in_array( $event['type'], [ 'site_created', 'site_deleted' ], true );
+		if ( '' === trim( (string) ( $event['meta']['name'] ?? '' ) ) && '' !== $identity['name'] ) {
+			$event['meta']['name'] = $identity['name'];
+		}
+		if ( $is_site_event ) {
+			if ( '' === (string) $event['subject'] ) {
+				$event['subject'] = $identity['subject'];
+			}
+		} else {
+			$event['meta']['address'] = $identity['subject'];
+		}
+		return $event;
+	}
+
+	/**
 	 * Identité actuelle du site, celle notée dans l'événement s'il n'existe plus, null pour le réseau entier.
 	 */
 	private function site( array $event, ?SiteRecord $record ): ?array {
@@ -107,13 +136,14 @@ final class EventsQuery {
 		if ( null !== $record ) {
 			return SitesQuery::identity( $record );
 		}
-		$name   = PlainText::from_html( (string) ( $event['meta']['name'] ?? '' ) );
-		$is_url = in_array( $event['type'], [ 'site_created', 'site_deleted' ], true ) && '' !== $event['subject'];
+		$name          = PlainText::from_html( (string) ( $event['meta']['name'] ?? '' ) );
+		$is_site_event = in_array( $event['type'], [ 'site_created', 'site_deleted' ], true );
+		$address       = $is_site_event ? (string) $event['subject'] : (string) ( $event['meta']['address'] ?? '' );
 		return [
 			'id'        => $site_id,
 			/* translators: %d: site ID. */
 			'name'      => '' !== trim( $name ) ? $name : sprintf( __( 'Site #%d', 'multisite-radar' ), $site_id ),
-			'url'       => $is_url ? set_url_scheme( 'http://' . $event['subject'] ) : '',
+			'url'       => '' !== $address ? set_url_scheme( 'http://' . $address ) : '',
 			'admin_url' => '',
 		];
 	}

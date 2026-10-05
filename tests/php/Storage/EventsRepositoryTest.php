@@ -110,6 +110,42 @@ final class EventsRepositoryTest extends TestCase {
 		$this->assertSame( [ 'alert_raised' => 1 ], $this->repository()->counts( 78, '2026-01-01 00:00:00' ), 'The other network keeps its events.' );
 	}
 
+	public function test_identities_come_from_the_latest_named_site_event_of_the_network(): void {
+		$this->repository()->insert(
+			[
+				$this->event( 'site_created', 6, '2026-08-01 10:00:00', [ 'subject' => 'old.example.org/', 'meta' => [ 'name' => 'Old' ] ] ),
+				$this->event( 'site_deleted', 6, '2026-09-01 10:00:00', [ 'subject' => 'old.example.org/', 'meta' => [ 'name' => '' ] ] ),
+				$this->event( 'site_created', 7, '2026-08-01 10:00:00', [ 'subject' => 'first.example.org/', 'meta' => [ 'name' => 'First' ] ] ),
+				$this->event( 'site_deleted', 7, '2026-09-01 10:00:00', [ 'subject' => 'last.example.org/rh/', 'meta' => [ 'name' => 'Last' ] ] ),
+				$this->event( 'site_deleted', 8, '2026-09-01 10:00:00', [ 'subject' => 'noname.example.org/' ] ),
+				$this->event( 'alert_raised', 9, '2026-09-01 10:00:00', [ 'subject' => 'no_users' ] ),
+				$this->event( 'site_deleted', 10, '2026-09-01 10:00:00', [ 'network_id' => 78, 'subject' => 'other.example.org/', 'meta' => [ 'name' => 'Other' ] ] ),
+			]
+		);
+
+		$identities = $this->repository()->identities( self::NETWORK, [ 6, 7, 8, 9, 10 ] );
+		ksort( $identities );
+		$this->assertSame(
+			[
+				6  => [
+					'name'    => 'Old',
+					'subject' => 'old.example.org/',
+				],
+				7  => [
+					'name'    => 'Last',
+					'subject' => 'last.example.org/rh/',
+				],
+				8  => [
+					'name'    => '',
+					'subject' => 'noname.example.org/',
+				],
+			],
+			$identities,
+			'Site 9 has no site event, site 10 belongs to another network.'
+		);
+		$this->assertSame( [], $this->repository()->identities( self::NETWORK, [] ) );
+	}
+
 	public function test_a_long_subject_is_cut_to_the_column_size(): void {
 		$this->repository()->insert( [ $this->event( 'site_created', 5, '2026-09-01 10:00:00', [ 'subject' => str_repeat( 'é', 300 ) ] ) ] );
 

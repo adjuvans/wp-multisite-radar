@@ -108,6 +108,52 @@ final class EventsRepository {
 	}
 
 	/**
+	 * Identité (nom et adresse) de sites qui n'existent plus, relevée sur leurs événements de création et de
+	 * suppression : le plus récent qui porte un nom donne le nom et son adresse ; sans nom, l'adresse du plus récent.
+	 *
+	 * @param int   $network_id Réseau.
+	 * @param int[] $site_ids   Sites cherchés.
+	 * @return array<int, array{name: string, subject: string}> Par ID de site ; les sites sans événement de ce type sont omis.
+	 * @throws \RuntimeException Si la lecture échoue.
+	 */
+	public function identities( int $network_id, array $site_ids ): array {
+		global $wpdb;
+		$site_ids = array_values( array_unique( array_filter( array_map( 'intval', $site_ids ) ) ) );
+		if ( [] === $site_ids ) {
+			return [];
+		}
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- La liste ne contient que des placeholders.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- Parameters are spread via array_merge ; placeholders match.
+				"SELECT id, network_id, site_id, type, subject, meta, created_at FROM %i WHERE network_id = %d AND type IN ('site_deleted','site_created') AND site_id IN (" . implode( ',', array_fill( 0, count( $site_ids ), '%d' ) ) . ') ORDER BY created_at DESC, id DESC',
+				array_merge( [ Schema::events_table(), $network_id ], $site_ids )
+			),
+			ARRAY_A
+		);
+		// phpcs:enable
+		self::check_read();
+
+		$identities = [];
+		foreach ( (array) $rows as $row ) {
+			$event   = self::row( $row );
+			$site_id = $event['site_id'];
+			$name    = trim( (string) ( $event['meta']['name'] ?? '' ) );
+			if ( ! isset( $identities[ $site_id ] ) ) {
+				$identities[ $site_id ] = [
+					'name'    => $name,
+					'subject' => $event['subject'],
+				];
+			} elseif ( '' === $identities[ $site_id ]['name'] && '' !== $name ) {
+				$identities[ $site_id ] = [
+					'name'    => $name,
+					'subject' => $event['subject'],
+				];
+			}
+		}
+		return $identities;
+	}
+
+	/**
 	 * @return int Nombre d'événements supprimés (antérieurs à $before, GMT).
 	 * @throws \RuntimeException Si la suppression échoue.
 	 */
