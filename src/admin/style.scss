@@ -459,3 +459,35 @@ $msradar-dashes: (
 	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 	gap: 16px;
 }
+
+// DataViews assemblé par le plugin (components/data-views/radar-data-views).
+.msradar-dataviews__toolbar {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.msradar-dataviews__search,
+.msradar-dataviews__config {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.msradar-dataviews__config {
+	flex-shrink: 0;
+}
+
+.msradar-dataviews__bulk {
+	padding: 0 24px 12px;
+}
+
+// Zone du tableau : reçoit le clic sur une ligne, sans boîte propre.
+.msradar-dataviews__layout {
+	display: contents;
+}
+
+.msradar-dataviews__layout.is-clickable .dataviews-view-table tbody tr.dataviews-view-table__row {
+	cursor: pointer;
+}
