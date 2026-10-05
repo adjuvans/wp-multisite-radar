@@ -32,6 +32,7 @@ Le `Makefile` regroupe les commandes ci-dessous (`make` seul affiche l'aide) :
 make install          # dépendances npm et Composer
 make i18n             # catalogue .pot, vérification et compilation des traductions (WP-CLI)
 make dist             # dist/multisite-radar-<version>.zip, filtré par .distignore
+make plugin-check     # Plugin Check (wp-env démarré) sur les fichiers du paquet : zéro erreur et zéro avertissement
 make check            # lint + tests PHPUnit et Vitest
 make e2e WP_ENV_PORT=8890   # bout en bout ; make e2e-stop pour arrêter wp-env
 make bench            # banc de performance (BENCH_DB_*, BENCH_SITES=1000) ; résultats dans docs/benchmarks.md

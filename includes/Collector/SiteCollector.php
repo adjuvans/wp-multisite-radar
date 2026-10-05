@@ -9,6 +9,8 @@ use RuntimeException;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Aggregated reads of the core tables of each site, one query per measure; the results are stored in the msradar_sites table, which is the cache.
+
 /**
  * Construit un SiteRecord par requêtes SQL agrégées sur les tables d'un site, sans charger ses plugins.
  */

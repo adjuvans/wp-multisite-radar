@@ -3,6 +3,8 @@ namespace MultisiteRadar\Scan;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Atomic lock row in the options table of the main site: the options API cannot compare and swap, and a cached value would defeat the lock.
+
 /**
  * Verrou réseau pour qu'une seule analyse tourne à la fois (cron, REST, WP-CLI).
  * Stocké dans la table options du site principal, dont l'index unique rend la prise atomique.

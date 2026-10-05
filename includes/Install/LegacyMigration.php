@@ -7,6 +7,8 @@ use MultisiteRadar\Support\MainSite;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-off migration of the 1.x options and menu items, by batches.
+
 /**
  * Reprise d'une installation Network Plugin Utilities 1.x : réglages, caches, éléments de menu.
  * S'exécute une seule fois. Les éléments de menu sont convertis par lots de sites, via des événements cron enchaînés.

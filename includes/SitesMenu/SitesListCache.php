@@ -6,6 +6,8 @@ use WP_Site;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Bulk read of wp_blogs and of the name and address of every public site, without switch_to_blog(); the result is cached in a site transient.
+
 /**
  * Liste des sites publics du réseau (identifiant, nom, adresse, inscription), sans limite de nombre.
  *
@@ -134,13 +136,13 @@ final class SitesListCache {
 
 		$suppress = $wpdb->suppress_errors( true );
 		try {
-			$rows = (array) $wpdb->get_results( $wpdb->prepare( implode( ' UNION ALL ', $parts ), $params ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $parts only holds the fixed SELECT above, with placeholders.
+			$rows = (array) $wpdb->get_results( $wpdb->prepare( implode( ' UNION ALL ', $parts ), $params ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $parts only holds the fixed SELECT above, with placeholders.
 			// empty() et non une comparaison stricte avec '' : PHPStan type last_error sans chaîne vide.
 			if ( ! empty( $wpdb->last_error ) ) {
 				$rows = [];
 				foreach ( $blogs as $blog ) {
 					$id     = (int) $blog['blog_id'];
-					$single = $wpdb->get_results( $wpdb->prepare( $select, $id, $wpdb->get_blog_prefix( $id ) . 'options', 'blogname', 'home' ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fixed SELECT with placeholders.
+					$single = $wpdb->get_results( $wpdb->prepare( $select, $id, $wpdb->get_blog_prefix( $id ) . 'options', 'blogname', 'home' ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SELECT with placeholders.
 					// Même raison que plus haut : empty() plutôt que '' === last_error.
 					if ( empty( $wpdb->last_error ) ) {
 						$rows = array_merge( $rows, (array) $single );

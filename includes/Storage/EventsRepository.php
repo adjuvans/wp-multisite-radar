@@ -5,6 +5,8 @@ use MultisiteRadar\Install\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Multisite Radar's own network tables: no WordPress API reads or writes them, and the query services cache what they need.
+
 /**
  * Tout le SQL de la table msradar_events : le journal des changements du réseau (spec §3.1, lot 3).
  */
@@ -68,7 +70,7 @@ final class EventsRepository {
 		$per_page = max( 1, (int) $args['per_page'] );
 		$offset   = ( max( 1, (int) $args['page'] ) - 1 ) * $per_page;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $where ne contient que des fragments fixes et des placeholders.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $where ne contient que des fragments fixes et des placeholders.
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where}", array_merge( [ $table ], $params ) )
 		);
@@ -81,7 +83,7 @@ final class EventsRepository {
 			ARRAY_A
 		);
 		self::check_read();
-		// phpcs:enable
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		return [
 			'items' => array_map( [ self::class, 'row' ], (array) $rows ),
@@ -130,7 +132,7 @@ final class EventsRepository {
 			),
 			ARRAY_A
 		);
-		// phpcs:enable
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		self::check_read();
 
 		$identities = [];

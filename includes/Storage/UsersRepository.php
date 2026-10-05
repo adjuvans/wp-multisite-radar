@@ -3,6 +3,8 @@ namespace MultisiteRadar\Storage;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Multisite Radar's own network tables: no WordPress API reads or writes them, and the query services cache what they need.
+
 /**
  * SQL des comptes de l'installation (tables globales users, usermeta, blogs) et de leur nombre de sites.
  */
@@ -71,7 +73,7 @@ final class UsersRepository {
 		$per_page  = (int) $args['per_page'];
 		$offset    = ( (int) $args['page'] - 1 ) * $per_page;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $join, $from et $condition ne contiennent que des fragments fixes et des placeholders ; $sort vient d'une liste blanche ; $direction vaut ASC ou DESC.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $join, $from et $condition ne contiennent que des fragments fixes et des placeholders ; $sort vient d'une liste blanche ; $direction vaut ASC ou DESC.
 		if ( $derived ) {
 			// Filtre d'appartenance ou tri par nombre de sites : la table dérivée agrège les appartenances de tous les comptes.
 			$from   = "%i AS u LEFT JOIN (SELECT m.user_id, COUNT(DISTINCT b.blog_id) AS sites_count FROM %i AS m {$join} GROUP BY m.user_id) AS c ON c.user_id = u.ID";
@@ -118,7 +120,7 @@ final class UsersRepository {
 				}
 			}
 		}
-		// phpcs:enable
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		return [
 			'items' => array_map(

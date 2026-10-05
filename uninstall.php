@@ -7,6 +7,8 @@
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Drops the plugin's own tables and deletes its data on uninstall.
+
 if ( ! is_multisite() ) {
 	return;
 }

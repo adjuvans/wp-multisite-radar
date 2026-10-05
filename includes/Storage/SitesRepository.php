@@ -5,6 +5,8 @@ use MultisiteRadar\Install\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Multisite Radar's own network tables: no WordPress API reads or writes them, and the query services cache what they need.
+
 /**
  * Tout le SQL de la table msradar_sites.
  */
@@ -363,7 +365,7 @@ final class SitesRepository {
 		$per_page  = (int) $args['per_page'];
 		$offset    = ( (int) $args['page'] - 1 ) * $per_page;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $union ne contient que des fragments fixes et des placeholders ; $order_by vient d'une liste blanche.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $union ne contient que des fragments fixes et des placeholders ; $order_by vient d'une liste blanche.
 		$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM ({$union}) AS pairs", $params ) );
 		self::check_read();
 		$rows = $wpdb->get_results(
@@ -371,7 +373,7 @@ final class SitesRepository {
 			ARRAY_A
 		);
 		self::check_read();
-		// phpcs:enable
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		return [
 			'items' => array_map(
@@ -464,7 +466,7 @@ final class SitesRepository {
 		$per_page = (int) $args['per_page'];
 		$offset   = ( (int) $args['page'] - 1 ) * $per_page;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $where ne contient que des fragments fixes et des placeholders ; $order vaut ASC ou DESC.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter -- $where ne contient que des fragments fixes et des placeholders ; $order vaut ASC ou DESC.
 		$total = (int) $wpdb->get_var(
 			$wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where}", array_merge( [ $table ], $params ) )
 		);
@@ -477,7 +479,7 @@ final class SitesRepository {
 			ARRAY_A
 		);
 		self::check_read();
-		// phpcs:enable
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		return [
 			'items' => array_map( [ SiteRecord::class, 'from_row' ], (array) $rows ),

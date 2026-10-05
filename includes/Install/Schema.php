@@ -3,6 +3,8 @@ namespace MultisiteRadar\Install;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Creates, upgrades and checks the plugin's own network tables.
+
 /**
  * Tables réseau du plugin (créées et mises à jour par dbDelta).
  */

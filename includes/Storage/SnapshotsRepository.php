@@ -5,6 +5,8 @@ use MultisiteRadar\Install\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Multisite Radar's own network tables: no WordPress API reads or writes them, and the query services cache what they need.
+
 /**
  * Tout le SQL de la table msradar_snapshots : une ligne par site analysé et par jour UTC (spec §3.1, lot 3).
  */

@@ -15,7 +15,7 @@ WP_BASE_URL       ?= http://localhost:$(WP_ENV_PORT)
 export WP_ENV_PORT WP_ENV_TESTS_PORT WP_BASE_URL
 
 .DEFAULT_GOAL := help
-.PHONY: help install build i18n dist deploy-test deploy-prod lint test check e2e e2e-stop bench version clean
+.PHONY: help install build i18n dist plugin-check deploy-test deploy-prod lint test check e2e e2e-stop bench version clean
 
 help: ## Affiche cette aide
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "} {printf "  %-12s %s\n", $$1, $$2}'
@@ -51,6 +51,15 @@ dist: node_modules ## Produit dist/multisite-radar-<version>.zip, traductions co
 	fi
 	cd $(DIST_DIR) && if command -v zip >/dev/null 2>&1; then zip -qr $(ZIP) $(SLUG); else python3 -m zipfile -c $(ZIP) $(SLUG); fi
 	@echo "Paquet : $(DIST_DIR)/$(ZIP)"
+
+plugin-check: build ## Plugin Check sur les fichiers du paquet, dans wp-env (démarré) ; échoue sur toute erreur ou tout avertissement
+	rm -rf $(DIST_DIR)/plugin-check
+	mkdir -p $(DIST_DIR)/plugin-check/$(SLUG)
+	rsync -a --exclude-from=.distignore ./ $(DIST_DIR)/plugin-check/$(SLUG)/
+	npm run --silent wp-env -- run tests-cli wp plugin install plugin-check --activate
+	npm run --silent wp-env -- run tests-cli wp plugin check wp-content/plugins/$(SLUG)/$(DIST_DIR)/plugin-check/$(SLUG) \
+		--format=csv --fields=file,line,type,code,message > $(DIST_DIR)/plugin-check.csv || true
+	node bin/plugin-check-report.mjs $(DIST_DIR)/plugin-check.csv
 
 .env:
 	@echo "Fichier .env absent : cp .env.example .env, puis le remplir." >&2; exit 1

@@ -132,6 +132,9 @@ jobs:
       - uses: wordpress/plugin-check-action@v1
         with:
           build-dir: /tmp/build/multisite-radar
+          # Tout avertissement fait échouer le job (écart E3 du plan M7). Une nouvelle version majeure de WordPress
+          # peut faire signaler « Tested up to » : mettre le readme à jour (docs/release.md).
+          strict: true
 
   e2e-ui:
     runs-on: ubuntu-latest
