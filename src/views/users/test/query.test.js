@@ -47,6 +47,7 @@ describe( 'users view state', () => {
 		expect( usersPrefsFromView( view ) ).toEqual( {
 			fields: [
 				'display_name',
+				'email',
 				'super_admin',
 				'sites_count',
 				'registered_gmt',
@@ -60,4 +61,26 @@ describe( 'users view state', () => {
 			'/multisite-radar/v1/users?membership=none&order=desc&orderby=registered&page=1&per_page=20&search=jo&super_admin=1'
 		);
 	} );
+} );
+
+test( 'the open account lives in the address', () => {
+	expect( parseUsersQuery( { user: '7' } ).user ).toBe( 7 );
+	expect( parseUsersQuery( { user: 'x' } ).user ).toBe( 0 );
+	expect(
+		serializeUsersState( { ...parseUsersQuery( {} ), user: 7 } ).user
+	).toBe( '7' );
+} );
+
+test( 'the e-mail is shown by default, and only the available columns are kept', () => {
+	const state = parseUsersQuery( {} );
+	expect( toUsersView( state, null, null ).fields ).toEqual( [
+		'display_name',
+		'email',
+		'super_admin',
+		'sites_count',
+		'registered_gmt',
+	] );
+	expect(
+		toUsersView( state, null, [ 'display_name', 'sites_count' ] ).fields
+	).toEqual( [ 'display_name', 'sites_count' ] );
 } );

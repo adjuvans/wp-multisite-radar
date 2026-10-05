@@ -1,4 +1,4 @@
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { formatNumber } from '../../utils/format';
 import { DateCell } from '../sites/fields';
 import { SUPER_ADMINS } from './query';
@@ -23,9 +23,35 @@ function membership( count ) {
 }
 
 /**
- * Champs DataViews de la liste des comptes. Les filtres « Sites » et « Super admin » sont appliqués par la route REST.
+ * Rôles d'un compte, du plus fréquent au moins fréquent : « Administrator on 3 sites, Editor on 1 site ».
+ *
+ * @param {Array} roles Liste de { label, sites } (GET /users).
  */
-export function getUsersFields() {
+export function rolesSummary( roles = [] ) {
+	return roles
+		.map( ( role ) =>
+			sprintf(
+				/* translators: 1: role name, 2: number of sites. */
+				_n(
+					'%1$s on %2$d site',
+					'%1$s on %2$d sites',
+					role.sites,
+					'multisite-radar'
+				),
+				role.label,
+				role.sites
+			)
+		)
+		.join( ', ' );
+}
+
+/**
+ * Champs DataViews de la liste des comptes. Les filtres « Sites » et « Super admin » sont appliqués par la route REST.
+ *
+ * @param {Object}  options
+ * @param {boolean} options.canSeeEmails Le compte connecté peut voir les e-mails.
+ */
+export function getUsersFields( { canSeeEmails = false } = {} ) {
 	const memberships = membershipLabels();
 	return [
 		{
@@ -38,8 +64,53 @@ export function getUsersFields() {
 		{
 			id: 'display_name',
 			type: 'text',
-			label: __( 'Name', 'multisite-radar' ),
+			label: __( 'Public name', 'multisite-radar' ),
 			filterBy: false,
+		},
+		...( canSeeEmails
+			? [
+					{
+						id: 'email',
+						type: 'text',
+						label: __( 'Email', 'multisite-radar' ),
+						filterBy: false,
+						render: ( { item } ) => item.email || '—',
+					},
+				]
+			: [] ),
+		{
+			id: 'full_name',
+			type: 'text',
+			label: __( 'First and last name', 'multisite-radar' ),
+			enableSorting: false,
+			filterBy: false,
+			getValue: ( { item } ) =>
+				[ item.first_name, item.last_name ]
+					.filter( Boolean )
+					.join( ' ' ),
+			render: ( { item } ) =>
+				[ item.first_name, item.last_name ]
+					.filter( Boolean )
+					.join( ' ' ) || '—',
+		},
+		{
+			id: 'roles',
+			type: 'text',
+			label: __( 'Roles', 'multisite-radar' ),
+			enableSorting: false,
+			filterBy: false,
+			getValue: ( { item } ) => rolesSummary( item.roles ),
+			render: ( { item } ) => rolesSummary( item.roles ) || '—',
+		},
+		{
+			id: 'published',
+			type: 'integer',
+			label: __( 'Published content', 'multisite-radar' ),
+			filterBy: false,
+			render: ( { item } ) =>
+				item.published === null || item.published === undefined
+					? '—'
+					: formatNumber( item.published ),
 		},
 		{
 			id: 'super_admin',

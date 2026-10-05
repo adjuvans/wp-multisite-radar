@@ -1,6 +1,7 @@
-import { useMemo, useState } from '@wordpress/element';
+import { useCallback, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { pencil } from '@wordpress/icons';
+import { info, pencil } from '@wordpress/icons';
+import { getConfig } from '../../admin/config';
 import { DataViews } from '../../components/data-views';
 import ErrorNotice from '../../components/error-notice';
 import Skeleton from '../../components/skeleton';
@@ -8,6 +9,7 @@ import { useDebouncedSave, usePreferences } from '../../hooks/use-preferences';
 import { useResource } from '../../hooks/use-resource';
 import { useUrlState } from '../../hooks/use-url-state';
 import { samePrefs } from '../../utils/view-query';
+import UserPanel from '../user-panel';
 import { getUsersFields } from './fields';
 import {
 	fromUsersView,
@@ -19,6 +21,7 @@ import {
 } from './query';
 
 export default function UsersView() {
+	const { canSeeEmails } = getConfig();
 	const [ state, setState ] = useUrlState(
 		parseUsersQuery,
 		serializeUsersState
@@ -31,23 +34,43 @@ export default function UsersView() {
 	const list = useResource(
 		usersPrefs ? usersPath( state, { users: usersPrefs } ) : null
 	);
-	const fields = useMemo( () => getUsersFields(), [] );
+	const fields = useMemo(
+		() => getUsersFields( { canSeeEmails } ),
+		[ canSeeEmails ]
+	);
+	const available = useMemo(
+		() => fields.map( ( field ) => field.id ),
+		[ fields ]
+	);
 	const view = useMemo(
-		() => toUsersView( state, usersPrefs ),
-		[ state, usersPrefs ]
+		() => toUsersView( state, usersPrefs, available ),
+		[ state, usersPrefs, available ]
+	);
+	const openUser = useCallback(
+		( item ) =>
+			setState( ( current ) => ( { ...current, user: item.id } ) ),
+		[ setState ]
 	);
 	const actions = useMemo(
 		() => [
 			{
+				id: 'open',
+				label: __( 'View the account', 'multisite-radar' ),
+				icon: info,
+				callback: ( [ item ] ) => openUser( item ),
+			},
+			{
 				id: 'edit',
 				label: __( 'Edit the account', 'multisite-radar' ),
 				icon: pencil,
-				isPrimary: true,
 				callback: ( [ item ] ) =>
 					window.location.assign( item.edit_url ),
 			},
 		],
-		[]
+		[ openUser ]
+	);
+	const openRow = ( list.data || [] ).find(
+		( item ) => item.id === state.user
 	);
 
 	const onChangeView = ( next ) => {
@@ -68,6 +91,7 @@ export default function UsersView() {
 				view={ view }
 				onChangeView={ onChangeView }
 				actions={ actions }
+				onClickItem={ openUser }
 				defaultLayouts={ { table: {} } }
 				paginationInfo={ {
 					totalItems: list.total || 0,
@@ -92,6 +116,19 @@ export default function UsersView() {
 					)
 				}
 			/>
+			{ state.user > 0 && (
+				<UserPanel
+					userId={ state.user }
+					title={
+						openRow
+							? openRow.display_name || openRow.login
+							: __( 'Account', 'multisite-radar' )
+					}
+					onClose={ () =>
+						setState( ( current ) => ( { ...current, user: 0 } ) )
+					}
+				/>
+			) }
 		</div>
 	);
 }

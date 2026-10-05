@@ -24,6 +24,7 @@ export const MEMBERSHIPS = [ 'none', 'several' ];
 export const SUPER_ADMINS = 'yes';
 export const DEFAULT_USER_FIELDS = [
 	'display_name',
+	'email',
 	'super_admin',
 	'sites_count',
 	'registered_gmt',
@@ -31,7 +32,9 @@ export const DEFAULT_USER_FIELDS = [
 export const FIELD_TO_ORDERBY = {
 	login: 'login',
 	display_name: 'display_name',
+	email: 'email',
 	sites_count: 'sites_count',
+	published: 'published',
 	registered_gmt: 'registered',
 };
 export const ORDERBY_TO_FIELD = Object.fromEntries(
@@ -44,6 +47,7 @@ export const ORDERBY_TO_FIELD = Object.fromEntries(
 export function parseUsersQuery( query ) {
 	const orderby = text( query, 'orderby' );
 	const membership = text( query, 'membership' );
+	const user = text( query, 'user' );
 	return {
 		search: trimAscii( text( query, 's' ) ),
 		page: page( query ),
@@ -51,6 +55,7 @@ export function parseUsersQuery( query ) {
 		order: text( query, 'order' ) === 'desc' ? 'desc' : 'asc',
 		membership: MEMBERSHIPS.includes( membership ) ? membership : '',
 		super_admin: text( query, 'super_admin' ) === '1',
+		user: /^\d+$/.test( user ) && Number( user ) > 0 ? Number( user ) : 0,
 	};
 }
 
@@ -97,10 +102,20 @@ export function serializeUsersState( state ) {
 	if ( state.super_admin ) {
 		out.super_admin = '1';
 	}
+	if ( state.user ) {
+		out.user = String( state.user );
+	}
 	return out;
 }
 
-export function toUsersView( state, usersPrefs ) {
+/**
+ * Vue DataViews de la liste des comptes.
+ *
+ * @param {Object}      state      État de la page.
+ * @param {Object|null} usersPrefs Préférences enregistrées.
+ * @param {string[]}    available  Identifiants des colonnes proposées (sans E-mail pour qui ne peut pas le voir) ; null : toutes.
+ */
+export function toUsersView( state, usersPrefs, available = null ) {
 	return {
 		type: 'table',
 		search: state.search,
@@ -119,9 +134,10 @@ export function toUsersView( state, usersPrefs ) {
 			},
 		] ),
 		titleField: 'login',
-		fields: usersPrefs?.fields?.length
+		fields: ( usersPrefs?.fields?.length
 			? usersPrefs.fields
-			: DEFAULT_USER_FIELDS,
+			: DEFAULT_USER_FIELDS
+		).filter( ( id ) => ! available || available.includes( id ) ),
 		layout: {},
 	};
 }
