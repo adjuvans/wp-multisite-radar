@@ -131,9 +131,14 @@ final class UsersQuery {
 		$analysed = $counted ? $this->authors->analysed_among( array_column( $sites, 'site_id' ) ) : [];
 		$labels   = self::role_labels();
 
-		$items = [];
+		// Le total ne compte que les sites dont le compte est membre, ceux que la fiche liste : un super-admin peut
+		// publier sur un site sans en être membre.
+		$items     = [];
+		$published = 0;
 		foreach ( $sites as $site ) {
-			$items[] = [
+			$on_site    = isset( $analysed[ $site['site_id'] ] ) ? ( $by_site[ $site['site_id'] ] ?? 0 ) : null;
+			$published += (int) $on_site;
+			$items[]    = [
 				'id'        => $site['site_id'],
 				'name'      => '' !== $site['name'] ? $site['name'] : $site['domain'] . untrailingslashit( $site['path'] ),
 				'admin_url' => '' !== $site['siteurl'] ? trailingslashit( $site['siteurl'] ) . 'wp-admin/' : get_admin_url( $site['site_id'] ),
@@ -144,7 +149,7 @@ final class UsersQuery {
 					],
 					$site['roles']
 				),
-				'published' => isset( $analysed[ $site['site_id'] ] ) ? ( $by_site[ $site['site_id'] ] ?? 0 ) : null,
+				'published' => $on_site,
 			];
 		}
 		usort(
@@ -164,7 +169,7 @@ final class UsersQuery {
 			'super_admin'    => in_array( $user['login'], self::super_admins(), true ),
 			'registered_gmt' => self::registered( $user['registered'] ),
 			'edit_url'       => network_admin_url( 'user-edit.php?user_id=' . $user['id'] ),
-			'published'      => $counted ? array_sum( $by_site ) : null,
+			'published'      => $counted ? $published : null,
 			'sites'          => array_slice( $items, 0, max( 1, $limit ) ),
 			'sites_total'    => count( $items ),
 		];

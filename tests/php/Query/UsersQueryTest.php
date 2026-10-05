@@ -278,6 +278,24 @@ final class UsersQueryTest extends TestCase {
 		$this->assertNull( $this->query()->get( 999999, true ) );
 	}
 
+	public function test_the_detail_total_adds_only_the_sites_of_the_account(): void {
+		global $wpdb;
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i', \MultisiteRadar\Install\Schema::authors_table() ) );
+		$this->assertNull( $this->query()->get( $this->multi, false )['published'], 'Nothing counted yet.' );
+
+		$elsewhere = self::factory()->blog->create();
+		$this->plugin()->authors()->replace_for_site( $this->site_a, [ $this->multi => 2 ] );
+		$this->plugin()->authors()->replace_for_site( $this->site_b, [ $this->multi => 3 ] );
+		// Un super-admin peut publier sur un site dont il n'est pas membre : la fiche ne liste pas ce site.
+		$this->plugin()->authors()->replace_for_site( $elsewhere, [ $this->multi => 4 ] );
+
+		$detail = $this->query()->get( $this->multi, false );
+
+		$this->assertNotContains( $elsewhere, array_column( $detail['sites'], 'id' ) );
+		$this->assertSame( 5, $detail['published'] );
+		$this->assertSame( $detail['published'], array_sum( array_column( $detail['sites'], 'published' ) ) );
+	}
+
 	public function test_the_detail_lists_a_bounded_number_of_sites_and_counts_them_all(): void {
 		$this->assertSame( 200, UsersQuery::PANEL_SITES );
 
