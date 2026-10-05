@@ -119,3 +119,21 @@ test( 'the compact list of one site has neither filter nor site column', () => {
 		screen.getByText( 'New alert: Site without users.' )
 	).toBeInTheDocument();
 } );
+
+test( 'several lists keep their own, reachable, type filters', () => {
+	const registry = createRegistry();
+	registry.register( createCoreStore( {} ) );
+	render(
+		<RegistryProvider value={ registry }>
+			<EventsList />
+			<EventsList perPage={ 5 } />
+		</RegistryProvider>
+	);
+
+	const filters = screen.getAllByRole( 'combobox', {
+		name: 'Kind of change',
+	} );
+
+	expect( filters ).toHaveLength( 2 );
+	expect( filters[ 0 ].id ).not.toBe( filters[ 1 ].id );
+} );

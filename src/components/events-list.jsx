@@ -1,4 +1,5 @@
 import { SelectControl } from '@wordpress/components';
+import { useInstanceId } from '@wordpress/compose';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { pageUrl } from '../admin/config';
@@ -69,6 +70,7 @@ export default function EventsList( {
 	perPage = 20,
 	compact = false,
 } ) {
+	const typeId = useInstanceId( EventsList, 'msradar-events-type' );
 	const [ page, setPage ] = useState( 1 );
 	const [ type, setType ] = useState( '' );
 	const events = useResource(
@@ -82,6 +84,7 @@ export default function EventsList( {
 
 	const filter = ! compact && (
 		<SelectControl
+			id={ typeId }
 			__next40pxDefaultSize
 			__nextHasNoMarginBottom
 			label={ __( 'Kind of change', 'multisite-radar' ) }

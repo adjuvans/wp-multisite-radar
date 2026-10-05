@@ -43,6 +43,7 @@ export default function ReportsView() {
 				<CardHeader>
 					<h2>{ __( 'Trends', 'multisite-radar' ) }</h2>
 					<SelectControl
+						id="msradar-reports-period"
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
 						label={ __( 'Period', 'multisite-radar' ) }

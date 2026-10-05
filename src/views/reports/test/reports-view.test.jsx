@@ -113,7 +113,7 @@ test( 'shows the trends of the network from the preloaded data', () => {
 test( 'another period asks for its trends', async () => {
 	setup();
 
-	fireEvent.change( screen.getByLabelText( 'Period' ), {
+	fireEvent.change( screen.getByRole( 'combobox', { name: 'Period' } ), {
 		target: { value: '30' },
 	} );
 
@@ -205,4 +205,43 @@ test( 'the digest settings are reserved to managers', () => {
 	expect(
 		screen.queryByRole( 'button', { name: 'Send a test e-mail to me' } )
 	).toBeNull();
+} );
+
+test( 'a failed test e-mail shows the error message', async () => {
+	apiFetch.mockRejectedValue( {
+		code: 'msradar_mail_failed',
+		message: 'The e-mail could not be sent.',
+	} );
+	const registry = setup();
+
+	await act( async () => {
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Send a test e-mail to me' } )
+		);
+	} );
+
+	expect(
+		registry
+			.select( noticesStore )
+			.getNotices()
+			.map( ( notice ) => notice.content )
+	).toContain( 'The e-mail could not be sent.' );
+} );
+
+test( 'a failed test e-mail without message shows a fallback text', async () => {
+	apiFetch.mockRejectedValue( {} );
+	const registry = setup();
+
+	await act( async () => {
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Send a test e-mail to me' } )
+		);
+	} );
+
+	expect(
+		registry
+			.select( noticesStore )
+			.getNotices()
+			.map( ( notice ) => notice.content )
+	).toContain( 'The test e-mail could not be sent.' );
 } );
