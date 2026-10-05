@@ -2,6 +2,7 @@
 namespace MultisiteRadar\Query;
 
 use MultisiteRadar\Alerts\Severity;
+use MultisiteRadar\Storage\EventsRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -170,6 +171,26 @@ final class Schemas {
 				'label'    => self::type( 'string' ),
 				'severity' => self::enum( [ Severity::ERROR, Severity::WARNING, Severity::INFO ] ),
 				'message'  => self::type( 'string' ),
+			]
+		);
+	}
+
+	/**
+	 * Un événement du journal (EventsQuery::format()). Le site vaut null pour un événement du réseau entier.
+	 */
+	public static function event(): array {
+		return self::object(
+			[
+				'id'          => self::type( 'integer' ),
+				'type'        => self::enum( EventsRepository::TYPES ),
+				'site'        => [
+					'type'       => [ 'object', 'null' ],
+					'properties' => self::identity(),
+				],
+				'subject'     => self::type( 'string' ),
+				'label'       => self::type( 'string' ),
+				'message'     => self::type( 'string' ),
+				'created_gmt' => self::date(),
 			]
 		);
 	}

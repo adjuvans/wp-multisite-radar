@@ -28,6 +28,7 @@ use MultisiteRadar\Export\ThemesExport;
 use MultisiteRadar\Install\Installer;
 use MultisiteRadar\Install\LegacyMigration;
 use MultisiteRadar\Query\AlertsQuery;
+use MultisiteRadar\Query\EventsQuery;
 use MultisiteRadar\Query\InventoryQuery;
 use MultisiteRadar\Query\PluginsQuery;
 use MultisiteRadar\Query\ScanStatusQuery;
@@ -37,6 +38,7 @@ use MultisiteRadar\Query\ThemesQuery;
 use MultisiteRadar\Query\UsersQuery;
 use MultisiteRadar\Rest\AlertRulesController;
 use MultisiteRadar\Rest\AlertsController;
+use MultisiteRadar\Rest\EventsController;
 use MultisiteRadar\Rest\InventoryController;
 use MultisiteRadar\Rest\PluginsController;
 use MultisiteRadar\Rest\PreferencesController;
@@ -110,6 +112,8 @@ final class Plugin {
 	private ?History $history                   = null;
 
 	private ?SitesQuery $sites_query = null;
+
+	private ?EventsQuery $events_query = null;
 
 	private ?ScanStatusQuery $scan_status_query = null;
 
@@ -203,6 +207,7 @@ final class Plugin {
 			new SettingsController( $this->settings(), $this->settings_updater() ),
 			new AlertsController( $this->alerts_query() ),
 			new AlertRulesController( $this->rules() ),
+			new EventsController( $this->events_query() ),
 			new PreferencesController( $this->preferences() ),
 		];
 		foreach ( $controllers as $controller ) {
@@ -336,6 +341,10 @@ final class Plugin {
 
 	public function site_users_query(): SiteUsersQuery {
 		return $this->site_users_query ??= new SiteUsersQuery();
+	}
+
+	public function events_query(): EventsQuery {
+		return $this->events_query ??= new EventsQuery( $this->events(), $this->sites(), $this->rules() );
 	}
 
 	public function sites_query(): SitesQuery {

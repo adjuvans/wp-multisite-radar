@@ -23,6 +23,18 @@ final class ItemSchemasTest extends RestTestCase {
 				'alert_rules' => ',no_users,',
 			]
 		);
+		$this->plugin()->events()->insert(
+			[
+				[
+					'network_id' => get_current_network_id(),
+					'site_id'    => 961,
+					'type'       => 'alert_raised',
+					'subject'    => 'no_users',
+					'meta'       => [ 'severity' => 'error' ],
+					'created_at' => '2026-09-01 00:00:00',
+				],
+			]
+		);
 	}
 
 	/**
@@ -35,6 +47,7 @@ final class ItemSchemasTest extends RestTestCase {
 			'themes'            => [ '/themes', true ],
 			'users'             => [ '/users', true ],
 			'alerts'            => [ '/alerts', true ],
+			'events'            => [ '/events', true ],
 			'alerts summary'    => [ '/alerts/summary', false ],
 			'inventory summary' => [ '/inventory/summary', false ],
 			'scan status'       => [ '/scan/status', false ],
