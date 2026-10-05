@@ -18,7 +18,12 @@ final class Digest {
 
 	public const SENT_OPTION = 'msradar_digest_sent';
 
-	private const DAYS       = 7;
+	/**
+	 * Jours couverts par le récapitulatif. History::daily() garde au moins ces jours de changements tant que le
+	 * récapitulatif est actif.
+	 */
+	public const DAYS = 7;
+
 	private const MAX_ALERTS = 20;
 
 	private Settings $settings;
@@ -37,7 +42,7 @@ final class Digest {
 	}
 
 	/**
-	 * Sur la tâche quotidienne : le jour réglé (fuseau du site principal), une seule fois ce jour-là. Non typé :
+	 * Sur la tâche quotidienne : le récapitulatif du jour réglé, une seule fois (écart E8 du plan M7). Non typé :
 	 * WordPress appelle les hooks avec un argument vide.
 	 *
 	 * @param mixed $now Horodatage Unix (tests) ; maintenant sinon.
@@ -47,11 +52,8 @@ final class Digest {
 		if ( ! (bool) $this->settings->get( 'reports.digest_enabled', false ) ) {
 			return;
 		}
-		if ( (int) wp_date( 'w', $now ) !== (int) $this->settings->get( 'reports.digest_day', 1 ) ) {
-			return;
-		}
-		$today = (string) wp_date( 'Y-m-d', $now );
-		if ( get_site_option( self::SENT_OPTION ) === $today ) {
+		$due = $this->due_day( $now );
+		if ( null === $due ) {
 			return;
 		}
 		$recipients = $this->recipients();
@@ -65,8 +67,27 @@ final class Digest {
 			return;
 		}
 		if ( $sent ) {
-			update_site_option( self::SENT_OPTION, $today );
+			update_site_option( self::SENT_OPTION, $due );
 		}
+	}
+
+	/**
+	 * Jour réglé (Y-m-d, fuseau du site principal) dont le récapitulatif reste à envoyer, ou null : le dernier jour réglé,
+	 * aujourd'hui compris, si rien n'est parti pour lui. Une tâche quotidienne qui glisse après minuit (WP-Cron en
+	 * retard) l'envoie donc le lendemain. Un récapitulatif jamais envoyé n'attend que le jour réglé : activer le réglage
+	 * un autre jour n'envoie rien tout de suite.
+	 *
+	 * @param int $now Horodatage Unix.
+	 */
+	public function due_day( int $now ): ?string {
+		$today = ( new \DateTimeImmutable( '@' . $now ) )->setTimezone( wp_timezone() );
+		$late  = ( (int) $today->format( 'w' ) - (int) $this->settings->get( 'reports.digest_day', 1 ) + 7 ) % 7;
+		$due   = $today->sub( new \DateInterval( 'P' . $late . 'D' ) )->format( 'Y-m-d' );
+		$sent  = (string) get_site_option( self::SENT_OPTION, '' );
+		if ( '' === $sent ) {
+			return 0 === $late ? $due : null;
+		}
+		return $sent < $due ? $due : null;
 	}
 
 	/**

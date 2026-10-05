@@ -2,6 +2,7 @@
 namespace MultisiteRadar\Scan;
 
 use MultisiteRadar\Install\Schema;
+use MultisiteRadar\Reports\Digest;
 use MultisiteRadar\Settings\Settings;
 use MultisiteRadar\Storage\EventsRepository;
 use MultisiteRadar\Storage\SnapshotsRepository;
@@ -10,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Historique du réseau courant, sur la tâche quotidienne (spec §7.3) : instantané du jour des sites analysés (écart E6),
- * puis purge des instantanés et des événements au-delà de la rétention réglée. Ne fait jamais échouer la tâche.
+ * puis purge des relevés et des événements au-delà de la rétention réglée (au moins les jours du récapitulatif tant qu'il est actif). Chaque étape est indépendante ; aucune ne fait échouer la tâche.
  */
 final class History {
 
@@ -42,12 +43,24 @@ final class History {
 		$network_id = get_current_network_id();
 		$snapshots  = max( 1, (int) $this->settings->get( 'retention.snapshots_days', 365 ) );
 		$events     = max( 1, (int) $this->settings->get( 'retention.events_days', 90 ) );
+		if ( (bool) $this->settings->get( 'reports.digest_enabled', false ) ) {
+			// Le récapitulatif (priorité 30) lit les changements de ses derniers jours : la purge (priorité 20) les garde.
+			$events = max( Digest::DAYS, $events );
+		}
+		// Une étape par try : une table de relevés abîmée n'empêche pas la purge du journal.
+		self::attempt( fn () => $this->snapshots->capture( $network_id, gmdate( 'Y-m-d', $now ) ) );
+		self::attempt( fn () => $this->snapshots->purge( $network_id, gmdate( 'Y-m-d', $now - $snapshots * DAY_IN_SECONDS ) ) );
+		self::attempt( fn () => $this->events->purge( $network_id, gmdate( 'Y-m-d H:i:s', $now - $events * DAY_IN_SECONDS ) ) );
+	}
+
+	/**
+	 * @param callable $step Étape de la tâche quotidienne ; une erreur est signalée, jamais levée.
+	 */
+	private static function attempt( callable $step ): void {
 		try {
-			$this->snapshots->capture( $network_id, gmdate( 'Y-m-d', $now ) );
-			$this->snapshots->purge( $network_id, gmdate( 'Y-m-d', $now - $snapshots * DAY_IN_SECONDS ) );
-			$this->events->purge( $network_id, gmdate( 'Y-m-d H:i:s', $now - $events * DAY_IN_SECONDS ) );
+			$step();
 		} catch ( \Throwable $error ) {
-			do_action( 'msradar_error', __METHOD__, $error );
+			do_action( 'msradar_error', __CLASS__ . '::daily', $error );
 		}
 	}
 }

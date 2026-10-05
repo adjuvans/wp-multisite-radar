@@ -87,6 +87,41 @@ final class DigestTest extends TestCase {
 		$this->assertSame( '2026-09-16', get_site_option( Digest::SENT_OPTION ) );
 	}
 
+	public function test_a_digest_missed_on_its_day_goes_out_once_on_the_next_days(): void {
+		$this->enable();
+		update_site_option( Digest::SENT_OPTION, '2026-09-09' ); // Le mercredi précédent.
+
+		// La tâche du mercredi 16 a glissé au jeudi 17, 00:30 ; elle repasse le vendredi.
+		$this->plugin()->digest()->maybe_send( self::NOW + 12 * HOUR_IN_SECONDS + 30 * MINUTE_IN_SECONDS );
+		$this->plugin()->digest()->maybe_send( self::NOW + 2 * DAY_IN_SECONDS );
+
+		$this->assertCount( 2, $this->sent(), 'One e-mail per recipient, once.' );
+		$this->assertSame( '2026-09-16', get_site_option( Digest::SENT_OPTION ) );
+	}
+
+	public function test_a_digest_never_sent_waits_for_its_day(): void {
+		$this->enable();
+
+		$this->plugin()->digest()->maybe_send( self::NOW + DAY_IN_SECONDS ); // Jeudi.
+		$this->plugin()->digest()->maybe_send( self::NOW + 6 * DAY_IN_SECONDS ); // Mardi.
+		$this->assertSame( [], $this->sent() );
+
+		$this->plugin()->digest()->maybe_send( self::NOW + 7 * DAY_IN_SECONDS ); // Mercredi suivant.
+		$this->assertCount( 2, $this->sent() );
+		$this->assertSame( '2026-09-23', get_site_option( Digest::SENT_OPTION ) );
+	}
+
+	public function test_due_day_follows_the_chosen_day(): void {
+		$this->enable();
+
+		$this->assertSame( '2026-09-16', $this->plugin()->digest()->due_day( self::NOW ) );
+		$this->assertNull( $this->plugin()->digest()->due_day( self::NOW + DAY_IN_SECONDS ), 'Never sent: only on the chosen day.' );
+
+		update_site_option( Digest::SENT_OPTION, '2026-09-16' );
+		$this->assertNull( $this->plugin()->digest()->due_day( self::NOW + 3 * DAY_IN_SECONDS ) );
+		$this->assertSame( '2026-09-23', $this->plugin()->digest()->due_day( self::NOW + 7 * DAY_IN_SECONDS ) );
+	}
+
 	public function test_the_content_lists_the_alerts_of_the_week_with_plain_escaped_names(): void {
 		$mail = $this->plugin()->digest()->compose( self::NOW );
 

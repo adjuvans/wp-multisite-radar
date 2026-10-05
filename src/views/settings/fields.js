@@ -110,7 +110,7 @@ export function getSettingsFields( { postTypes = [], plugins = [] } ) {
 			type: 'integer',
 			label: __( 'Keep the changes for (days)', 'multisite-radar' ),
 			description: __(
-				'Older changes are deleted every day.',
+				'Older changes are deleted every day. While the weekly e-mail summary is on, the changes of its last 7 days are always kept.',
 				'multisite-radar'
 			),
 			isValid: { required: true, min: 1, max: 3650 },

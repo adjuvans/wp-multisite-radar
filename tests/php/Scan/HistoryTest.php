@@ -1,6 +1,7 @@
 <?php
 namespace MultisiteRadar\Tests\Scan;
 
+use MultisiteRadar\Reports\Digest;
 use MultisiteRadar\Scan\History;
 use MultisiteRadar\Scan\Queue;
 use MultisiteRadar\Tests\TestCase;
@@ -128,6 +129,79 @@ final class HistoryTest extends TestCase {
 			remove_action( 'msradar_error', $report );
 		}
 
-		$this->assertSame( [ History::class . '::daily' ], $reported );
+		$this->assertNotSame( [], $reported );
+		$this->assertSame( [ History::class . '::daily' ], array_values( array_unique( $reported ) ) );
+	}
+
+	public function test_while_the_digest_is_on_the_changes_of_its_days_are_kept(): void {
+		$this->insert_event( 4504, 'five-days-ago', 5 );
+		$this->plugin()->settings()->update(
+			[
+				'retention' => [ 'events_days' => 3 ],
+				'reports'   => [ 'digest_enabled' => true ],
+			]
+		);
+
+		$this->plugin()->history()->daily( self::NOW );
+		$this->assertSame( [ 'five-days-ago' ], $this->subjects( 4504 ), 'Kept: the digest covers ' . Digest::DAYS . ' days.' );
+
+		$this->plugin()->settings()->update( [ 'reports' => [ 'digest_enabled' => false ] ] );
+		$this->plugin()->history()->daily( self::NOW );
+		$this->assertSame( [], $this->subjects( 4504 ) );
+	}
+
+	public function test_a_broken_snapshots_table_does_not_stop_the_purge_of_the_changes(): void {
+		global $wpdb;
+		$this->insert_event( 4505, 'too-old', 100 );
+		$ignore   = static function (): void {};
+		$break    = static function ( string $query ): string {
+			return false !== strpos( $query, 'msradar_snapshots' ) ? 'SELECT * FROM msradar_missing_table' : $query;
+		};
+		add_action( 'msradar_error', $ignore );
+		add_filter( 'query', $break );
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			$this->plugin()->history()->daily( self::NOW );
+		} finally {
+			$wpdb->suppress_errors( $suppress );
+			remove_filter( 'query', $break );
+			remove_action( 'msradar_error', $ignore );
+		}
+
+		$this->assertSame( [], $this->subjects( 4505 ) );
+	}
+
+	/**
+	 * @return string[] Sujets des changements du site, du plus récent au plus ancien.
+	 */
+	private function subjects( int $site_id ): array {
+		return array_column(
+			$this->plugin()->events()->query(
+				[
+					'network_id' => get_current_network_id(),
+					'since'      => null,
+					'types'      => [],
+					'site_id'    => $site_id,
+					'page'       => 1,
+					'per_page'   => 20,
+				]
+			)['items'],
+			'subject'
+		);
+	}
+
+	private function insert_event( int $site_id, string $subject, int $age_in_days ): void {
+		$this->plugin()->events()->insert(
+			[
+				[
+					'network_id' => get_current_network_id(),
+					'site_id'    => $site_id,
+					'type'       => 'theme_switched',
+					'subject'    => $subject,
+					'meta'       => [],
+					'created_at' => gmdate( 'Y-m-d H:i:s', self::NOW - $age_in_days * DAY_IN_SECONDS ),
+				],
+			]
+		);
 	}
 }
